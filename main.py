@@ -8,7 +8,7 @@ import glm
 from Graphics.Buffers import BasicVBO
 from Graphics.Shaders import Shader
 
-# set up pyhame
+# set up pygame
 pg.init()
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
