@@ -6,6 +6,7 @@ import numpy as np
 import pyrr
 import glm
 from anyio import current_time
+import keyboard
 
 from Graphics.Buffers import BasicVBO, DynamicVBO
 from Graphics.Shaders import Shader
@@ -67,18 +68,13 @@ vertices = np.array([
         -0.5,  0.5, -0.5,  0.0,  1.0,  0.0
 ], dtype=np.float32)
 
-vbo_test = DynamicVBO(vertices.nbytes * 3, 24)
-
-vertices[::6] += 3.1
-cube_1 = vbo_test.add_vertices(vertices)
-
-vertices[::6] -= 1.1
-cube_2 = vbo_test.add_vertices(vertices)
-
-vbo_test.free_vertices(cube_2)
-
-vertices[::6] -= 1.1
-cube_3 = vbo_test.add_vertices(vertices)
+num_cubes = 3
+vbo_test = DynamicVBO(vertices.nbytes * num_cubes, 24)
+cubes = [0, 0, 0]
+for i in range(num_cubes):
+    vertices[::6] += np.float32(i + 0.1 * i)
+    cubes[i] = vbo_test.add_vertices(vertices)
+    vertices[::6] -= np.float32(i + 0.1 * i)
 
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
@@ -117,6 +113,18 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
+
+    # check input
+    for i in range(num_cubes):
+        if keyboard.is_pressed((i + 1).__str__()):
+            if cubes[i] == -1:
+                vertices[::6] += np.float32(i + 0.1 * i)
+                cubes[i] = vbo_test.add_vertices(vertices)
+                vertices[::6] -= np.float32(i + 0.1 * i)
+            else:
+                vbo_test.free_vertices(cubes[i])
+                cubes[i] = -1
+            print(i)
 
     # update cube
     cube_rot += 0.05 * dt
