@@ -117,6 +117,32 @@ class DynamicVBO:
 
         target.active = status
 
+    def get_vertices_status(self, block_id:int):
+        target = None
+        for block in self.used_memory:
+            if block.start == block_id:
+                target = block
+                break
+
+        if target is None:
+            return -1
+
+        return target.active
+
+    def draw_vertices(self, block_id:int):
+        target = None
+        for block in self.used_memory:
+            if block.start == block_id:
+                target = block
+                break
+
+        if target is None or not target.active:
+            return
+
+        first = target.start // self.size_of_vertex
+        count = target.size // self.size_of_vertex
+        glDrawArrays(GL_TRIANGLES, first, count)
+
     def draw(self):
         for block in self.used_memory:
             if not block.active:

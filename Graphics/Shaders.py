@@ -2,7 +2,6 @@ import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram,compileShader
 import numpy as np
-import glm
 import pyrr
 
 class Shader:
@@ -21,9 +20,6 @@ class Shader:
     def use_shader(self):
         glUseProgram(self.shader)
 
-    def set_bool(self, uniform_name:str, value:bool):
-        glUniform1i(glGetUniformLocation(self.shader, uniform_name), value)
-
     def set_int(self, uniform_name:str, value:int):
         glUniform1i(glGetUniformLocation(self.shader, uniform_name), value)
 
@@ -33,13 +29,10 @@ class Shader:
     def set_3float(self, uniform_name:str, x, y, z):
         glUniform3f(glGetUniformLocation(self.shader, uniform_name), x , y, z)
 
-    def set_4float(self, uniform_name:str, value:glm.vec4):
-        glUniform4f(glGetUniformLocation(self.shader, uniform_name), value)
-
-    def set_mat3(self, uniform_name:str, mat3:pyrr.matrix33):
+    def set_mat3(self, uniform_name:str, mat3):
         glUniformMatrix3fv(glGetUniformLocation(self.shader, uniform_name), 1, GL_FALSE, mat3)
 
-    def set_mat4(self, uniform_name:str, mat4:pyrr.matrix44):
+    def set_mat4(self, uniform_name:str, mat4):
         glUniformMatrix4fv(glGetUniformLocation(self.shader, uniform_name),1, GL_FALSE, mat4)
 
 

@@ -1,13 +1,11 @@
 import time
 import pygame as pg
 from OpenGL.GL import *
-from OpenGL.GL.shaders import compileProgram,compileShader
 import numpy as np
 import pyrr
-import glm
-from anyio import current_time
 
-from Graphics.Buffers import BasicVBO, DynamicVBO
+from Graphics.Buffers import DynamicVBO
+from Graphics.Mesh import Mesh
 from Graphics.Shaders import Shader
 
 # set up pygame
@@ -23,7 +21,7 @@ glEnable(GL_DEPTH_TEST)
 
 # create shader and VBO
 
-vertices = np.array([
+vertices = [
         -0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
          0.5, -0.5, -0.5,  0.0,  0.0, -1.0,
          0.5,  0.5, -0.5,  0.0,  0.0, -1.0,
@@ -65,22 +63,26 @@ vertices = np.array([
          0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
         -0.5,  0.5,  0.5,  0.0,  1.0,  0.0,
         -0.5,  0.5, -0.5,  0.0,  1.0,  0.0
-], dtype=np.float32)
+]
 
 num_cubes = 3
-vbo_test = DynamicVBO(vertices.nbytes * num_cubes, 24)
-cubes = [0, 0, 0]
+vbo_test = DynamicVBO(24 * len(vertices) * num_cubes, 24)
+
+cubes = [Mesh(vbo_test), Mesh(vbo_test), Mesh(vbo_test)]
+
+start = -2.0
 for i in range(num_cubes):
-    vertices[::6] += np.float32(i + 0.1 * i)
-    cubes[i] = vbo_test.add_vertices(vertices)
-    vertices[::6] -= np.float32(i + 0.1 * i)
+    cubes[i].set_vertices(vertices)
+    cubes[i].flush()
+    cubes[i].position = [start + 2.0 * i, 0.0, -4.0]
+    cubes[i].update_matrices()
 
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
 
 projection_transform = pyrr.matrix44.create_perspective_projection(
     fovy = 45, aspect = 640/480,
-    near = 0.1, far = 10, dtype=np.float32
+    near = 0.1, far = 20, dtype=np.float32
 )
 
 view = pyrr.matrix44.create_look_at(np.array([0, 0, 2]), np.array([0, 0, -1]), np.array([0, 1, 0]))
@@ -94,16 +96,11 @@ shader.set_float("ambientStrength", 0.6)
 shader.set_float("specularStrength", 0.6)
 shader.set_int("shininess", 8)
 
-cube_rot = 0.0
-cube_pos = [0.0, 0.0, -2.0]
-
 dt = 0.0
 last_time = 0.0
 
 # main loop
 running = True
-
-KEYS = [pg.K_1, pg.K_2, pg.K_3]
 
 while running:
     current_time = time.time()
@@ -114,47 +111,18 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-            # check input
-        if event.type == pg.KEYDOWN:
-            for i in range(num_cubes):
-                if event.key == KEYS[i]:
-                    if cubes[i] == -1:
-                        vertices[::6] += np.float32(i + 0.1 * i)
-                        cubes[i] = vbo_test.add_vertices(vertices)
-                        vertices[::6] -= np.float32(i + 0.1 * i)
-                    else:
-                        vbo_test.free_vertices(cubes[i])
-                        cubes[i] = -1
-
-    # update cube
-    cube_rot += 0.05 * dt
-    model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
-
-    model_transform = pyrr.matrix44.multiply(
-        m1=model_transform,
-        m2=pyrr.matrix44.create_from_axis_rotation(
-            axis=[0, 1, 0],
-            theta=np.radians(cube_rot),
-            dtype=np.float32
-        )
-    )
-
-    model_transform = pyrr.matrix44.multiply(
-        m1=model_transform,
-        m2=pyrr.matrix44.create_from_translation(
-            vec=np.array(cube_pos), dtype=np.float32
-        )
-    )
 
     # refresh screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    shader.use_shader()
-    shader.set_mat4("model", model_transform)
 
-    vbo_test.draw()
+    # update and draw cubes
+    shader.use_shader()
+    for i in range(num_cubes):
+        cubes[i].rotation[i] += np.radians(0.05 * dt)
+        cubes[i].update_matrices()
+        cubes[i].draw(shader)
 
     pg.display.flip()
-
 
 shader.del_shader()
 pg.quit()

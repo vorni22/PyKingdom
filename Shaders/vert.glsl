@@ -4,7 +4,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormalVector;
 
 uniform mat4 model;
-// uniform mat3 normMatrix;
+uniform mat3 normMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -15,7 +15,7 @@ out vec3 FragPos;
 out vec3 LightPos;
 
 void main() {
-    mat3 normMatrix = mat3(transpose(inverse(model)));
+    //mat3 normMatrix = mat3(transpose(inverse(model)));
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 
