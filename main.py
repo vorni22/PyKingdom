@@ -124,7 +124,6 @@ while running:
             else:
                 vbo_test.free_vertices(cubes[i])
                 cubes[i] = -1
-            print(i)
 
     # update cube
     cube_rot += 0.05 * dt

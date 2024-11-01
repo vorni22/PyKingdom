@@ -5,6 +5,7 @@ class MemBlock:
     def __init__(self, start, size):
         self.start = start
         self.size = size
+        self.active = True
 
     def __hash__(self):
         return hash((self.start, self.size))
@@ -31,6 +32,8 @@ class DynamicVBO:
         ]
 
         self.used_memory = set()
+
+        self.status = set()
 
     def add_vertices(self, vertices:np.array) -> int:
         #first try to find valid zone to place the vertices in GPU memory
@@ -59,6 +62,7 @@ class DynamicVBO:
             del self.free_memory[block_id]
 
         self.used_memory.add(new_used_block)
+        self.status.add(new_used_block.start)
 
         glBufferSubData(GL_ARRAY_BUFFER, new_used_block.start, data_size, vertices)
 
@@ -84,6 +88,7 @@ class DynamicVBO:
                 break
 
         self.free_memory.insert(insertion_index, target)
+        self.status.remove(block_id)
 
         # coalesce the list
         if len(self.free_memory) == 1:
@@ -100,8 +105,22 @@ class DynamicVBO:
             else:
                 i += 1
 
+    def set_vertices_status(self, block_id:int, status:bool):
+        target = None
+        for block in self.used_memory:
+            if block.start == block_id:
+                target = block
+                break
+
+        if target is None:
+            return
+
+        target.active = status
+
     def draw(self):
         for block in self.used_memory:
+            if not block.active:
+                continue
             first = block.start // self.size_of_vertex
             count = block.size // self.size_of_vertex
             glDrawArrays(GL_TRIANGLES, first, count)
