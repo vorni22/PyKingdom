@@ -1,4 +1,5 @@
 import Resources
+from Map_Generation import Map as Map
 
 district_types = ['Campus', 'Theatre Square', 'Commercial Hub', 'Harbour', 'Industrial Zone',
                   'Neighborhood', 'Aqueduct', 'City Center']
@@ -111,14 +112,35 @@ class District:
 # @param population: shows how many people the city holds. Population determines how many tiles are worked
 # @param city_resources: food and production the city accumulated
 # @param city_resources_per_turn: food and production the city should earn this turn
+# @param center_line_location: the line of the map on which the city center is located
+# @param center_column_location: the column of the map on which the city center is located
 class City:
-    def __init__(self, city_name):
+    def __init__(self, city_name, center_line_location, center_column_location):
         self.city_name = city_name
         self.districts = [District(district_types[7])]
         self.housing = 3
         self.population = 1
+        self.tiles = [Map.Map.get_tile(center_line_location, center_column_location)]
+        self.init_tiles()
         self.city_resources = Resources.CityResources(0, 0)
         self.city_resources_per_turn = Resources.CityResourcesPerTurn(0, 0)
+        self.center_line_location = center_line_location
+        self.center_column_location = center_column_location
+
+    def init_tiles(self):
+        self.tiles.append(Map.Map.get_tile(self.center_line_location, self.center_column_location - 1))
+        self.tiles.append(Map.Map.get_tile(self.center_line_location, self.center_column_location + 1))
+        self.tiles.append(Map.Map.get_tile(self.center_line_location + 1, self.center_column_location))
+        self.tiles.append(Map.Map.get_tile(self.center_line_location - 1, self.center_column_location))
+        if self.center_line_location % 2:
+            self.tiles.append(Map.Map.get_tile(self.center_line_location + 1, self.center_column_location - 1))
+            self.tiles.append(Map.Map.get_tile(self.center_line_location - 1, self.center_column_location - 1))
+        else:
+            self.tiles.append(Map.Map.get_tile(self.center_line_location + 1, self.center_column_location + 1))
+            self.tiles.append(Map.Map.get_tile(self.center_line_location - 1, self.center_column_location + 1))
+
+    def add_tile(self, line, column):
+        self.tiles.append(Map.Map.get_tile(line, column))
 
     def add_district(self, district_name_id):
         if district_types[district_name_id] in self.districts and district_name_id != 5:
@@ -156,4 +178,6 @@ class City:
         if has_aqueduct:
             total_city_resources_per_turn.food_per_turn_count *= 1.25
         return total_resources_per_turn, total_city_resources_per_turn
+
+
 

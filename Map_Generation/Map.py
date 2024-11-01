@@ -1,4 +1,4 @@
-import Logic.Tile
+from Logic.Tile import Tile as tile
 
 # Holds information about the map. Should be generated once using init_map, then information should be accessed directly
 # from the class container via get_tile
