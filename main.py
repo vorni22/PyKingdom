@@ -6,7 +6,6 @@ import numpy as np
 import pyrr
 import glm
 from anyio import current_time
-import keyboard
 
 from Graphics.Buffers import BasicVBO, DynamicVBO
 from Graphics.Shaders import Shader
@@ -104,6 +103,8 @@ last_time = 0.0
 # main loop
 running = True
 
+KEYS = [pg.K_1, pg.K_2, pg.K_3]
+
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
@@ -113,17 +114,17 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-
-    # check input
-    for i in range(num_cubes):
-        if keyboard.is_pressed((i + 1).__str__()):
-            if cubes[i] == -1:
-                vertices[::6] += np.float32(i + 0.1 * i)
-                cubes[i] = vbo_test.add_vertices(vertices)
-                vertices[::6] -= np.float32(i + 0.1 * i)
-            else:
-                vbo_test.free_vertices(cubes[i])
-                cubes[i] = -1
+            # check input
+        if event.type == pg.KEYDOWN:
+            for i in range(num_cubes):
+                if event.key == KEYS[i]:
+                    if cubes[i] == -1:
+                        vertices[::6] += np.float32(i + 0.1 * i)
+                        cubes[i] = vbo_test.add_vertices(vertices)
+                        vertices[::6] -= np.float32(i + 0.1 * i)
+                    else:
+                        vbo_test.free_vertices(cubes[i])
+                        cubes[i] = -1
 
     # update cube
     cube_rot += 0.05 * dt
