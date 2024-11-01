@@ -22,43 +22,24 @@ class District:
         self.district_type = district_type
         self.buildings = []
 
-    def add_building(self, building):
+    def add_building(self, building_id):
         if self.district_type == district_types[0]:
-            if building not in campus_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(campus_buildings[building_id])
         elif self.district_type == district_types[1]:
-            if building not in theatre_square_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(theatre_square_buildings[building_id])
         elif self.district_type == district_types[2]:
-            if building not in commercial_hub_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(commercial_hub_buildings[building_id])
         elif self.district_type == district_types[3]:
-            if building not in harbour_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(harbour_buildings[building_id])
         elif self.district_type == district_types[4]:
-            if building not in industrial_zone_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(industrial_zone_buildings[building_id])
         elif self.district_type == district_types[5]:
-            if building not in neighborhood_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(neighborhood_buildings[building_id])
         elif self.district_type == district_types[6]:
             raise TypeError("Invalid building type: Aqueducts have no buildings")
         elif self.district_type == district_types[7]:
-            if building not in city_center_buildings:
-                raise TypeError("Invalid building type")
+            self.buildings.append(city_center_buildings[building_id])
 
-        if building == campus_buildings[1] and len(self.buildings) == 0:
-            raise ValueError("Tier 1 building must be built first")
-        elif building == theatre_square_buildings[1] and len(self.buildings) == 0:
-            raise ValueError("Tier 1 building must be built first")
-        elif building == commercial_hub_buildings[1] and len(self.buildings) == 0:
-            raise ValueError("Tier 1 building must be built first")
-        elif building == harbour_buildings[1] and len(self.buildings) == 0:
-            raise ValueError("Tier 1 building must be built first")
-        elif building == industrial_zone_buildings[1] and len(self.buildings) == 0:
-            raise ValueError("Tier 1 building must be built first")
-
-        self.buildings.append(building)
 
     def calculate_yields(self):
         resources = Resources.ResourcesPerTurn(0, 0, 0)
@@ -144,8 +125,8 @@ class City:
             raise ValueError("Can only build one district of this type in a city")
         self.districts.append(District(district_types[district_name_id]))
 
-    def add_building(self, building_name, district_id):
-        self.districts[district_id].add_building(building_name)
+    def add_building(self, building_name_id, district_id):
+        self.districts[district_id].add_building(building_name_id)
 
     def calculate_yields_districts(self):
         total_resources_per_turn = Resources.ResourcesPerTurn(0, 0, 0)
