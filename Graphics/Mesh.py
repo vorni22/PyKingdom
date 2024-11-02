@@ -8,12 +8,14 @@ from Graphics.Buffers import DynamicVBO
 from Graphics.Shaders import Shader
 
 class Vertex:
-    def __init__(self, position, normal):
+    def __init__(self, position, normal, color):
         self.position = position
         self.normal = normal
+        self.color = color
     def to_list(self) -> list[float]:
         return [self.position[0], self.position[1], self.position[2],
-                self.normal[0], self.normal[1], self.normal[2]]
+                self.normal[0], self.normal[1], self.normal[2],
+                self.color[0], self.color[1], self.color[2]]
 
 class Mesh:
     def __init__(self, vbo_ref:DynamicVBO):
@@ -76,19 +78,22 @@ class Mesh:
         self.vertices.append(vertex.to_list())
 
     def pop_vertex(self):
-        for i in range(6):
+        for i in range(9):
             self.vertices.pop()
 
     def set_vertex(self, vert_id:int, vertex:Vertex):
         real_id = vert_id * self.vbo.size_of_vertex
         if real_id >= len(self.vertices):
             return
-        self.vertices[real_id] = vertex.position.x
-        self.vertices[real_id + 1] = vertex.position.y
-        self.vertices[real_id + 2] = vertex.position.z
-        self.vertices[real_id + 3] = vertex.normal.x
-        self.vertices[real_id + 4] = vertex.normal.y
-        self.vertices[real_id + 5] = vertex.normal.z
+        self.vertices[real_id] = vertex.position[0]
+        self.vertices[real_id + 1] = vertex.position[1]
+        self.vertices[real_id + 2] = vertex.position[2]
+        self.vertices[real_id + 3] = vertex.normal[0]
+        self.vertices[real_id + 4] = vertex.normal[1]
+        self.vertices[real_id + 5] = vertex.normal[2]
+        self.vertices[real_id + 6] = vertex.color[0]
+        self.vertices[real_id + 7] = vertex.color[1]
+        self.vertices[real_id + 8] = vertex.color[2]
 
     def flush(self):
         if len(self.vertices) == 0:
