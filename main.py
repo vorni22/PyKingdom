@@ -108,12 +108,21 @@ font = pg.font.SysFont("Arial", 24)
 # main loop
 running = True
 mouse_visible = False
+cnt = 0
+sum_time = 0.0
 
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
     last_time = current_time
-    fps = dt
+
+    cnt += 1
+    sum_time += dt
+    if sum_time >= 1000:
+        fps = cnt
+        sum_time = 0.0
+        cnt = 0
+        pg.display.set_caption(f"FPS = {fps}")
 
     # check events
     for event in pg.event.get():
