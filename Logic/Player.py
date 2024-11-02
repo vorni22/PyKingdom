@@ -21,4 +21,12 @@ class Player:
         self.resources.culture_count += self.resources_per_turn.culture_per_turn_count
         self.resources.gold_count += self.resources_per_turn.gold_per_turn_count
 
+    def add_cities(self, city_name, city_line, city_column):
+        self.cities.append(City.City(city_name, city_line, city_column))
 
+    def end_turn(self):
+        self.resources_per_turn.reset_resources_per_turn()
+        for city in self.cities:
+            self.resources_per_turn += city.end_turn_update()
+
+        self.add_resources()

@@ -16,6 +16,8 @@ city_center_buildings = ['Palace', 'Monument', 'Granary', 'Water Mill', 'Sewer']
 # @param district_type: what type of district is this one. Should be part of the district_types list
 # @param buildings: list of buildings that have been built in this district. Buildings are specific to each district
 # and a building of tier 2 requires a tier 1 building to be built first
+# @param location_line: the line on which the district is situated
+# @param location_column: the column on which the district is situated
 class District:
     def __init__(self, district_type, location_line, location_column):
         if district_type not in district_types:
@@ -114,6 +116,7 @@ class District:
 # @param population: shows how many people the city holds. Population determines how many tiles are worked
 # @param city_resources: food and production the city accumulated
 # @param city_resources_per_turn: food and production the city should earn this turn
+# @param resources_per_turn: science, culture and gold that the player gains from this city this turn
 # @param center_line_location: the line of the map on which the city center is located
 # @param center_column_location: the column of the map on which the city center is located
 class City:
@@ -211,4 +214,6 @@ class City:
 
         self.city_resources.food_count += self.city_resources_per_turn.food_per_turn_count
         self.city_resources_per_turn.production_per_turn_count += self.city_resources_per_turn.production_per_turn_count
+
+        return self.resources_per_turn
 
