@@ -3,11 +3,11 @@ import pygame as pg
 from OpenGL.GL import *
 import numpy as np
 import pyrr
-
 from Graphics.Buffers import DynamicVBO
 from Graphics.Camera import Camera, CameraManager
 from Graphics.Mesh import Mesh
 from Graphics.Shaders import Shader
+from Map_Generation.MapBuilder import MapMesh
 
 WIDTH = 1200
 HEIGHT = 600
@@ -23,8 +23,9 @@ pg.mouse.set_visible(False)  # Hide the mouse cursor
 pg.event.set_grab(True)  # Grab the mouse for capturing movement
 
 # set up OpenGL
-glClearColor(0.1, 0.2, 0.2, 1)
+glClearColor(0.6, 0.6, 0.6, 1)
 glEnable(GL_DEPTH_TEST)
+#glEnable(GL_CULL_FACE)
 
 # create shader and VBO
 
@@ -73,8 +74,9 @@ vertices = [
 ]
 
 num_cubes = 3
-vbo_test = DynamicVBO(36 * len(vertices) * num_cubes, 36)
+vbo_test = DynamicVBO(36 * len(vertices) * (num_cubes + 7), 36)
 
+builder = MapMesh(1, 1, vbo_test)
 cubes = [Mesh(vbo_test), Mesh(vbo_test), Mesh(vbo_test)]
 
 start = 0.0
@@ -88,7 +90,7 @@ shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
 
 camera = Camera(np.array([0.0, 0.0, 0.0]), HEIGHT, WIDTH,
-                45.0, 0.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 20.0)
+                45.0, 0.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 100.0)
 cameraManager = CameraManager(camera)
 
 shader.set_mat4("view", camera.get_view_matrix())
@@ -158,6 +160,8 @@ while running:
         cubes[i].rotation[i] += np.radians(0.05 * dt)
         cubes[i].update_matrices()
         cubes[i].draw(shader)
+
+    builder.draw(shader)
 
     pg.display.flip()
 

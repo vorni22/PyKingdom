@@ -66,6 +66,7 @@ class CameraManager:
 
         self.__last_pos_x = 0.0
         self.__last_pos_y = 0.0
+        self.first_update = True
 
     def __process_input(self, dt: float):
         keys = pg.key.get_pressed()
@@ -76,6 +77,11 @@ class CameraManager:
         dx, dy = pg.mouse.get_rel()
         x = 0.0
         z = 0.0
+
+        if self.first_update:
+            self.first_update = False
+            dx = 0
+            dy = 0
 
         yaw = dx * camera_sensitivity
         pitch = - dy * camera_sensitivity
