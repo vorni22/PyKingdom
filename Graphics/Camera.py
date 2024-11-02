@@ -41,11 +41,11 @@ class Camera:
         self.yaw += delta_yaw
 
         if constrain_pitch:
-            constrain_pitch = abs(constrain_pitch)
-            if self.pitch > constrain_pitch:
-                pitch = constrain_pitch
-            if self.pitch < -constrain_pitch:
-                pitch = -constrain_pitch
+            constrain_val = abs(constrain_val)
+            if self.pitch > constrain_val:
+                pitch = constrain_val
+            if self.pitch < -constrain_val:
+                pitch = -constrain_val
 
     def camera_update(self):
         self.front[0] = np.cos(np.radians(self.yaw)) * np.cos(np.radians(self.pitch))

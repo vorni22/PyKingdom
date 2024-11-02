@@ -22,10 +22,13 @@ class DynamicVBO:
         glBufferData(GL_ARRAY_BUFFER, capacity, None, GL_DYNAMIC_DRAW)
 
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(0))
 
         glEnableVertexAttribArray(1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(12))
+
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(24))
 
         self.free_memory = [
             MemBlock(0, capacity)
