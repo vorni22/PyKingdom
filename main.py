@@ -25,7 +25,7 @@ pg.event.set_grab(True)  # Grab the mouse for capturing movement
 # set up OpenGL
 glClearColor(0.6, 0.6, 0.6, 1)
 glEnable(GL_DEPTH_TEST)
-#glEnable(GL_CULL_FACE)
+glEnable(GL_CULL_FACE)
 
 # create shader and VBO
 
@@ -74,23 +74,20 @@ vertices = [
 ]
 
 num_cubes = 3
-vbo_test = DynamicVBO(36 * len(vertices) * (num_cubes + 7), 36)
 
-builder = MapMesh(1, 1, vbo_test)
-cubes = [Mesh(vbo_test), Mesh(vbo_test), Mesh(vbo_test)]
+size_x = 20
+size_y = 20
+vertices_per_hex = 17 * 3
+total_size = vertices_per_hex * size_x * size_y * 36
 
-start = 0.0
-for i in range(num_cubes):
-    cubes[i].set_vertices(vertices)
-    cubes[i].flush()
-    cubes[i].position = [start + 2.0 * i, 0.0, -4.0]
-    cubes[i].update_matrices()
+vbo_test = DynamicVBO(total_size, 36)
+builder = MapMesh(size_x, size_y, vbo_test)
 
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
 
 camera = Camera(np.array([0.0, 0.0, 0.0]), HEIGHT, WIDTH,
-                45.0, 0.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 100.0)
+                45.0, 0.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 300.0)
 cameraManager = CameraManager(camera)
 
 shader.set_mat4("view", camera.get_view_matrix())
@@ -99,7 +96,7 @@ shader.set_mat4("projection", camera.get_perspective_matrix())
 shader.set_3float("lightColor", 0.9, 0.8, 0.8)
 shader.set_float("ambientStrength", 0.6)
 shader.set_float("specularStrength", 0.6)
-shader.set_int("shininess", 8)
+shader.set_int("shininess", 2)
 
 dt = 0.0
 last_time = 0.0
@@ -123,7 +120,7 @@ while running:
         fps = cnt
         sum_time = 0.0
         cnt = 0
-        pg.display.set_caption(f"FPS = {fps}")
+        pg.display.set_caption(f"FPS = {fps}; pos = {camera.pos}")
 
     # check events
     for event in pg.event.get():
@@ -154,13 +151,7 @@ while running:
 
     cameraManager.every_frame(shader, dt, not mouse_visible)
 
-    # update and draw cubes
     shader.use_shader()
-    for i in range(num_cubes):
-        cubes[i].rotation[i] += np.radians(0.05 * dt)
-        cubes[i].update_matrices()
-        cubes[i].draw(shader)
-
     builder.draw(shader)
 
     pg.display.flip()

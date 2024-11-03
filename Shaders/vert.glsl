@@ -9,11 +9,8 @@ uniform mat3 normMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
-vec3 lightPos = vec3(0.0, 0.3, -0.3);
-
 out vec3 Normal;
 out vec3 FragPos;
-out vec3 LightPos;
 out vec3 Color;
 
 void main() {
@@ -23,6 +20,5 @@ void main() {
 
 	FragPos = vec3(view * model * vec4(aPos, 1.0));
 	Normal = normMatrix * aNormalVector;
-	LightPos = vec3(view * vec4(lightPos, 1.0));
 	Color = aColor;
 }

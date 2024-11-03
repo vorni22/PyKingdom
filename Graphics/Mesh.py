@@ -82,6 +82,12 @@ class Mesh:
         self.vertices.extend(p2.to_list())
         self.vertices.extend(p3.to_list())
 
+    def push_triangle_pos(self, p1:np.array, p2:np.array, p3:np.array, color1, color2, color3, norm):
+        v1 = Vertex(p1, norm, color1)
+        v2 = Vertex(p2, norm, color2)
+        v3 = Vertex(p3, norm, color3)
+        self.push_triangle(v1, v2, v3)
+
     def pop_vertex(self):
         for i in range(9):
             self.vertices.pop()
