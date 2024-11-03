@@ -15,6 +15,7 @@ class Player:
         self.resources = Resources.Resources(0, 0, 0)
         self.resources_per_turn = Resources.ResourcesPerTurn(0, 0, 0)
         self.cities = []
+        self.units = []
 
     def add_resources(self):
         self.resources.science_count += self.resources_per_turn.science_per_turn_count

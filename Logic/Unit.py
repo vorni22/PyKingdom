@@ -8,9 +8,23 @@ naval_melee_units = ['Galley', 'Caravel']
 naval_ranged_units = ['Quadrireme', 'Frigate']
 civilian_units = ['Settler']
 
+# Holds information about a unit
+# @param position_line: the line on which the unit is currently situated
+# @param position_column: the column on which the unit is currently situated
+# @param type: what type of unit this unit could be
+# @param display_name: what name the unit displays. By default, the same as the internal name, but can be changed
+# @param name: the name of the unit type
+# @param movement: how much movement the unit has
+# @param ranged_strength: how much ranged strength the unit has. Only applicable to ranged, siege and naval ranged units
+# @param melee_strength: how much melee strength the unit has
+# @param health percentage: how much health the unit has left. If the unit reaches 0, it dies
+
 class Unit:
-    def __init__(self, type_id, name_id):
+    def __init__(self, display_name, type_id, name_id, position_line, position_column):
+        self.position_line = position_line
+        self.position_column = position_column
         self.type = unit_classes[type_id]
+        self.display_name = display_name
         self.name = None
         self.init_name(type_id, name_id)
         self.movement = 0
@@ -39,6 +53,9 @@ class Unit:
             self.name = naval_ranged_units[name_id]
         elif type_id == 6:
             self.name = civilian_units[name_id]
+
+        if not self.display_name or self.display_name == "":
+           self.display_name = self.name
 
     def init_movement(self, type_id, name_id):
         if type_id == 0:

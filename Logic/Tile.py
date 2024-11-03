@@ -1,6 +1,6 @@
 import Logic.Resources as Resources
 
-tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Tundra', None]
+tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Peaks', None]
 tile_basic_resources = ['Banana', 'Wheat', 'Rice', 'Maize', 'Stone', 'Fish', 'Crabs', None]
 tile_features = ['Woods', 'Rainforests', 'Marsh', 'Coral Reef', None]
 tile_strategic_resources = ['Horses', 'Iron', 'Niter', 'Coal', None]
@@ -12,7 +12,7 @@ tile_luxury_resources = ['Mercury', 'Silk', 'Cocoa', 'Turtles', 'Coffee', 'Ivory
 # @param type: the type of tile this tile is. Tiles can be Ocean, Shallow Water, Grassland, Plains or Mountains
 # depending on their altitude (increasing in this order). Mountains may not have features or resources. Fish, Crabs,
 # Whales and Coral Reefs may be found only on shallow water tiles. Every other resource or feature may only be found
-# on grassland or plains tiles (equal chances)
+# on grassland, plains or tundra tiles (equal chances)
 # @param basic_resource: the basic resource on the tile (if the tile has one) only one of basic, strategic or luxury
 # resources can be present on a tile
 # @param strategic_resource: the strategic resource on the tile (if the tile has one) only one of basic, strategic or
@@ -54,6 +54,8 @@ class Tile:
             self.city_resources.production_per_turn_count += 2
             self.movement_cost = "Unpassable"
         elif self.type == tile_types[5]:
+            self.city_resources.production_per_turn_count += 1
+        elif self.type == tile_types[6]:
             raise TypeError("Tile must have a type")
 
         if self.basic_resource == tile_basic_resources[0]:
