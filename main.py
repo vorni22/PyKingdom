@@ -27,6 +27,10 @@ glClearColor(0.6, 0.6, 0.6, 1)
 glEnable(GL_DEPTH_TEST)
 glEnable(GL_CULL_FACE)
 
+glEnable(GL_BLEND)
+glBlendColor(0.0, 0.0, 0.0, 0.75)
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
 # create shader and VBO
 
 vertices = [
@@ -75,13 +79,13 @@ vertices = [
 
 num_cubes = 3
 
-size_x = 20
-size_y = 20
+size_x = 60
+size_y = 40
 vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
-vbo_test = DynamicVBO(total_size, 36)
-builder = MapMesh(size_x, size_y, vbo_test)
+vbo_test = DynamicVBO(total_size + 6, 36)
+builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test)
 
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
@@ -94,9 +98,7 @@ shader.set_mat4("view", camera.get_view_matrix())
 shader.set_mat4("projection", camera.get_perspective_matrix())
 
 shader.set_3float("lightColor", 0.9, 0.8, 0.8)
-shader.set_float("ambientStrength", 0.6)
-shader.set_float("specularStrength", 0.6)
-shader.set_int("shininess", 2)
+shader.set_float("ambientStrength", 0.5)
 
 dt = 0.0
 last_time = 0.0
