@@ -1,6 +1,6 @@
-import Resources
+import Logic.Resources as Resources
 
-tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', None]
+tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Tundra', None]
 tile_basic_resources = ['Banana', 'Wheat', 'Rice', 'Maize', 'Stone', 'Fish', 'Crabs', None]
 tile_features = ['Woods', 'Rainforests', 'Marsh', 'Coral Reef', None]
 tile_strategic_resources = ['Horses', 'Iron', 'Niter', 'Coal', None]

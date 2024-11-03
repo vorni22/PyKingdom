@@ -1,5 +1,5 @@
-import City
-import Resources
+import Logic.City as City
+import Logic.Resources as Resources
 
 # Holds information about a player
 # @param player_id: the id of the player

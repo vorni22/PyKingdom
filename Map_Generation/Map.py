@@ -57,8 +57,8 @@ class Map:
         for i in range(0, Map.lines * Map.columns):
             Map.shortest_distances.append(nx.single_source_dijkstra_path_length(Map.G, i))
     @staticmethod
-    def get_shortest_distance(start, end):
-        return Map.shortest_distances[start][end]
+    def get_shortest_distance(start_line, start_col, end_line, end_col):
+        return Map.shortest_distances[start_line * Map.columns + start_col][end_line * Map.columns + end_col]
 
     @staticmethod
     def get_tile(line, column):
