@@ -8,8 +8,7 @@ in vec3 Color;
 
 uniform vec3 lightColor;
 uniform float ambientStrength;
-uniform float specularStrength;
-uniform int shininess;
+uniform float opacity;
 
 void main(){
     vec3 lightDir = normalize(vec3(0.1, -0.5, 0.3));
@@ -24,5 +23,5 @@ void main(){
 
 	vec3 ret = (ambient + diffuse) * Color;
 
-	FragColor = vec4(ret, 1.0);
+	FragColor = vec4(ret, opacity);
 }
