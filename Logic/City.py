@@ -1,5 +1,6 @@
-import Resources
+import Logic.Resources as Resources
 from Map_Generation import Map as Map
+import Logic.Unit as Unit
 
 district_types = ['Campus', 'Theatre Square', 'Commercial Hub', 'Harbour', 'Industrial Zone',
                   'Neighborhood', 'Aqueduct', 'City Center']
@@ -132,6 +133,8 @@ class City:
         self.resources_per_turn = Resources.ResourcesPerTurn(0, 0, 0)
         self.center_line_location = center_line_location
         self.center_column_location = center_column_location
+        self.health_percentage = 100
+        self.melee_combat_strength = 15
 
     def add_tiles(self, line, column):
         ref = Map.Map.get_tile(line, column - 1)
@@ -166,6 +169,7 @@ class City:
             raise ValueError("Can only build one district of this type in a city")
         self.districts.append(District(district_types[district_name_id], location_line, location_column))
         self.add_tiles(location_line, location_column)
+        self.melee_combat_strength += 5
 
     def add_building(self, building_name_id, district_id):
         self.districts[district_id].add_building(building_name_id)
@@ -215,5 +219,29 @@ class City:
         self.city_resources.food_count += self.city_resources_per_turn.food_per_turn_count
         self.city_resources_per_turn.production_per_turn_count += self.city_resources_per_turn.production_per_turn_count
 
+        self.health_percentage = min(100, self.health_percentage + 20)
+
         return self.resources_per_turn
 
+    def health_strength_loss(self):
+        return 0.1 * (100 - self.health_percentage)
+
+    def melee_combat(self, unit):
+        diff = (self.melee_combat_strength - self.health_strength_loss() -
+                unit.melee_combat_strength - unit.health_strength_loss())
+
+        if diff > 0:
+            self.health_percentage -= 0.4 * diff - 3
+        else:
+            self.health_percentage -= 2.5 * (-diff) - 5
+
+    def ranged_combat(self, unit):
+        diff = (self.melee_combat_strength + 10 - self.health_strength_loss() -
+                unit.ranged_combat_strength + unit.health_strength_loss())
+        if unit.type == Unit.unit_classes[3]:
+            diff -= 10
+
+        if diff > 0:
+            self.health_percentage -= 0.4 * diff - 3
+        else:
+            self.health_percentage -= 2.5 * (-diff) - 5

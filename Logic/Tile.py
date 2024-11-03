@@ -1,4 +1,4 @@
-import Logic.Resources
+import Logic.Resources as Resources
 
 tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Tundra', None]
 tile_basic_resources = ['Banana', 'Wheat', 'Rice', 'Maize', 'Stone', 'Fish', 'Crabs', None]
