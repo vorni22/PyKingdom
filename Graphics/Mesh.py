@@ -12,7 +12,7 @@ class Vertex:
         self.position = position
         self.normal = normal
         self.color = color
-    def to_list(self) -> list[float]:
+    def to_list(self):
         return [self.position[0], self.position[1], self.position[2],
                 self.normal[0], self.normal[1], self.normal[2],
                 self.color[0], self.color[1], self.color[2]]

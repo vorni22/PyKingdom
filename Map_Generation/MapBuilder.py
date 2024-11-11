@@ -16,12 +16,22 @@ y_axis = np.array([0.0, 1.0, 0.0])
 z_axis = np.array([0.0, 0.0, 1.0])
 diag_a1 = np.array([np.cos(np.radians(60)), 0.0, np.sin(np.radians(60))])
 
-tile_colors = {'Plains':[0.41, 0.74, 0.06],
-               'Grassland':[0.06, 0.74, 0.1],
-               'Shallow Water':[0.74, 0.74, 0.32],
-               'Ocean':[0.47, 0.47, 0.33],
-               'Mountain':[0.4, 0.43, 0.43],
-               'Peaks':[0.63, 0.78, 0.76],
+color_palet = np.array([
+    [0.41, 0.74, 0.06],     # pale green
+    [0.06, 0.74, 0.1],      # green
+    [0.74, 0.74, 0.32],     # pale yellow
+    [0.47, 0.47, 0.33],     # gray
+    [0.4, 0.43, 0.43],      # brown
+    [0.63, 0.78, 0.76],     # white
+    [0.0, 0.2, 0.5]         # blue
+])
+
+tile_colors = {'Plains': 0,
+               'Grassland': 1,
+               'Shallow Water': 2,
+               'Ocean': 3,
+               'Mountain': 4,
+               'Peaks': 5,
 }
 
 class MapMesh:
@@ -54,10 +64,10 @@ class MapMesh:
         # add water plane
         lvl = (y_max / divs) * 1.8
         self.water = Mesh(vbo)
-        p1 = Vertex([0.0, lvl, 0.0], [0.0, 1.0, 0.0], [0.0, 0.2, 0.5])
-        p2 = Vertex([1.0, lvl, 0.0], [0.0, 1.0, 0.0], [0.0, 0.2, 0.5])
-        p3 = Vertex([1.0, lvl, 1.0], [0.0, 1.0, 0.0], [0.0, 0.2, 0.5])
-        p4 = Vertex([0.0, lvl, 1.0], [0.0, 1.0, 0.0], [0.0, 0.2, 0.5])
+        p1 = Vertex([0.0, lvl, 0.0], [0.0, 1.0, 0.0], [6, 0, 0])
+        p2 = Vertex([1.0, lvl, 0.0], [0.0, 1.0, 0.0], [6, 0, 0])
+        p3 = Vertex([1.0, lvl, 1.0], [0.0, 1.0, 0.0], [6, 0, 0])
+        p4 = Vertex([0.0, lvl, 1.0], [0.0, 1.0, 0.0], [6, 0, 0])
         self.water.push_triangle(p2, p1, p3)
         self.water.push_triangle(p1, p4, p3)
         self.water.flush()
@@ -108,7 +118,7 @@ class MapMesh:
         x = x_offset + (2 * self.len_x + dR) * x_id
         y = (self.len_y + R + dR * np.sqrt(3.0) / 2.0) * y_id
 
-        value = (1.0 + self.noise([x / (self.size_x * 0.2), y / (self.size_y * 0.2)])) * 0.5
+        value = (1.0 + self.noise([x / (self.size_y * 0.2), y / (self.size_y * 0.2)])) * 0.5
         value = 1.2 * value * value
         value *= MapMesh.continental(x_id, self.size_x) * MapMesh.continental(y_id, self.size_y) * self.y_max
 
@@ -151,7 +161,7 @@ class MapMesh:
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5
 
-        color = tile_colors[tile_types[self.types[x_id * self.size_y + y_id]]]
+        color = [tile_colors[tile_types[self.types[x_id * self.size_y + y_id]]], 0, 0]
 
         # main hexagon
         center = Vertex([x, h, y], [0.0, 1.0, 0.0], color)
@@ -172,7 +182,7 @@ class MapMesh:
         if x_id != self.size_x - 1:
             #(x + 1, y)
             real_id = (x_id + 1) * self.size_y + y_id
-            other_color = tile_colors[tile_types[self.types[real_id]]]
+            other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
             p11 = np.array(p1.position)
             p66 = np.array(p6.position)
             m1 = np.array([x + dx + dR, self.heights[real_id], y + dy])
@@ -194,7 +204,7 @@ class MapMesh:
             #(x + 1, y + 1)
             if y_id != self.size_y - 1:
                 real_id = other_x * self.size_y + y_id + 1
-                other_color = tile_colors[tile_types[self.types[real_id]]]
+                other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
                 p11 = np.array(p1.position)
                 p22 = np.array(p2.position)
                 m1 = np.array([x + 0.5 * dR, self.heights[real_id], y + R + dR * np.sqrt(3.0) / 2.0])
@@ -212,7 +222,7 @@ class MapMesh:
                 if x_id != self.size_x - 1:
                     tmp = (x_id + 1) * self.size_y + y_id
                     n1 = np.array([x + dx + dR, self.heights[tmp], y + dy])
-                    tmp_col = tile_colors[tile_types[self.types[tmp]]]
+                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], 0, 0]
                     d1 = n1 - m3
                     d2 = p11 - m3
                     norm = np.cross(d1, d2)
@@ -220,7 +230,7 @@ class MapMesh:
                     self.mesh.push_triangle_pos(m3, n1, p11, other_color, tmp_col, color, norm)
             if y_id != 0:
                 real_id = other_x * self.size_y + y_id - 1
-                other_color = tile_colors[tile_types[self.types[real_id]]]
+                other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
                 p66 = np.array(p6.position)
                 p55 = np.array(p5.position)
                 m1 = np.array([x + dx + 0.5 * dR, self.heights[real_id], y - self.len_y - dR * np.sqrt(3.0) / 2.0])
@@ -238,7 +248,7 @@ class MapMesh:
                 if x_id != self.size_x - 1:
                     tmp = (x_id + 1) * self.size_y + y_id
                     n1 = np.array([x + dx + dR, self.heights[tmp], y - dy])
-                    tmp_col = tile_colors[tile_types[self.types[tmp]]]
+                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], 0, 0]
                     d1 = p66 - m1
                     d2 = n1 - m1
                     norm = np.cross(d1, d2)
