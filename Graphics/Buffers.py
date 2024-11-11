@@ -156,38 +156,30 @@ class DynamicVBO:
 
 class BasicVBO:
 
-    # capacity -> max size of vbo in bytes
-    # attributes -> list for the number of GL_FLOATS for each attribute
-    def __init__(self, capacity:int):
+    # capacity -> size of vbo in bytes
+    # vertices -> list of vertices that will be copied into vbo
+    def __init__(self, capacity:int, vertices: np.array):
         self.capacity = capacity
-        self.currentSize = 0
 
         self.vao = glGenVertexArrays(1)
         glBindVertexArray(self.vao)
         self.vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glBufferData(GL_ARRAY_BUFFER, capacity, None, GL_DYNAMIC_DRAW)
+        glBufferData(GL_ARRAY_BUFFER, capacity, vertices, GL_STATIC_DRAW)
 
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * vertices.itemsize, ctypes.c_void_p(0))
 
         glEnableVertexAttribArray(1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * vertices.itemsize, ctypes.c_void_p(2 * vertices.itemsize))
 
-    # push a list of vertices at the end of the buffer
-    def push_vertices(self, vertices:np.array):
-        if self.currentSize + vertices.nbytes > self.capacity:
-            return False
-
-        glBufferSubData(GL_ARRAY_BUFFER, self.currentSize, vertices.nbytes, vertices)
-        self.currentSize += vertices.nbytes
-
-        return True
-
-    #draw content of VBO
     def draw_vertices(self):
-        if self.currentSize == 0:
+        if self.capacity == 0:
             return
-        glDrawArrays(GL_TRIANGLES, 0, self.currentSize)
+        glDrawArrays(GL_TRIANGLES, 0, 6)
 
+    def bind(self):
+        glBindVertexArray(self.vao)
 
+    def unbind(self):
+        glBindVertexArray(0)

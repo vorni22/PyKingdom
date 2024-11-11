@@ -3,11 +3,15 @@ import pygame as pg
 from OpenGL.GL import *
 import numpy as np
 import pyrr
+from OpenGL.arrays.vbo import VBO
+
 from Graphics.Buffers import DynamicVBO
+from Graphics.Buffers import BasicVBO
 from Graphics.Camera import Camera, CameraManager
 from Graphics.Mesh import Mesh
 from Graphics.Shaders import Shader
 from Map_Generation.MapBuilder import MapMesh
+from Graphics.FrameBuffer import FrameBuffer
 
 WIDTH = 1200
 HEIGHT = 600
@@ -111,6 +115,33 @@ mouse_visible = False
 cnt = 0
 sum_time = 0.0
 
+# FrameBuffers
+quad_vertex = np.array([
+    -1.0,  1.0, 0.0, 1.0,
+    -1.0, -1.0, 0.0, 0.0,
+     1.0, -1.0, 1.0, 0.0,
+
+    -1.0,  1.0, 0.0, 1.0,
+     1.0, -1.0, 1.0, 0.0,
+     1.0,  1.0, 1.0, 1.0
+], dtype=np.float32)
+
+
+quad_vbo = BasicVBO(quad_vertex.nbytes, quad_vertex)
+
+quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl")
+quad_shader.use_shader()
+quad_shader.set_int("screen_texture", 0)
+
+
+fbo = FrameBuffer(WIDTH, HEIGHT)
+
+if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+    print("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
+
+fbo.unbind()
+
+#FrameBuffers
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
@@ -124,6 +155,10 @@ while running:
         cnt = 0
         pg.display.set_caption(f"FPS = {fps}; pos = {camera.pos}")
 
+    fbo.bind()
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
     # check events
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -135,6 +170,7 @@ while running:
             camera.screen_height = HEIGHT
             camera.screen_width = WIDTH
             glViewport(0, 0, WIDTH, HEIGHT)
+            fbo.resize(WIDTH, HEIGHT)
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_TAB:
                 if mouse_visible:
@@ -148,13 +184,21 @@ while running:
             if event.key == pg.K_ESCAPE:
                 running = False
 
-    # refresh screen
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
+    shader.use_shader()
     cameraManager.every_frame(shader, dt, not mouse_visible)
 
-    shader.use_shader()
+    glBindVertexArray(builder.mesh.vbo.vao)
     builder.draw(shader)
+
+
+    fbo.unbind()
+    glClear(GL_COLOR_BUFFER_BIT)
+
+    quad_vbo.bind()
+    quad_shader.use_shader()
+    glBindTexture(GL_TEXTURE_2D, fbo.texture)
+    quad_vbo.draw_vertices()
+
 
     pg.display.flip()
 

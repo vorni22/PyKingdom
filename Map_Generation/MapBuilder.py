@@ -21,7 +21,7 @@ tile_colors = {'Plains':[0.41, 0.74, 0.06],
                'Shallow Water':[0.74, 0.74, 0.32],
                'Ocean':[0.47, 0.47, 0.33],
                'Mountain':[0.4, 0.43, 0.43],
-               'Tundra':[0.63, 0.78, 0.76],
+               'Peaks':[0.63, 0.78, 0.76],
 }
 
 class MapMesh:
