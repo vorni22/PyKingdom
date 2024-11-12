@@ -25,19 +25,29 @@ class FrameBuffer:
 
         glBindFramebuffer(GL_FRAMEBUFFER, self.fbo)
 
-        glDeleteTextures(1, [self.texture])
+        glDeleteTextures(2, [self.color_texture, self.data_texture])
         self.__gen_texture()
 
         glDeleteRenderbuffers(1, [self.rbo])
         self.__gen_renderbuffer()
 
     def __gen_texture(self):
-        self.texture = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, self.texture)
+        self.color_texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.color_texture)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, self.width, self.height, 0, GL_RGB, GL_UNSIGNED_BYTE, None)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self.texture, 0)
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self.color_texture, 0)
+
+        self.data_texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.data_texture)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, self.width, self.height, 0, GL_RED_INTEGER, GL_INT, None)
+        #glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        #glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, self.data_texture, 0)
+
+        gl_enums = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1]
+        glDrawBuffers(2, gl_enums)
 
     def __gen_renderbuffer(self):
         self.rbo = glGenRenderbuffers(1)

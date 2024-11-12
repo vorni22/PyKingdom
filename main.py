@@ -88,8 +88,13 @@ size_y = 40
 vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
-vbo_test = DynamicVBO(total_size + 6, 36)
+vbo_test = DynamicVBO(2 * total_size + 6, 36)
 builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test)
+
+fbo = FrameBuffer(WIDTH, HEIGHT)
+if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+    print("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
+fbo.unbind()
 
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
@@ -132,14 +137,6 @@ quad_vbo = BasicVBO(quad_vertex.nbytes, quad_vertex)
 quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl")
 quad_shader.use_shader()
 quad_shader.set_int("screen_texture", 0)
-
-
-fbo = FrameBuffer(WIDTH, HEIGHT)
-
-if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
-    print("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
-
-fbo.unbind()
 
 #FrameBuffers
 while running:
@@ -190,15 +187,13 @@ while running:
     glBindVertexArray(builder.mesh.vbo.vao)
     builder.draw(shader)
 
-
     fbo.unbind()
     glClear(GL_COLOR_BUFFER_BIT)
 
     quad_vbo.bind()
     quad_shader.use_shader()
-    glBindTexture(GL_TEXTURE_2D, fbo.texture)
+    glBindTexture(GL_TEXTURE_2D, fbo.color_texture)
     quad_vbo.draw_vertices()
-
 
     pg.display.flip()
 

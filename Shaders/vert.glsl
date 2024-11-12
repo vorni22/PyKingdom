@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormalVector;
-layout (location = 2) in vec3 aColor;
+layout (location = 2) in vec3 aData;
 
 uniform mat4 model;
 uniform mat3 normMatrix;
@@ -12,8 +12,10 @@ uniform mat4 projection;
 out vec3 Normal;
 out vec3 FragPos;
 out vec3 Color;
+out float visibility;
+out float id;
 
-const vec3 color_palet[] = vec3[](
+uniform vec3 color_palet[] = vec3[](
     vec3(0.41, 0.74, 0.06),     // pale green
     vec3(0.06, 0.74, 0.1),      // green
     vec3(0.74, 0.74, 0.32),     // pale yellow
@@ -28,7 +30,14 @@ void main() {
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 
+    visibility = 1.0;
+    id = aData.y;
+    // TO DO: determine visibility
+    if ((int(id) & 1) == 0) {
+        visibility = 0.7;
+    }
+
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	Normal = normMatrix * aNormalVector;
-	Color = color_palet[int(aColor.x)];
+	Color = color_palet[int(aData.x)];
 }

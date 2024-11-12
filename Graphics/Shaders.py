@@ -14,6 +14,13 @@ class Shader:
 
         self.shader = compileProgram(compileShader(vertex_src, GL_VERTEX_SHADER),
                                      compileShader(fragment_src, GL_FRAGMENT_SHADER))
+
+        glValidateProgram(self.shader)
+        is_valid = glGetProgramiv(self.shader, GL_VALIDATE_STATUS)
+        if not is_valid:
+            info_log = glGetProgramInfoLog(self.shader)
+            print(f"Shader program validation failed: {info_log}")
+
     def del_shader(self):
         glDeleteProgram(self.shader)
 

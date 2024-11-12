@@ -59,19 +59,16 @@ class MapMesh:
             for x in range(0, size_x):
                 real_index = x * size_y + y
                 self.loaded[real_index] = True
-                self.add_hex(x, y, y & 1 == 0)
+                self.add_hex(x, y, self.mesh, y & 1 == 0)
 
         # add water plane
-        lvl = (y_max / divs) * 1.8
+        self.water_lvl = (y_max / divs) * 1.8
         self.water = Mesh(vbo)
-        p1 = Vertex([0.0, lvl, 0.0], [0.0, 1.0, 0.0], [6, 0, 0])
-        p2 = Vertex([1.0, lvl, 0.0], [0.0, 1.0, 0.0], [6, 0, 0])
-        p3 = Vertex([1.0, lvl, 1.0], [0.0, 1.0, 0.0], [6, 0, 0])
-        p4 = Vertex([0.0, lvl, 1.0], [0.0, 1.0, 0.0], [6, 0, 0])
-        self.water.push_triangle(p2, p1, p3)
-        self.water.push_triangle(p1, p4, p3)
+        for y in range(0, size_y):
+            for x in range(0, size_x):
+                self.add_hex(x, y, self.water, y & 1 == 0, True)
+
         self.water.flush()
-        self.water.scale = np.array([size_x * (2.0 * self.len_x + dR), 1.0, size_y * (R + self.len_y + dR * np.sqrt(3) / 2)])
         self.water.update_matrices()
         self.water.activate()
 
@@ -149,19 +146,24 @@ class MapMesh:
         shader.set_float("opacity", 0.7)
         self.water.draw(shader)
 
-    def add_hex(self, x_id, y_id, even_tile: bool):
+    def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         x_offset = 0
         if not even_tile:
             x_offset = self.len_x + 0.5 * dR
 
+        central_id = x_id * self.size_y + y_id
         x = x_offset + (2 * self.len_x + dR) * x_id
         y = (self.len_y + R + dR * np.sqrt(3) / 2) * y_id
         h = self.heights[x_id * self.size_y + y_id]
+        if water_tile:
+            h = self.water_lvl
 
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5
 
-        color = [tile_colors[tile_types[self.types[x_id * self.size_y + y_id]]], 0, 0]
+        color = [tile_colors[tile_types[self.types[x_id * self.size_y + y_id]]], central_id, 0]
+        if water_tile:
+            color = [6, central_id, 0]
 
         # main hexagon
         center = Vertex([x, h, y], [0.0, 1.0, 0.0], color)
@@ -172,29 +174,33 @@ class MapMesh:
         p5 = Vertex([x, h, y - R], [0.0, 1.0, 0.0], color)
         p6 = Vertex([x + dx, h, y - dy], [0.0, 1.0, 0.0], color)
 
-        self.mesh.push_triangle(center, p2, p1)
-        self.mesh.push_triangle(center, p3, p2)
-        self.mesh.push_triangle(center, p4, p3)
-        self.mesh.push_triangle(center, p5, p4)
-        self.mesh.push_triangle(center, p6, p5)
-        self.mesh.push_triangle(center, p1, p6)
+        mesh.push_triangle(center, p2, p1)
+        mesh.push_triangle(center, p3, p2)
+        mesh.push_triangle(center, p4, p3)
+        mesh.push_triangle(center, p5, p4)
+        mesh.push_triangle(center, p6, p5)
+        mesh.push_triangle(center, p1, p6)
 
         if x_id != self.size_x - 1:
             #(x + 1, y)
             real_id = (x_id + 1) * self.size_y + y_id
-            other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
+            other_color = [tile_colors[tile_types[self.types[real_id]]], real_id, 0]
             p11 = np.array(p1.position)
             p66 = np.array(p6.position)
-            m1 = np.array([x + dx + dR, self.heights[real_id], y + dy])
-            m2 = np.array([x + dx + dR, self.heights[real_id], y])
-            m3 = np.array([x + dx + dR, self.heights[real_id], y - dy])
+            nh = self.heights[real_id]
+            if water_tile:
+                nh = self.water_lvl
+                other_color = [6, real_id, 0]
+            m1 = np.array([x + dx + dR, nh, y + dy])
+            m2 = np.array([x + dx + dR, nh, y])
+            m3 = np.array([x + dx + dR, nh, y - dy])
             d1 = p11 - m2
             d2 = m1 - m2
             norm = np.cross(d1, d2)
             norm = norm / np.linalg.norm(norm)
-            self.mesh.push_triangle_pos(m2, p11, m1, other_color, color, other_color, norm)
-            self.mesh.push_triangle_pos(m2, m3, p66, other_color, other_color, color, norm)
-            self.mesh.push_triangle_pos(m2, p66, p11, other_color, color, color, norm)
+            mesh.push_triangle_pos(m2, p11, m1, other_color, color, other_color, norm)
+            mesh.push_triangle_pos(m2, m3, p66, other_color, other_color, color, norm)
+            mesh.push_triangle_pos(m2, p66, p11, other_color, color, color, norm)
 
         other_x = x_id
         if not even_tile:
@@ -204,55 +210,71 @@ class MapMesh:
             #(x + 1, y + 1)
             if y_id != self.size_y - 1:
                 real_id = other_x * self.size_y + y_id + 1
-                other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
+                other_color = [tile_colors[tile_types[self.types[real_id]]], real_id, 0]
                 p11 = np.array(p1.position)
                 p22 = np.array(p2.position)
-                m1 = np.array([x + 0.5 * dR, self.heights[real_id], y + R + dR * np.sqrt(3.0) / 2.0])
-                m3 = np.array([x + dx + 0.5 * dR, self.heights[real_id], y + self.len_y + dR * np.sqrt(3.0) / 2.0])
+                nh = self.heights[real_id]
+                if water_tile:
+                    nh = self.water_lvl
+                    other_color = [6, real_id, 0]
+                m1 = np.array([x + 0.5 * dR, nh, y + R + dR * np.sqrt(3.0) / 2.0])
+                m3 = np.array([x + dx + 0.5 * dR, nh, y + self.len_y + dR * np.sqrt(3.0) / 2.0])
                 m2 = (m1 + m3) * 0.5
                 d1 = p22 - m2
                 d2 = m1 - m2
                 norm = np.cross(d1, d2)
                 norm = norm / np.linalg.norm(norm)
-                self.mesh.push_triangle_pos(m2, p22, m1, other_color, color, other_color, norm)
-                self.mesh.push_triangle_pos(m2, m3, p11, other_color, other_color, color, norm)
-                self.mesh.push_triangle_pos(m2, p11, p22, other_color, color, color, norm)
+                mesh.push_triangle_pos(m2, p22, m1, other_color, color, other_color, norm)
+                mesh.push_triangle_pos(m2, m3, p11, other_color, other_color, color, norm)
+                mesh.push_triangle_pos(m2, p11, p22, other_color, color, color, norm)
 
                 #corner
                 if x_id != self.size_x - 1:
                     tmp = (x_id + 1) * self.size_y + y_id
-                    n1 = np.array([x + dx + dR, self.heights[tmp], y + dy])
-                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], 0, 0]
+                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], tmp, 0]
+                    tmp_h = self.heights[tmp]
+                    if water_tile:
+                        tmp_h = self.water_lvl
+                        tmp_col = [6, tmp, 0]
+                    n1 = np.array([x + dx + dR, tmp_h, y + dy])
                     d1 = n1 - m3
                     d2 = p11 - m3
                     norm = np.cross(d1, d2)
                     norm = norm / np.linalg.norm(norm)
-                    self.mesh.push_triangle_pos(m3, n1, p11, other_color, tmp_col, color, norm)
+                    mesh.push_triangle_pos(m3, n1, p11, other_color, tmp_col, color, norm)
             if y_id != 0:
                 real_id = other_x * self.size_y + y_id - 1
-                other_color = [tile_colors[tile_types[self.types[real_id]]], 0, 0]
+                other_color = [tile_colors[tile_types[self.types[real_id]]], real_id, 0]
                 p66 = np.array(p6.position)
                 p55 = np.array(p5.position)
-                m1 = np.array([x + dx + 0.5 * dR, self.heights[real_id], y - self.len_y - dR * np.sqrt(3.0) / 2.0])
-                m3 = np.array([x + 0.5 * dR, self.heights[real_id], y - R - dR * np.sqrt(3.0) / 2.0])
+                nh = self.heights[real_id]
+                if water_tile:
+                    nh = self.water_lvl
+                    other_color = [6, real_id, 0]
+                m1 = np.array([x + dx + 0.5 * dR, nh, y - self.len_y - dR * np.sqrt(3.0) / 2.0])
+                m3 = np.array([x + 0.5 * dR, nh, y - R - dR * np.sqrt(3.0) / 2.0])
                 m2 = (m1 + m3) * 0.5
                 d1 = p66 - m2
                 d2 = m1 - m2
                 norm = np.cross(d1, d2)
                 norm = norm / np.linalg.norm(norm)
-                self.mesh.push_triangle_pos(m2, p66, m1, other_color, color, other_color, norm)
-                self.mesh.push_triangle_pos(m2, m3, p55, other_color, other_color, color, norm)
-                self.mesh.push_triangle_pos(m2, p55, p66, other_color, color, color, norm)
+                mesh.push_triangle_pos(m2, p66, m1, other_color, color, other_color, norm)
+                mesh.push_triangle_pos(m2, m3, p55, other_color, other_color, color, norm)
+                mesh.push_triangle_pos(m2, p55, p66, other_color, color, color, norm)
 
                 # corner
                 if x_id != self.size_x - 1:
                     tmp = (x_id + 1) * self.size_y + y_id
-                    n1 = np.array([x + dx + dR, self.heights[tmp], y - dy])
-                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], 0, 0]
+                    tmp_col = [tile_colors[tile_types[self.types[tmp]]], tmp, 0]
+                    tmp_h = self.heights[tmp]
+                    if water_tile:
+                        tmp_h = self.water_lvl
+                        tmp_col = [6, tmp, 0]
+                    n1 = np.array([x + dx + dR, tmp_h, y - dy])
                     d1 = p66 - m1
                     d2 = n1 - m1
                     norm = np.cross(d1, d2)
                     norm = norm / np.linalg.norm(norm)
-                    self.mesh.push_triangle_pos(m1, p66, n1, other_color, color, tmp_col, norm)
+                    mesh.push_triangle_pos(m1, p66, n1, other_color, color, tmp_col, norm)
 
 
