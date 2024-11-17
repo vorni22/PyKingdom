@@ -1,7 +1,5 @@
 #version 330 core
 
-out vec4 FragColor;
-
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 Color;
@@ -12,12 +10,14 @@ uniform vec3 lightColor;
 uniform float ambientStrength;
 uniform float opacity;
 
+uniform float highlight_id;
+
 layout(location = 0) out vec4 ColorOutput;
 layout(location = 1) out ivec4 DataOutput;
 
 void main(){
     if (visibility <= 0.01) {
-        ColorOutput = vec4(int(id), 0.0, 0.0, 0.0);
+        DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
 	    return;
     }
 
@@ -31,6 +31,11 @@ void main(){
 	float diff = max(dot(norm, -lightDir), 0.0);
 	vec3 diffuse = diff * lightColor;
 
+    float hgh = 1.0;
+    if (abs(highlight_id - id) <= 0.001) {
+        hgh = 0.5;
+    }
+
     float vi = visibility;
     float op = opacity;
     if (visibility < 0.69 && visibility < op) {
@@ -38,8 +43,8 @@ void main(){
         vi = 0.69;
     }
 
-	vec3 ret = (ambient + diffuse) * Color * vi;
+	vec3 ret = (ambient + diffuse) * Color * vi * hgh;
 
 	ColorOutput = vec4(ret, op);
-	DataOutput = ivec4(int(id), 0, 0, 0);
+	DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
 }

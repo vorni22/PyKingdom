@@ -36,6 +36,9 @@ class Camera:
     def camera_move(self, front:float, right:float, up:float):
         self.pos += self.right * right + self.front * front + self.up * up
 
+    def camera_move_globally(self, x_axis:float, y_axis:float, z_axis:float):
+        self.pos += np.array([x_axis, y_axis, z_axis])
+
     def camera_rotate(self, delta_yaw: float, delta_pitch: float, constrain_pitch: bool, constrain_val: float):
         self.pitch += delta_pitch
         self.yaw += delta_yaw
@@ -101,6 +104,39 @@ class CameraManager:
 
         self.camera.camera_rotate(yaw, pitch, True, 89.0)
         self.camera.camera_move(z, x, 0)
+
+    def every_frame(self, shader: Shaders, dt: float, move_camera: bool):
+        if move_camera:
+            self.__process_input(dt)
+        self.camera.camera_update()
+        shader.set_mat4("view", self.camera.get_view_matrix())
+        shader.set_mat4("projection", self.camera.get_perspective_matrix())
+
+class StrategicCamera:
+    def __init__(self, camera: Camera):
+        self.camera = camera
+        self.camera_speed = 0.01
+
+    def __process_input(self, dt: float):
+        keys = pg.key.get_pressed()
+
+        camera_speed = self.camera_speed * dt
+        x = y = z = 0
+
+        if keys[pg.K_s]:
+            z = camera_speed
+        if keys[pg.K_w]:
+            z = -camera_speed
+        if keys[pg.K_d]:
+            x = camera_speed
+        if keys[pg.K_a]:
+            x = -camera_speed
+        if keys[pg.K_SPACE]:
+            y = camera_speed
+        if keys[pg.K_LSHIFT]:
+            y = -camera_speed
+
+        self.camera.camera_move_globally(x, y, z)
 
     def every_frame(self, shader: Shaders, dt: float, move_camera: bool):
         if move_camera:

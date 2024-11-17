@@ -7,7 +7,7 @@ from Graphics.Buffers import DynamicVBO
 from Graphics.Mesh import Mesh
 from Graphics.Mesh import Vertex
 from Graphics.Shaders import Shader
-from enum import Enum
+import struct
 
 R = 1.0
 dR = 0.3
@@ -95,12 +95,22 @@ class MapMesh:
         glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, self.size_y * self.size_x, 0, GL_RED, GL_FLOAT, self.visibility)
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glBindTexture(GL_TEXTURE_1D, 0)
 
-    def set_visibility(self, x, y ,new_state):
-        real_id = x * self.size_y + y
+    def set_visibility(self, real_id, new_state):
         self.visibility[real_id] = new_state
         glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
         glTexSubImage1D(GL_TEXTURE_1D, 0, real_id, 1, GL_RED, GL_FLOAT, new_state)
+
+    def get_tile_on_mouse(self, mouse_x, mouse_y, fbo):
+        glReadBuffer(GL_COLOR_ATTACHMENT1)
+        glBindTexture(GL_TEXTURE_2D, fbo.data_texture)
+        pixel = glReadPixels(mouse_x, mouse_y, 1, 1, GL_RED_INTEGER, GL_INT)
+        pixel = struct.unpack('f', struct.pack('I', pixel[0][0]))[0]
+        if abs(pixel - round(pixel)) == 0.0:
+            return round(pixel)
+        else:
+            return -1
 
     def __value(self, val: float, steps: int)->float:
         dv = (self.y_max - self.y_min) / steps
@@ -182,14 +192,14 @@ class MapMesh:
         central_id = x_id * self.size_y + y_id
         x = x_offset + (2 * self.len_x + dR) * x_id
         y = (self.len_y + R + dR * np.sqrt(3) / 2) * y_id
-        h = self.heights[x_id * self.size_y + y_id]
+        h = self.heights[central_id]
         if water_tile:
             h = self.water_lvl
 
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5
 
-        color = [tile_colors[tile_types[self.types[x_id * self.size_y + y_id]]], central_id, 0]
+        color = [tile_colors[tile_types[self.types[central_id]]], central_id, 0]
         if water_tile:
             color = [6, central_id, 0]
 

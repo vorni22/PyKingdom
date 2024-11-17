@@ -7,7 +7,7 @@ from OpenGL.arrays.vbo import VBO
 
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
-from Graphics.Camera import Camera, CameraManager
+from Graphics.Camera import Camera, CameraManager, StrategicCamera
 from Graphics.Mesh import Mesh
 from Graphics.Shaders import Shader
 from Map_Generation.MapBuilder import MapMesh
@@ -23,8 +23,10 @@ pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL|pg.DOUBLEBUF|pg.RESIZABLE)
 
-pg.mouse.set_visible(False)  # Hide the mouse cursor
-pg.event.set_grab(True)  # Grab the mouse for capturing movement
+# pg.mouse.set_visible(False)  # Hide the mouse cursor
+# pg.event.set_grab(True)  # Grab the mouse for capturing movement
+pg.mouse.set_visible(True)
+pg.event.set_grab(False)
 
 # set up OpenGL
 glClearColor(0.6, 0.6, 0.6, 1)
@@ -99,15 +101,17 @@ fbo.unbind()
 shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
 shader.use_shader()
 
-camera = Camera(np.array([0.0, 0.0, 0.0]), HEIGHT, WIDTH,
-                45.0, 0.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 300.0)
-cameraManager = CameraManager(camera)
+camera = Camera(np.array([0.0, 10.0, 40.0]), HEIGHT, WIDTH,
+                45.0, -45.0, -90.0, np.array([0.0, 1.0, 0.0]), 0.1, 300.0)
+#cameraManager = CameraManager(camera)
+cameraManager = StrategicCamera(camera)
 
 shader.set_mat4("view", camera.get_view_matrix())
 shader.set_mat4("projection", camera.get_perspective_matrix())
 
 shader.set_3float("lightColor", 0.9, 0.8, 0.8)
 shader.set_float("ambientStrength", 0.5)
+shader.set_float("highlight_id", -1.0)
 
 dt = 0.0
 last_time = 0.0
@@ -116,7 +120,6 @@ font = pg.font.SysFont("Arial", 24)
 
 # main loop
 running = True
-mouse_visible = False
 cnt = 0
 sum_time = 0.0
 
@@ -169,23 +172,26 @@ while running:
             glViewport(0, 0, WIDTH, HEIGHT)
             fbo.resize(WIDTH, HEIGHT)
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_TAB:
-                if mouse_visible:
-                    mouse_visible = False
-                    pg.mouse.set_visible(False)
-                    pg.event.set_grab(True)
-                else:
-                    mouse_visible = True
-                    pg.mouse.set_visible(True)
-                    pg.event.set_grab(False)
             if event.key == pg.K_ESCAPE:
                 running = False
 
     shader.use_shader()
-    cameraManager.every_frame(shader, dt, not mouse_visible)
+    cameraManager.every_frame(shader, dt, True)
 
     glBindVertexArray(builder.mesh.vbo.vao)
     builder.draw(shader)
+
+    # TEST
+    mouse_x, mouse_y = pg.mouse.get_pos()
+    mouse_y = HEIGHT - mouse_y
+
+    pixel = builder.get_tile_on_mouse(mouse_x, mouse_y, fbo)
+
+    if 0 <= pixel <= builder.size_x * builder.size_y:
+        shader.set_float("highlight_id", pixel)
+        #builder.set_visibility(pixel, 0.7)
+
+    # STOP TEST
 
     fbo.unbind()
     glClear(GL_COLOR_BUFFER_BIT)
