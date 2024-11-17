@@ -7,6 +7,7 @@ from Graphics.Buffers import DynamicVBO
 from Graphics.Mesh import Mesh
 from Graphics.Mesh import Vertex
 from Graphics.Shaders import Shader
+from enum import Enum
 
 R = 1.0
 dR = 0.3
@@ -47,6 +48,10 @@ class MapMesh:
         self.heights = [0.0] * (size_x * size_y)
         self.types = [0] * (size_x * size_y)
 
+        # 0 - VISIBLE, 1 - SHADOWED, 2 - INVISIBLE
+        self.visibility = np.ones(self.size_y * self.size_x, dtype=np.float32)
+        self.__init_visibility_texture()
+
         self.len_x = R * np.cos(np.radians(30))
         self.len_y = R * np.sin(np.radians(30))
         self.noise = PerlinNoise(octaves = 1, seed = random.randint(0, 0xffff))
@@ -75,6 +80,27 @@ class MapMesh:
         self.mesh.flush()
         self.mesh.update_matrices()
         self.mesh.activate()
+
+    def __bind_texture_to_shader(self, shader: Shader):
+        shader.use_shader()
+        texture_location = glGetUniformLocation(shader.shader, "uVisibilityTexture")
+
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
+        glUniform1i(texture_location, 0)
+
+    def __init_visibility_texture(self):
+        self.visibility_texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, self.size_y * self.size_x, 0, GL_RED, GL_FLOAT, self.visibility)
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
+    def set_visibility(self, x, y ,new_state):
+        real_id = x * self.size_y + y
+        self.visibility[real_id] = new_state
+        glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
+        glTexSubImage1D(GL_TEXTURE_1D, 0, real_id, 1, GL_RED, GL_FLOAT, new_state)
 
     def __value(self, val: float, steps: int)->float:
         dv = (self.y_max - self.y_min) / steps
@@ -138,6 +164,8 @@ class MapMesh:
         self.types[x_id * self.size_y + y_id] = tile_type
 
     def draw(self, shader: Shader):
+        self.__bind_texture_to_shader(shader)
+
         glEnable(GL_CULL_FACE)
         shader.set_float("opacity", 1.0)
         self.mesh.draw(shader)

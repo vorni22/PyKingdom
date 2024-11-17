@@ -9,6 +9,8 @@ uniform mat3 normMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform sampler1D uVisibilityTexture;
+
 out vec3 Normal;
 out vec3 FragPos;
 out vec3 Color;
@@ -33,9 +35,8 @@ void main() {
     visibility = 1.0;
     id = aData.y;
     // TO DO: determine visibility
-    if ((int(id) & 1) == 0) {
-        visibility = 0.7;
-    }
+
+    visibility = texelFetch(uVisibilityTexture, int(id), 0).r;
 
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	Normal = normMatrix * aNormalVector;
