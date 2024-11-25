@@ -13,6 +13,16 @@ industrial_zone_buildings = ['Workshop', 'Factory']
 neighborhood_buildings = ['Food Market']
 city_center_buildings = ['Palace', 'Monument', 'Granary', 'Water Mill', 'Sewer']
 
+district_cost = 120
+
+campus_buildings_costs = [80, 120]
+theatre_square_buildings_costs = [80, 120]
+commercial_hub_buildings_costs = [80, 120]
+harbour_buildings_costs = [80, 120]
+industrial_zone_buildings_costs = [80, 120]
+neighborhood_buildings_costs = [100]
+city_center_buildings_costs = [0, 40, 60, 60, 100]
+
 # Holds information about a district
 # @param district_type: what type of district is this one. Should be part of the district_types list
 # @param buildings: list of buildings that have been built in this district. Buildings are specific to each district
@@ -124,6 +134,7 @@ class City:
     def __init__(self, city_name, center_line_location, center_column_location):
         self.city_name = city_name
         self.districts = [District(district_types[7], center_line_location, center_column_location)]
+        self.add_building(0, 0)
         self.housing = 3
         self.population = 1
         self.tiles = [Map.Map.get_tile(center_line_location, center_column_location)]
@@ -170,6 +181,12 @@ class City:
         self.districts.append(District(district_types[district_name_id], location_line, location_column))
         self.add_tiles(location_line, location_column)
         self.melee_combat_strength += 5
+
+    def get_district_id(self, district_location_line, district_location_column):
+        for i, district in enumerate(self.districts):
+            if (district.location_line == district_location_line and
+                    district.location_column == district_location_column):
+                return i
 
     def add_building(self, building_name_id, district_id):
         self.districts[district_id].add_building(building_name_id)
@@ -245,3 +262,88 @@ class City:
             self.health_percentage -= 0.4 * diff - 3
         else:
             self.health_percentage -= 2.5 * (-diff) - 5
+
+    def build_district(self, district_name_id, district_location_line, district_location_column):
+        if self.city_resources.production_count < district_cost:
+            remaining_production = self.city_resources.production_count - district_cost
+            return remaining_production / self.city_resources_per_turn.production_per_turn_count
+        self.add_district(district_name_id, district_location_line, district_location_column)
+        self.city_resources.production_count -= district_cost
+        return 0
+
+    def build_building_with_production(self, building_name_id, district_id):
+        district = self.districts[district_id]
+        if district.district_type == district_types[0]:
+            if self.city_resources.production_count < campus_buildings_costs[building_name_id]:
+                remaining_production = self.city_resources.production_count - campus_buildings_costs[building_name_id]
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= campus_buildings_costs[building_name_id]
+        elif district.district_type == district_types[1]:
+            if self.city_resources.production_count < theatre_square_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        theatre_square_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= theatre_square_buildings_costs[building_name_id]
+        elif district.district_type == district_types[2]:
+            if self.city_resources.production_count < commercial_hub_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        commercial_hub_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= commercial_hub_buildings_costs[building_name_id]
+        elif district.district_type == district_types[3]:
+            if self.city_resources.production_count < harbour_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        harbour_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= harbour_buildings_costs[building_name_id]
+        elif district.district_type == district_types[4]:
+            if self.city_resources.production_count < industrial_zone_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        industrial_zone_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= industrial_zone_buildings_costs[building_name_id]
+        elif district.district_type == district_types[5]:
+            if self.city_resources.production_count < neighborhood_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        neighborhood_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= neighborhood_buildings_costs[building_name_id]
+        elif district.district_type == district_types[6]:
+            raise ValueError('Aqueducts do not have buildings')
+        elif district.district_type == district_types[7]:
+            if self.city_resources.production_count < city_center_buildings_costs[building_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        city_center_buildings_costs[building_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= city_center_buildings_costs[building_name_id]
+
+        self.add_building(building_name_id, district_id)
+        return 0

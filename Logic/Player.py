@@ -31,3 +31,96 @@ class Player:
             self.resources_per_turn += city.end_turn_update()
 
         self.add_resources()
+
+    def build_district(self, city_line, city_column, district_name_id,
+                       district_location_line, district_location_column):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                return city.build_district(district_name_id, district_location_line, district_location_column)
+
+    def build_building_with_production(self, city_line, city_column, district_location_line, district_location_column,
+                                       building_name_id):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                return city.build_building_with_production(building_name_id, city.get_district_id(district_location_line,
+                                                                                           district_location_column))
+
+    def build_building_with_gold(self, city_line, city_column, district_location_line, district_location_column,
+                                 building_name_id):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                district = city.districts[city.get_district_id(district_location_line, district_location_column)]
+                if district.district_type == City.district_types[0]:
+                    if self.resources.gold_count < City.campus_buildings_costs[building_name_id] * 2:
+                        remaining_gold = City.campus_buildings_costs[building_name_id] * 2 - self.resources.gold_count
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.campus_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[1]:
+                    if self.resources.gold_count < City.theatre_square_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.theatre_square_buildings_costs[building_name_id] * 2 -
+                                          self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.theatre_square_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[2]:
+                    if self.resources.gold_count < City.commercial_hub_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.commercial_hub_buildings_costs[building_name_id] * 2 -
+                                          self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.commercial_hub_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[3]:
+                    if self.resources.gold_count < City.harbour_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.harbour_buildings_costs[building_name_id] * 2 -
+                                         self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.harbour_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[4]:
+                    if self.resources.gold_count < City.industrial_zone_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.industrial_zone_buildings_costs[building_name_id] * 2 -
+                                          self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.industrial_zone_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[5]:
+                    if self.resources.gold_count < City.neighborhood_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.neighborhood_buildings_costs[building_name_id] * 2 -
+                                          self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.neighborhood_buildings_costs[building_name_id] * 2
+                elif district.district_type == City.district_types[6]:
+                    raise ValueError("No buildings for aqueducts")
+                else:
+                    if self.resources.gold_count < City.city_center_buildings_costs[building_name_id] * 2:
+                        remaining_gold = (City.city_center_buildings_costs[building_name_id] * 2 -
+                                          self.resources.gold_count)
+                        if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                        else:
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                    else:
+                        self.resources.gold_count -= City.city_center_buildings_costs[building_name_id] * 2
+                district.add_building(building_name_id)
+                return 0
+
