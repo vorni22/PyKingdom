@@ -213,3 +213,33 @@ class Player:
         for unit in self.units:
             if unit.position_line == unit_position_line and unit.position_column == unit_position_column:
                 return unit.move(unit_new_line, unit_new_column)
+
+    def buy_tech(self, tech_id: int):
+        for pred in self.tech_tree.G.predecessors(self.tech_tree.G[tech_id]):
+            if not pred.owned:
+                return -1
+        if self.resources.science_count < self.tech_tree.G[tech_id].cost:
+            remaining_science = self.resources.science_count - self.tech_tree.G[tech_id].cost
+            if remaining_science % self.resources_per_turn.science_per_turn_count == 0:
+                return remaining_science // self.resources_per_turn.science_per_turn_count
+            else:
+                return remaining_science // self.resources_per_turn.science_per_turn_count + 1
+        else:
+            self.resources.science_count -= self.tech_tree.G[tech_id].cost
+        self.tech_tree.G[tech_id].owned = True
+        return 0
+
+    def buy_civic(self, civic_id: int):
+        for pred in self.civic_tree.G.predecessors(self.civic_tree.G[civic_id]):
+            if not pred.owned:
+                return -1
+        if self.resources.culture_count < self.civic_tree.G[civic_id].cost:
+            remaining_culture = self.resources.culture_count - self.civic_tree.G[civic_id].cost
+            if remaining_culture % self.resources_per_turn.culture_per_turn_count == 0:
+                return remaining_culture // self.resources_per_turn.culture_per_turn_count
+            else:
+                return remaining_culture // self.resources_per_turn.culture_per_turn_count + 1
+        else:
+            self.resources.culture_count -= self.civic_tree.G[civic_id].cost
+        self.civic_tree.G[civic_id].owned = True
+        return 0
