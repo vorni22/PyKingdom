@@ -1,3 +1,4 @@
+import Logic.Player
 import Logic.Resources as Resources
 from Map_Generation import Map as Map
 import Logic.Unit as Unit
@@ -346,4 +347,80 @@ class City:
                 self.city_resources.production_count -= city_center_buildings_costs[building_name_id]
 
         self.add_building(building_name_id, district_id)
+        return 0
+
+    def build_unit_with_production(self, unit_type_id, unit_name_id, player_reference: Logic.Player.Player):
+        if unit_type_id == 0:
+            if self.city_resources.production_count < Unit.melee_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.melee_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.melee_units_costs[unit_name_id]
+        elif unit_type_id == 1:
+            if self.city_resources.production_count < Unit.ranged_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.ranged_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.ranged_units_costs[unit_name_id]
+        elif unit_type_id == 2:
+            if self.city_resources.production_count < Unit.cavalry_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.cavalry_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.cavalry_units_costs[unit_name_id]
+        elif unit_type_id == 3:
+            if self.city_resources.production_count < Unit.siege_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.siege_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.siege_units_costs[unit_name_id]
+        elif unit_type_id == 4:
+            if self.city_resources.production_count < Unit.naval_melee_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.naval_melee_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.naval_melee_units_costs[unit_name_id]
+        elif unit_type_id == 5:
+            if self.city_resources.production_count < Unit.ranged_units_costs[unit_name_id]:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.ranged_units_costs[unit_name_id])
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.naval_ranged_units_costs[unit_name_id]
+        elif unit_type_id == 6:
+            if self.city_resources.production_count < Unit.civilian_units_costs:
+                remaining_production = (self.city_resources.production_count -
+                                        Unit.civilian_units_costs)
+                if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count
+                else:
+                    return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
+            else:
+                self.city_resources.production_count -= Unit.civilian_units_costs
+
+        player_reference.units.append(Unit.Unit(unit_type_id, unit_name_id, self.center_line_location,
+                                                self.center_column_location))
         return 0

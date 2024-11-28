@@ -1,3 +1,4 @@
+import Map_Generation.Map as Map
 unit_classes = ['Melee', 'Ranged', 'Cavalry', 'Siege', 'Naval Melee', 'Naval Ranged', 'Civilian']
 
 melee_units = ['Warrior', 'Swordsman', 'Man at Arms']
@@ -6,7 +7,15 @@ cavalry_units = ['Horseman', 'Heavy Chariot', 'Knight']
 siege_units = ['Catapult', 'Trebuchet', 'Bombard']
 naval_melee_units = ['Galley', 'Caravel']
 naval_ranged_units = ['Quadrireme', 'Frigate']
-civilian_units = ['Settler']
+civilian_units = ['Settler', ]
+
+melee_units_costs = [50, 70, 90]
+ranged_units_costs = [50, 70, 90]
+cavalry_units_costs = [50, 70, 90]
+siege_units_costs = [50, 70, 90]
+naval_melee_units_costs = [60, 80]
+naval_ranged_units_costs = [60, 80]
+civilian_units_costs = 120
 
 # Holds information about a unit
 # @param position_line: the line on which the unit is currently situated
@@ -20,12 +29,12 @@ civilian_units = ['Settler']
 # @param health percentage: how much health the unit has left. If the unit reaches 0, it dies
 
 class Unit:
-    def __init__(self, display_name, type_id, name_id, position_line, position_column):
+    def __init__(self, type_id, name_id, position_line, position_column):
         self.position_line = position_line
         self.position_column = position_column
         self.type = unit_classes[type_id]
-        self.display_name = display_name
         self.name = None
+        self.display_name = self.name
         self.init_name(type_id, name_id)
         self.movement = 0
         self.init_movement(type_id, name_id)
@@ -53,9 +62,6 @@ class Unit:
             self.name = naval_ranged_units[name_id]
         elif type_id == 6:
             self.name = civilian_units[name_id]
-
-        if not self.display_name or self.display_name == "":
-           self.display_name = self.name
 
     def init_movement(self, type_id, name_id):
         if type_id == 0:
@@ -180,3 +186,15 @@ class Unit:
             self.health_percentage -= 2.5 * diff - 5
         else:
             self.health_percentage -= 0.4 * (-diff) - 5
+
+    def move(self, new_line, new_column):
+        distance = Map.Map.get_shortest_distance(self.position_line, self.position_column, new_line, new_column)
+        if distance < self.movement:
+            if distance % self.movement == 0:
+                return distance // self.movement
+            else:
+                return distance // self.movement + 1
+        self.movement -= distance
+        self.position_line = new_line
+        self.position_column = new_column
+        return 0

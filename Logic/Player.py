@@ -1,5 +1,6 @@
 import Logic.City as City
 import Logic.Resources as Resources
+import Logic.Unit as Unit
 
 # Holds information about a player
 # @param player_id: the id of the player
@@ -56,7 +57,7 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.campus_buildings_costs[building_name_id] * 2
                 elif district.district_type == City.district_types[1]:
@@ -66,7 +67,7 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.theatre_square_buildings_costs[building_name_id] * 2
                 elif district.district_type == City.district_types[2]:
@@ -76,7 +77,7 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.commercial_hub_buildings_costs[building_name_id] * 2
                 elif district.district_type == City.district_types[3]:
@@ -86,7 +87,7 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.harbour_buildings_costs[building_name_id] * 2
                 elif district.district_type == City.district_types[4]:
@@ -106,7 +107,7 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.neighborhood_buildings_costs[building_name_id] * 2
                 elif district.district_type == City.district_types[6]:
@@ -118,9 +119,92 @@ class Player:
                         if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
                             return remaining_gold // self.resources_per_turn.gold_per_turn_count
                         else:
-                            return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                            return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
                     else:
                         self.resources.gold_count -= City.city_center_buildings_costs[building_name_id] * 2
                 district.add_building(building_name_id)
                 return 0
 
+    def build_unit_with_production(self, city_line, city_column, unit_type_id, unit_name_id):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                return city.build_unit_with_production(unit_type_id, unit_name_id, self)
+
+    def build_unit_with_gold(self, city_line, city_column, unit_type_id, unit_name_id):
+        if unit_type_id == 0:
+            if self.resources.gold_count < Unit.melee_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.melee_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.melee_units_costs[unit_name_id] * 2
+        elif unit_type_id == 1:
+            if self.resources.gold_count < Unit.ranged_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.ranged_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.ranged_units_costs[unit_name_id] * 2
+        elif unit_type_id == 2:
+            if self.resources.gold_count < Unit.cavalry_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.cavalry_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.cavalry_units_costs[unit_name_id] * 2
+        elif unit_type_id == 3:
+            if self.resources.gold_count < Unit.siege_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.siege_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.siege_units_costs[unit_name_id] * 2
+        elif unit_type_id == 4:
+            if self.resources.gold_count < Unit.naval_melee_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.naval_melee_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.naval_melee_units_costs[unit_name_id] * 2
+        elif unit_type_id == 5:
+            if self.resources.gold_count < Unit.naval_ranged_units_costs[unit_name_id] * 2:
+                remaining_gold = (Unit.naval_ranged_units_costs[unit_name_id] * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.naval_ranged_units_costs[unit_name_id] * 2
+        elif unit_type_id == 6:
+            if self.resources.gold_count < Unit.civilian_units_costs * 2:
+                remaining_gold = (Unit.civilian_units_costs * 2 -
+                                  self.resources.gold_count)
+                if remaining_gold % self.resources_per_turn.gold_per_turn_count == 0:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count
+                else:
+                    return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
+            else:
+                self.resources.gold_count -= Unit.civilian_units_costs * 2
+        self.units.append(Unit.Unit(unit_name_id, unit_type_id, city_line, city_column))
+        return 0
+
+    def move_unit(self, unit_position_line, unit_position_column, unit_new_line, unit_new_column):
+        for unit in self.units:
+            if unit.position_line == unit_position_line and unit.position_column == unit_position_column:
+                return unit.move(unit_new_line, unit_new_column)
