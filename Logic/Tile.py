@@ -12,7 +12,7 @@ tile_luxury_resources = ['Mercury', 'Silk', 'Cocoa', 'Turtles', 'Coffee', 'Ivory
 # @param type: the type of tile this tile is. Tiles can be Ocean, Shallow Water, Grassland, Plains or Mountains
 # depending on their altitude (increasing in this order). Mountains may not have features or resources. Fish, Crabs,
 # Whales and Coral Reefs may be found only on shallow water tiles. Every other resource or feature may only be found
-# on grassland, plains or tundra tiles (equal chances)
+# on grassland or plains tiles (equal chances)
 # @param basic_resource: the basic resource on the tile (if the tile has one) only one of basic, strategic or luxury
 # resources can be present on a tile
 # @param strategic_resource: the strategic resource on the tile (if the tile has one) only one of basic, strategic or

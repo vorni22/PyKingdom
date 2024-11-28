@@ -1,6 +1,9 @@
 import Logic.City as City
 import Logic.Resources as Resources
 import Logic.Unit as Unit
+import Logic.Tech as Tech
+import Logic.Civic as Civic
+
 
 # Holds information about a player
 # @param player_id: the id of the player
@@ -15,6 +18,8 @@ class Player:
 
         self.resources = Resources.Resources(0, 0, 0)
         self.resources_per_turn = Resources.ResourcesPerTurn(0, 0, 0)
+        self.tech_tree = Tech.TechTree()
+        self.civic_tree = Civic.CivicTree()
         self.cities = []
         self.units = []
 
