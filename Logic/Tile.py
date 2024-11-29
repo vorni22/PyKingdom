@@ -4,7 +4,7 @@ tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Peak
 tile_basic_resources = ['Banana', 'Wheat', 'Rice', 'Maize', 'Stone', 'Fish', 'Crabs', None]
 tile_features = ['Woods', 'Rainforests', 'Marsh', 'Coral Reef', None]
 tile_strategic_resources = ['Horses', 'Iron', 'Niter', 'Coal', None]
-tile_luxury_resources = ['Mercury', 'Silk', 'Cocoa', 'Turtles', 'Coffee', 'Ivory', 'Furs', None]
+tile_luxury_resources = ['Mercury', 'Silk', 'Turtles', 'Coffee', 'Diamonds', None]
 
 # Holds information about a tile on the map
 # @param line: the line on the map on which the tile is situated

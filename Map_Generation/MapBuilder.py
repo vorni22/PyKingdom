@@ -2,6 +2,8 @@ import random
 import numpy as np
 from OpenGL.GL import *
 from perlin_noise import PerlinNoise
+
+from Graphics.ColorPalette import ColorPalette
 from Logic.Tile import tile_types
 from Graphics.Buffers import DynamicVBO
 from Graphics.Mesh import Mesh
@@ -17,16 +19,6 @@ y_axis = np.array([0.0, 1.0, 0.0])
 z_axis = np.array([0.0, 0.0, 1.0])
 diag_a1 = np.array([np.cos(np.radians(60)), 0.0, np.sin(np.radians(60))])
 
-color_palet = np.array([
-    [0.41, 0.74, 0.06],     # pale green
-    [0.06, 0.74, 0.1],      # green
-    [0.74, 0.74, 0.32],     # pale yellow
-    [0.47, 0.47, 0.33],     # gray
-    [0.4, 0.43, 0.43],      # brown
-    [0.63, 0.78, 0.76],     # white
-    [0.0, 0.2, 0.5]         # blue
-])
-
 tile_colors = {'Plains': 0,
                'Grassland': 1,
                'Shallow Water': 2,
@@ -36,13 +28,14 @@ tile_colors = {'Plains': 0,
 }
 
 class MapMesh:
-    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo: DynamicVBO):
+    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo: DynamicVBO, shader: Shader):
         self.size_x = size_x
         self.size_y = size_y
         self.y_min = y_min
         self.y_max = y_max
         self.mesh = Mesh(vbo)
         self.divs = divs
+        self.shader = shader
 
         self.loaded = [False] * (size_x * size_y)
         self.heights = [0.0] * (size_x * size_y)
@@ -55,6 +48,9 @@ class MapMesh:
         self.len_x = R * np.cos(np.radians(30))
         self.len_y = R * np.sin(np.radians(30))
         self.noise = PerlinNoise(octaves = 1, seed = random.randint(0, 0xffff))
+
+        self.color_palette = ColorPalette(shader)
+        self.color_palette.flush_texture_to_shader()
 
         for y in range(size_y):
             for x in range(size_x):
@@ -81,9 +77,9 @@ class MapMesh:
         self.mesh.update_matrices()
         self.mesh.activate()
 
-    def __bind_texture_to_shader(self, shader: Shader):
-        shader.use_shader()
-        texture_location = glGetUniformLocation(shader.shader, "uVisibilityTexture")
+    def __bind_texture_to_shader(self):
+        self.shader.use_shader()
+        texture_location = glGetUniformLocation(self.shader.shader, "uVisibilityTexture")
 
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
@@ -173,16 +169,16 @@ class MapMesh:
         self.heights[x_id * self.size_y + y_id] = self.__value(value, self.divs)
         self.types[x_id * self.size_y + y_id] = tile_type
 
-    def draw(self, shader: Shader):
-        self.__bind_texture_to_shader(shader)
+    def draw(self):
+        self.__bind_texture_to_shader()
 
         glEnable(GL_CULL_FACE)
-        shader.set_float("opacity", 1.0)
-        self.mesh.draw(shader)
+        self.shader.set_float("opacity", 1.0)
+        self.mesh.draw(self.shader)
 
         glDisable(GL_CULL_FACE)
-        shader.set_float("opacity", 0.7)
-        self.water.draw(shader)
+        self.shader.set_float("opacity", 0.7)
+        self.water.draw(self.shader)
 
     def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         x_offset = 0

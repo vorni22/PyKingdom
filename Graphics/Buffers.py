@@ -21,12 +21,15 @@ class DynamicVBO:
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, capacity, None, GL_DYNAMIC_DRAW)
 
+        # position
         glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(0))
 
+        # normal
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(12))
 
+        # data
         glEnableVertexAttribArray(2)
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, size_of_vertex, ctypes.c_void_p(24))
 
