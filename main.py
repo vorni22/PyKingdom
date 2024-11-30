@@ -8,8 +8,10 @@ from OpenGL.arrays.vbo import VBO
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
 from Graphics.Camera import Camera, CameraManager, StrategicCamera
+from Graphics.ColorPalette import ColorPalette
 from Graphics.Mesh import Mesh
 from Graphics.Shaders import Shader
+from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
 
@@ -64,13 +66,15 @@ size_y = 40
 vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
-vbo_test = DynamicVBO(2 * total_size + 6, 36)
-builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test, shader)
+vbo_test = DynamicVBO(2 * total_size + 6 + 300 * (2**20), 36)
+
+color_palette = ColorPalette(shader)
+assets = AssetsManager(vbo_test, color_palette)
+builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test, shader, assets)
+color_palette.flush_texture_to_shader()
 
 dt = 0.0
 last_time = 0.0
-
-font = pg.font.SysFont("Arial", 24)
 
 # main loop
 running = True
@@ -141,7 +145,7 @@ while running:
 
     pixel = builder.get_tile_on_mouse(mouse_x, mouse_y, fbo)
 
-    if 0 <= pixel <= builder.size_x * builder.size_y:
+    if 0 <= pixel < builder.size_x * builder.size_y:
         shader.set_float("highlight_id", pixel)
         #builder.set_visibility(pixel, 0.7)
 

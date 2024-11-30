@@ -47,7 +47,7 @@ class ColorPalette:
         self.color_palette.append(np.array(color, dtype=np.float32))
         self.color_id[key] = self.count
         self.count += 1
-        return self.color_palette[self.count - 1]
+        return self.count - 1
 
     def flush_texture_to_shader(self):
         self.shader.use_shader()

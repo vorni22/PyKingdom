@@ -36,7 +36,11 @@ void main() {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 
     id = aData.y;
-    visibility = texelFetch(uVisibilityTexture, int(id), 0).r;
+    if (id >= 0) {
+        visibility = texelFetch(uVisibilityTexture, int(id), 0).r;
+    } else {
+        visibility = 1.0;
+    }
 
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	Normal = normMatrix * aNormalVector;

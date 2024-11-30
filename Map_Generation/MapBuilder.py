@@ -28,7 +28,7 @@ tile_colors = {'Plains': 0,
 }
 
 class MapMesh:
-    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo: DynamicVBO, shader: Shader):
+    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo, shader, assets):
         self.size_x = size_x
         self.size_y = size_y
         self.y_min = y_min
@@ -36,6 +36,7 @@ class MapMesh:
         self.mesh = Mesh(vbo)
         self.divs = divs
         self.shader = shader
+        self.assets = assets
 
         self.loaded = [False] * (size_x * size_y)
         self.heights = [0.0] * (size_x * size_y)
@@ -48,9 +49,6 @@ class MapMesh:
         self.len_x = R * np.cos(np.radians(30))
         self.len_y = R * np.sin(np.radians(30))
         self.noise = PerlinNoise(octaves = 1, seed = random.randint(0, 0xffff))
-
-        self.color_palette = ColorPalette(shader)
-        self.color_palette.flush_texture_to_shader()
 
         for y in range(size_y):
             for x in range(size_x):
@@ -102,9 +100,12 @@ class MapMesh:
         glReadBuffer(GL_COLOR_ATTACHMENT1)
         glBindTexture(GL_TEXTURE_2D, fbo.data_texture)
         pixel = glReadPixels(mouse_x, mouse_y, 1, 1, GL_RED_INTEGER, GL_INT)
-        pixel = struct.unpack('f', struct.pack('I', pixel[0][0]))[0]
-        if abs(pixel - round(pixel)) == 0.0:
-            return round(pixel)
+        if 0 <= pixel[0][0] <= 4294967295:
+            pixel = struct.unpack('f', struct.pack('I', pixel[0][0]))[0]
+            if abs(pixel - round(pixel)) == 0.0:
+                return round(pixel)
+            else:
+                return -1
         else:
             return -1
 
@@ -179,6 +180,10 @@ class MapMesh:
         glDisable(GL_CULL_FACE)
         self.shader.set_float("opacity", 0.7)
         self.water.draw(self.shader)
+
+        glEnable(GL_CULL_FACE)
+        self.shader.set_float("opacity", 1.0)
+        self.mesh.draw(self.shader)
 
     def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         x_offset = 0

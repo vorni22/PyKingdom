@@ -32,13 +32,13 @@ void main(){
 	vec3 diffuse = diff * lightColor;
 
     float hgh = 1.0;
-    if (abs(highlight_id - id) <= 0.001) {
+    if (abs(highlight_id - id) <= 0.001 && id >= 0) {
         hgh = 0.5;
     }
 
     float vi = visibility;
     float op = opacity;
-    if (visibility < 0.69 && visibility < op) {
+    if (visibility < 0.69 && visibility < op && id >= 0) {
         op = visibility;
         vi = 0.69;
     }
