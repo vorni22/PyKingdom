@@ -27,8 +27,17 @@ class AssetsManager:
         count = 0
         for file in files:
             file_name = os.path.splitext(os.path.basename(file))[0]
-            triangles = self.read_ply(file)
-            mesh = self.__get_mesh_at(triangles, [0, 0, 0], -1)
+
+            scale = 0.6
+            if file_name == 'Rainforest' or file_name == 'Coral Reef' or file_name == 'Fish' or file_name == 'Banana':
+                scale = 0.5
+
+            h = 0
+            if file_name == 'Harbour':
+                h = -0.01
+                scale = 1.15
+            triangles = self.read_ply(file, scale)
+            mesh = self.__get_mesh_at(triangles, [0, h, 0], -1)
             mesh.flush()
             self.meshes[file_name] = mesh
             self.tile_ids_draw[file_name] = []
@@ -50,15 +59,44 @@ class AssetsManager:
         glBindTexture(GL_TEXTURE_2D, self.resource_texture)
         glUniform1i(texture_location, 2)
 
+    def remove_instance_of_at(self, asset_name, tile_id):
+        if asset_name not in self.meshes:
+            return
+
+        pos = -1
+        i = 0
+        for pairs in self.tile_ids_draw[asset_name]:
+            if pairs[0] == tile_id:
+                pos = i
+                break
+            i+=1
+
+        if pos == -1:
+            return
+
+        self.tile_ids_draw[asset_name].pop(pos)
+        x = 0
+        count = len(self.tile_ids_draw[asset_name])
+        y = self.asset_id[asset_name]
+        glBindTexture(GL_TEXTURE_2D, self.resource_texture)
+        glTexSubImage2D(
+            GL_TEXTURE_2D,  # Texture target
+            0,  # Mipmap level (0 for base level)
+            x,  # X position of the pixel
+            y,  # Y position of the pixel
+            count,  # Width of the region (1 pixel)
+            1,  # Height of the region (1 pixel)
+            GL_RG,  # Format of the data
+            GL_FLOAT,  # Data type
+            self.tile_ids_draw[asset_name]  # Pixel data
+        )
+
     def add_instance_of_at(self, asset_name, tile_id, h):
         if asset_name not in self.meshes:
             return
         x = len(self.tile_ids_draw[asset_name])
-        if (x >= self.width):
-            print(self.tile_ids_draw[asset_name])
-            print("Assets manager:",x)
         y = self.asset_id[asset_name]
-        self.tile_ids_draw[asset_name].append(tile_id)
+        self.tile_ids_draw[asset_name].append((tile_id, h))
         glBindTexture(GL_TEXTURE_2D, self.resource_texture)
         data = np.array([tile_id, h], dtype=np.float32)
         glTexSubImage2D(
@@ -110,11 +148,11 @@ class AssetsManager:
                     ply_files.append(os.path.join(dirpath, file))
         return ply_files
 
-    def read_ply(self, ply_file):
+    def read_ply(self, ply_file, scale):
         ply_data = PlyData.read(ply_file)
 
         vertices = ply_data['vertex']
-        positions = np.array([(0.7 * v['x'], 0.7 * v['y'], 0.7 * v['z']) for v in vertices], dtype=np.float32)
+        positions = np.array([(scale * v['x'], scale * v['y'], scale * v['z']) for v in vertices], dtype=np.float32)
         normals = np.array([(v['nx'], v['ny'], v['nz']) for v in vertices], dtype=np.float32)
         colors = np.array([(v['red'] / 256.0, v['green'] / 256.0, v['blue'] / 256.0) for v in vertices], dtype=np.float32)
 

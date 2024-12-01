@@ -66,7 +66,7 @@ size_y = 40
 vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
-vbo_test = DynamicVBO(2 * total_size + 6 + 300 * (2**20), 36)
+vbo_test = DynamicVBO(2 * total_size + 6 + 30 * (2**20), 36)
 
 color_palette = ColorPalette(shader)
 assets = AssetsManager(vbo_test, color_palette, shader, size_x * size_y)
@@ -117,6 +117,8 @@ while running:
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+    clicked = False
+
     # check events
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -147,7 +149,7 @@ while running:
 
     if 0 <= pixel < builder.size_x * builder.size_y:
         shader.set_float("highlight_id", pixel)
-        #builder.set_visibility(pixel, 0.7)
+        builder.add_object_on_tile(pixel, "Theatre Square")
 
     # STOP TEST
 

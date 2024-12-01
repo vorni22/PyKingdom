@@ -41,6 +41,7 @@ class MapMesh:
         self.loaded = [False] * (size_x * size_y)
         self.heights = [0.0] * (size_x * size_y)
         self.types = [0] * (size_x * size_y)
+        self.resource_type = [None] * (size_x * size_y)
 
         # 0 - VISIBLE, 1 - SHADOWED, 2 - INVISIBLE
         self.visibility = np.ones(self.size_y * self.size_x, dtype=np.float32)
@@ -48,7 +49,17 @@ class MapMesh:
 
         self.len_x = R * np.cos(np.radians(30))
         self.len_y = R * np.sin(np.radians(30))
-        self.noise = PerlinNoise(octaves = 1, seed = random.randint(0, 0xffff))
+        seed = random.randint(0, 0xffff)
+        random.seed(seed)
+        self.noise = PerlinNoise(octaves = 1, seed = seed)
+
+        shader.use_shader()
+        shader.set_float("R", R)
+        shader.set_float("dR", dR)
+        shader.set_float("len_x", self.len_x)
+        shader.set_float("len_y", self.len_y)
+        shader.set_float("size_x", self.size_x)
+        shader.set_float("size_y", self.size_y)
 
         for y in range(size_y):
             for x in range(size_x):
@@ -96,6 +107,18 @@ class MapMesh:
         self.visibility[real_id] = new_state
         glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
         glTexSubImage1D(GL_TEXTURE_1D, 0, real_id, 1, GL_RED, GL_FLOAT, new_state)
+
+    def clear_object_on_tile(self, tile_id):
+        if self.resource_type[tile_id] == None:
+            return
+        self.assets.remove_instance_of_at(self.resource_type[tile_id], tile_id)
+        self.resource_type[tile_id] = None
+
+    def add_object_on_tile(self, tile_id, asset_name):
+        if self.resource_type[tile_id] != None:
+            self.clear_object_on_tile(tile_id)
+        self.assets.add_instance_of_at(asset_name, tile_id, self.heights[tile_id])
+        self.resource_type[tile_id] = asset_name
 
     def get_tile_on_mouse(self, mouse_x, mouse_y, fbo):
         glReadBuffer(GL_COLOR_ATTACHMENT1)
@@ -189,6 +212,46 @@ class MapMesh:
         self.shader.set_float("opacity", 1.0)
         self.mesh.draw(self.shader)
 
+    def __pick_resource(self, id, h):
+        type = self.types[id]
+
+        if type == tile_colors['Ocean']:
+            return
+        # 40% chance of a resource spawning
+        rnd = random.random()
+        if type == tile_colors['Grassland']:
+            rnd -= 0.15
+        if (rnd <= 0.4):
+            #determine type
+            if type == tile_colors['Shallow Water']:
+                p = ['Turtles', 'Fish', 'Coral Reef', 'Crabs']
+                w = [1, 4, 2, 4]
+                str = random.choices(p, weights=w, k=1)[0]
+                if str == 'Fish':
+                    h -= 0.1
+                self.assets.add_instance_of_at(str, id, h)
+                self.resource_type[id] = str
+            if type == tile_colors['Peaks'] or type == tile_colors['Mountain']:
+                p = ['Stone', 'Diamonds', 'Coal', 'Iron', 'Niter', 'Mercury']
+                w = [2, 1, 1, 1, 1, 1]
+                str = random.choices(p, weights=w, k=1)[0]
+                self.assets.add_instance_of_at(str, id, h)
+                self.resource_type[id] = str
+            if type == tile_colors['Grassland']:
+                p = ['Banana', 'Maize', 'Rice', 'Wheat', 'Coffee', 'Horses', 'Marsh', 'Rainforest']
+                w = [1, 1, 1, 1, 1, 1, 1, 4]
+                str = random.choices(p, weights=w, k=1)[0]
+                if str == 'Marsh':
+                    h += 0.01
+                self.assets.add_instance_of_at(str, id, h)
+                self.resource_type[id] = str
+            if type == tile_colors['Plains']:
+                p = ['Woods', 'Stone', 'Horses', 'Wheat', 'Silk']
+                w = [5, 1, 1, 1, 2]
+                str = random.choices(p, weights=w, k=1)[0]
+                self.assets.add_instance_of_at(str, id, h)
+                self.resource_type[id] = str
+
     def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         x_offset = 0
         if not even_tile:
@@ -201,8 +264,7 @@ class MapMesh:
         if water_tile:
             h = self.water_lvl
         else:
-            type = random.choice(list(self.assets.meshes.keys()))
-            self.assets.add_instance_of_at(type, central_id, h + 0.01)
+            self.__pick_resource(central_id, h)
 
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5

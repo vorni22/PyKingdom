@@ -34,7 +34,6 @@ class Shader:
             self.shader = glCreateProgram()
             glAttachShader(self.shader, vertex_shader)
             glAttachShader(self.shader, fragment_shader)
-            # Link the program
             glLinkProgram(self.shader)
 
             # Pre-bind texture units
