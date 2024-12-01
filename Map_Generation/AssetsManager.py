@@ -29,7 +29,6 @@ class AssetsManager:
             file_name = os.path.splitext(os.path.basename(file))[0]
             triangles = self.read_ply(file)
             mesh = self.__get_mesh_at(triangles, [0, 0, 0], -1)
-            print(file_name, len(mesh.vertices) * 4 / (2**20) * 40 * 60)
             mesh.flush()
             self.meshes[file_name] = mesh
             self.tile_ids_draw[file_name] = []
