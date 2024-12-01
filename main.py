@@ -46,7 +46,7 @@ if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
     print("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
 fbo.unbind()
 
-shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl")
+shader = Shader("Shaders/frag.glsl", "Shaders/vert.glsl", True)
 shader.use_shader()
 
 camera = Camera(np.array([0.0, 10.0, 40.0]), HEIGHT, WIDTH,
@@ -95,7 +95,7 @@ quad_vertex = np.array([
 
 quad_vbo = BasicVBO(quad_vertex.nbytes, quad_vertex)
 
-quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl")
+quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl", False)
 quad_shader.use_shader()
 quad_shader.set_int("screen_texture", 0)
 

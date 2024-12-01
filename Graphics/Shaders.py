@@ -5,12 +5,27 @@ import numpy as np
 import pyrr
 
 class Shader:
-    def __init__(self, fragment_shader_path:str, vertex_shader_path:str):
+    def __init__(self, fragment_shader_path:str, vertex_shader_path:str, main_shader):
         with open(vertex_shader_path, 'r') as f:
             vertex_src = f.readlines()
 
         with open(fragment_shader_path, 'r') as f:
             fragment_src = f.readlines()
+
+        if main_shader:
+            dummy_texture_2d = glGenTextures(1)
+            dummy_texture_1d_1 = glGenTextures(1)
+            dummy_texture_1d_2 = glGenTextures(1)
+
+            # Bind them to texture units
+            glActiveTexture(GL_TEXTURE0)
+            glBindTexture(GL_TEXTURE_1D, dummy_texture_1d_1)
+
+            glActiveTexture(GL_TEXTURE1)
+            glBindTexture(GL_TEXTURE_1D, dummy_texture_1d_2)
+
+            glActiveTexture(GL_TEXTURE2)
+            glBindTexture(GL_TEXTURE_2D, dummy_texture_2d)
 
         # Create and compile vertex shader
         vertex_shader = compileShader(vertex_src, GL_VERTEX_SHADER)
