@@ -12,8 +12,31 @@ class Shader:
         with open(fragment_shader_path, 'r') as f:
             fragment_src = f.readlines()
 
-        self.shader = compileProgram(compileShader(vertex_src, GL_VERTEX_SHADER),
-                                     compileShader(fragment_src, GL_FRAGMENT_SHADER))
+        # Create and compile vertex shader
+        vertex_shader = compileShader(vertex_src, GL_VERTEX_SHADER)
+        # Check for compilation errors
+        if vertex_shader == 0:
+            print("Vertex Shader Compilation Failed!")
+            print(glGetShaderInfoLog(vertex_shader))
+        else:
+            print("Vertex Shader Compilation Successful!")
+
+        fragment_shader = compileShader(fragment_src, GL_FRAGMENT_SHADER)
+        # Check for compilation errors
+        if fragment_shader == 0:
+            print("Fragment Shader Compilation Failed!")
+            print(glGetShaderInfoLog(fragment_shader))
+        else:
+            print("Fragment Shader Compilation Successful!")
+
+        self.shader = compileProgram(vertex_shader, fragment_shader)
+
+        success = glGetProgramiv(self.shader, GL_LINK_STATUS)
+        if not success:
+            info_log = glGetProgramInfoLog(self.shader)
+            print(f"Program linking failed: {info_log.decode()}")
+        else:
+            print("Program compiled and linked successfully!")
 
         glValidateProgram(self.shader)
         is_valid = glGetProgramiv(self.shader, GL_VALIDATE_STATUS)

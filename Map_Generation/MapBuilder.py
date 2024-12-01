@@ -202,7 +202,7 @@ class MapMesh:
             h = self.water_lvl
         else:
             type = random.choice(list(self.assets.meshes.keys()))
-            self.assets.add_instance_of_at(type, central_id, h)
+            self.assets.add_instance_of_at(type, central_id, h + 0.01)
 
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5
