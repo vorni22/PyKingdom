@@ -12,21 +12,6 @@ class Shader:
         with open(fragment_shader_path, 'r') as f:
             fragment_src = f.readlines()
 
-        if main_shader:
-            dummy_texture_2d = glGenTextures(1)
-            dummy_texture_1d_1 = glGenTextures(1)
-            dummy_texture_1d_2 = glGenTextures(1)
-
-            # Bind them to texture units
-            glActiveTexture(GL_TEXTURE0)
-            glBindTexture(GL_TEXTURE_1D, dummy_texture_1d_1)
-
-            glActiveTexture(GL_TEXTURE1)
-            glBindTexture(GL_TEXTURE_1D, dummy_texture_1d_2)
-
-            glActiveTexture(GL_TEXTURE2)
-            glBindTexture(GL_TEXTURE_2D, dummy_texture_2d)
-
         # Create and compile vertex shader
         vertex_shader = compileShader(vertex_src, GL_VERTEX_SHADER)
         # Check for compilation errors
@@ -44,7 +29,21 @@ class Shader:
         else:
             print("Fragment Shader Compilation Successful!")
 
-        self.shader = compileProgram(vertex_shader, fragment_shader)
+        #self.shader = compileProgram(vertex_shader, fragment_shader)
+        if main_shader:
+            self.shader = glCreateProgram()
+            glAttachShader(self.shader, vertex_shader)
+            glAttachShader(self.shader, fragment_shader)
+            # Link the program
+            glLinkProgram(self.shader)
+
+            # Pre-bind texture units
+            glUseProgram(self.shader)
+            glUniform1i(glGetUniformLocation(self.shader, "uVisibilityTexture"), 0)  # Texture unit 0
+            glUniform1i(glGetUniformLocation(self.shader, "color_palette_t"), 1)  # Texture unit 1
+            glUniform1i(glGetUniformLocation(self.shader, "uResourcesTexture"), 2) # Texture unit 2
+        else:
+            self.shader = compileProgram(vertex_shader, fragment_shader)
 
         success = glGetProgramiv(self.shader, GL_LINK_STATUS)
         if not success:
