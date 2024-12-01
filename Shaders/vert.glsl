@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormalVector;
@@ -48,8 +48,8 @@ void main() {
 
         float R = 1;
         float dR = 0.3;
-        float len_x = R * cos(radians(30));
-        float len_y = R * sin(radians(30));
+        float len_x = R * cos(0.523599);
+        float len_y = R * sin(0.523599);
 
         float x_offset = 0;
         if ((int(id_y) & 1) != 0)

@@ -36,6 +36,7 @@ class ColorPalette:
         texture_location = glGetUniformLocation(self.shader.shader, "color_palette_t")
 
         glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_1D, self.color_texture)
         glUniform1i(texture_location, 1)
 
     def identify_color(self, color):

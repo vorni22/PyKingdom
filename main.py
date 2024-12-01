@@ -20,8 +20,8 @@ HEIGHT = 600
 
 # set up pygame
 pg.init()
-pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 4)
-pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 1)
+pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
+pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL|pg.DOUBLEBUF|pg.RESIZABLE)
 
