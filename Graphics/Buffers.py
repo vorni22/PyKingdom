@@ -135,6 +135,20 @@ class DynamicVBO:
 
         return target.active
 
+    def get_block_locations(self, block_id:int):
+        target = None
+        for block in self.used_memory:
+            if block.start == block_id:
+                target = block
+                break
+
+        if target is None or not target.active:
+            return None, None
+
+        first = target.start // self.size_of_vertex
+        count = target.size // self.size_of_vertex
+        return first, count
+
     def draw_vertices(self, block_id:int):
         target = None
         for block in self.used_memory:

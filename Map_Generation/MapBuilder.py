@@ -54,8 +54,8 @@ class MapMesh:
             for x in range(size_x):
                 self.pick_type(x, y)
 
-        for y in range(0, size_y):
-            for x in range(0, size_x):
+        for y in range(size_y):
+            for x in range(size_x):
                 real_index = x * size_y + y
                 self.loaded[real_index] = True
                 self.add_hex(x, y, self.mesh, y & 1 == 0)
@@ -63,8 +63,9 @@ class MapMesh:
         # add water plane
         self.water_lvl = (y_max / divs) * 1.8
         self.water = Mesh(vbo)
-        for y in range(0, size_y):
-            for x in range(0, size_x):
+
+        for y in range(size_y):
+            for x in range(size_x):
                 self.add_hex(x, y, self.water, y & 1 == 0, True)
 
         self.water.flush()
@@ -171,7 +172,10 @@ class MapMesh:
         self.types[x_id * self.size_y + y_id] = tile_type
 
     def draw(self):
+        self.assets.draw()
+
         self.__bind_texture_to_shader()
+        self.shader.set_float("resourceId", -1)
 
         glEnable(GL_CULL_FACE)
         self.shader.set_float("opacity", 1.0)
@@ -196,6 +200,9 @@ class MapMesh:
         h = self.heights[central_id]
         if water_tile:
             h = self.water_lvl
+        else:
+            type = random.choice(list(self.assets.meshes.keys()))
+            self.assets.add_instance_of_at(type, central_id, h)
 
         dx = R * np.cos(np.radians(30))
         dy = R * 0.5

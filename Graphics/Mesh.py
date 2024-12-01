@@ -65,6 +65,15 @@ class Mesh:
         normal_matrix = np.transpose(inverse_model_matrix)
         self.normal_matrix = (normal_matrix[:3, :3]).flatten()
 
+    def apply_transform_only(self, shader):
+        shader.set_mat4("model", self.model_matrix)
+        shader.set_mat3("normMatrix", self.normal_matrix)
+
+    def get_location(self):
+        if self.mem_id != -1:
+            return self.vbo.get_block_locations(self.mem_id)
+        return None, None
+
     def draw(self, shader:Shader):
         if self.mem_id != -1:
             shader.set_mat4("model", self.model_matrix)

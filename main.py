@@ -20,8 +20,8 @@ HEIGHT = 600
 
 # set up pygame
 pg.init()
-pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
-pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
+pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 4)
+pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 1)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL|pg.DOUBLEBUF|pg.RESIZABLE)
 
@@ -69,7 +69,7 @@ total_size = vertices_per_hex * size_x * size_y * 36
 vbo_test = DynamicVBO(2 * total_size + 6 + 300 * (2**20), 36)
 
 color_palette = ColorPalette(shader)
-assets = AssetsManager(vbo_test, color_palette)
+assets = AssetsManager(vbo_test, color_palette, shader, size_x * size_y)
 builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test, shader, assets)
 color_palette.flush_texture_to_shader()
 
