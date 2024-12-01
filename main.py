@@ -149,7 +149,7 @@ while running:
 
     if 0 <= pixel < builder.size_x * builder.size_y:
         shader.set_float("highlight_id", pixel)
-        builder.add_object_on_tile(pixel, "Theatre Square")
+        #builder.add_object_on_tile(pixel, "Theatre Square")
 
     # STOP TEST
 
