@@ -1,4 +1,5 @@
 #version 330 core
+#extension GL_ARB_explicit_uniform_location : enable
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormalVector;
@@ -9,19 +10,11 @@ uniform mat3 normMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform sampler1D uVisibilityTexture; // 0
-uniform sampler1D color_palette_t; // 1
-uniform sampler2D uResourcesTexture; // 2
+layout (location = 0) uniform sampler1D uVisibilityTexture; // 0
+layout (location = 1) uniform sampler1D color_palette_t; // 1
+layout (location = 2) uniform sampler2D uResourcesTexture; // 2
 
 uniform float resourceId;
-
-// variables
-uniform float R;
-uniform float dR;
-uniform float len_x;
-uniform float len_y;
-uniform float size_x;
-uniform float size_y;
 
 out vec3 Normal;
 out vec3 FragPos;
@@ -39,14 +32,21 @@ void main() {
         id = int(extract);
 
         // find real position
-        int id_x = int(round(id)) / int(size_y);
-        int id_y = int(mod(round(id), int(size_y)));
+        int id_x = int(id) / 40;
+        int id_y = int(mod(int(id), 40));
+
+        float R = 1;
+        float dR = 0.3;
+        float len_x = R * cos(0.523599);
+        float len_y = R * sin(0.523599);
 
         float x_offset = 0;
         if ((int(id_y) & 1) != 0)
             x_offset = len_x + 0.5 * dR;
-        real_pos.x += x_offset + (2 * len_x + dR) * id_x;
-        real_pos.z += (len_y + R + dR * sqrt(3.0) / 2.0) * id_y;
+        float x_pos = x_offset + (2 * len_x + dR) * id_x;
+        float y_pos = (len_y + R + dR * sqrt(3.0) / 2.0) * id_y;
+        real_pos.x += x_pos;
+        real_pos.z += y_pos;
         real_pos.y += h;
 
         gl_Position = projection * view * real_pos;
@@ -56,7 +56,7 @@ void main() {
     }
 
     if (id >= 0) {
-        visibility = texelFetch(uVisibilityTexture, int(round(id)), 0).r;
+        visibility = texelFetch(uVisibilityTexture, int(id), 0).r;
     } else {
         visibility = 1.0;
     }
