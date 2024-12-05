@@ -3,6 +3,8 @@ import Logic.Resources as Resources
 import Logic.Unit as Unit
 import Logic.Tech as Tech
 import Logic.Civic as Civic
+import Map_Generation.Map as Map
+import random
 
 
 # Holds information about a player
@@ -22,6 +24,31 @@ class Player:
         self.civic_tree = Civic.CivicTree()
         self.cities = []
         self.units = []
+        self.has_capital = False
+        self.capital_line = None
+        self.capital_column = None
+        self.set_starting_position()
+
+    def set_starting_position(self):
+        while True:
+            self.capital_line = random.randint(3, Map.Map.lines - 3)
+            self.capital_column = random.randint(3, Map.Map.columns - 3)
+            if Map.Map.get_tile(self.capital_line, self.capital_column).type_id in [0, 1]:
+                # add starting settler
+                self.add_units(6, 0, self.capital_line, self.capital_column)
+                # search for nearby good tile and give the player a warrior
+                if Map.Map.get_tile(self.capital_line + 1, self.capital_column).type_id in [0, 1]:
+                    self.add_units(0, 0, self.capital_line + 1, self.capital_column)
+                elif Map.Map.get_tile(self.capital_line - 1, self.capital_column).type_id in [0, 1]:
+                    self.add_units(0, 0, self.capital_line - 1, self.capital_column)
+                elif Map.Map.get_tile(self.capital_line, self.capital_column + 1).type_id in [0, 1]:
+                    self.add_units(0, 0, self.capital_line, self.capital_column + 1)
+                elif Map.Map.get_tile(self.capital_line, self.capital_column - 1).type_id in [0, 1]:
+                    self.add_units(0, 0, self.capital_line, self.capital_column - 1)
+                else:
+                    # this is pretty bad, as it's going to mean one of the units must be moved by player to settle
+                    self.add_units(0, 0, self.capital_line, self.capital_column)
+                return
 
     def add_resources(self):
         self.resources.science_count += self.resources_per_turn.science_per_turn_count
@@ -30,13 +57,33 @@ class Player:
 
     def add_cities(self, city_name, city_line, city_column):
         self.cities.append(City.City(city_name, city_line, city_column))
+        # if this is the first city placed, make it the capital and bring the player's starting camera position here
+        if len(self.cities) == 1:
+            self.cities[0].is_capital = True
+            self.capital_line = city_line
+            self.capital_column = city_column
 
-    def end_turn(self):
+    def add_units(self, unit_name_id, unit_type_id, unit_line, unit_column):
+        self.units.append(Unit.Unit(unit_name_id, unit_type_id, unit_line, unit_column))
+
+    def end_turn_resource_calculation(self):
         self.resources_per_turn.reset_resources_per_turn()
         for city in self.cities:
             self.resources_per_turn += city.end_turn_update()
 
         self.add_resources()
+
+    def is_city_owner(self, city_line, city_column):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                return True
+        return False
+
+    def is_unit_owner(self, unit_line, unit_column):
+        for unit in self.units:
+            if unit.unit_line == unit_line and unit.unit_column == unit_column:
+                return True
+        return False
 
     def build_district(self, city_line, city_column, district_name_id,
                        district_location_line, district_location_column):
@@ -206,7 +253,7 @@ class Player:
                     return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
             else:
                 self.resources.gold_count -= Unit.civilian_units_costs * 2
-        self.units.append(Unit.Unit(unit_name_id, unit_type_id, city_line, city_column))
+        self.add_units(unit_name_id, unit_type_id, city_line, city_column)
         return 0
 
     def move_unit(self, unit_position_line, unit_position_column, unit_new_line, unit_new_column):

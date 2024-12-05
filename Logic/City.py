@@ -147,6 +147,7 @@ class City:
         self.center_column_location = center_column_location
         self.health_percentage = 100
         self.melee_combat_strength = 15
+        self.is_capital = False
 
     def add_tiles(self, line, column):
         ref = Map.Map.get_tile(line, column - 1)

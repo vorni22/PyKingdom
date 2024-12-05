@@ -29,10 +29,15 @@ class Tile:
     def __init__(self, line, column, type_id, basic_resource_id, feature_id, strategic_resource_id, luxury_resource_id):
         self.line = line
         self.column = column
+        self.type_id = type_id
         self.type = tile_types[type_id]
+        self.basic_resource_id = basic_resource_id
         self.basic_resource = tile_basic_resources[basic_resource_id]
+        self.feature_id = feature_id
         self.feature = tile_features[feature_id]
+        self.strategic_resource_id = strategic_resource_id
         self.strategic_resource = tile_strategic_resources[strategic_resource_id]
+        self.luxury_resource_id = luxury_resource_id
         self.luxury_resource = tile_luxury_resources[luxury_resource_id]
         self.resources = Resources.ResourcesPerTurn(0, 0, 0)
         self.city_resources = Resources.CityResourcesPerTurn(0, 0)
@@ -55,6 +60,7 @@ class Tile:
             self.movement_cost = "Unpassable"
         elif self.type == tile_types[5]:
             self.city_resources.production_per_turn_count += 1
+            self.movement_cost = "Unpassable"
         elif self.type == tile_types[6]:
             raise TypeError("Tile must have a type")
 
@@ -89,17 +95,13 @@ class Tile:
         elif self.basic_resource == tile_luxury_resources[1]:
             self.resources.culture_per_turn_count += 1
         elif self.basic_resource == tile_luxury_resources[2]:
-            self.resources.gold_per_turn_count += 3
-        elif self.basic_resource == tile_luxury_resources[3]:
-            self.resources.science_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[4]:
-            self.resources.culture_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[5]:
-            self.resources.gold_per_turn_count += 1
-            self.city_resources.production_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[6]:
             self.resources.gold_per_turn_count += 1
             self.city_resources.food_per_turn_count += 1
+        elif self.basic_resource == tile_luxury_resources[3]:
+            self.resources.gold_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 1
+        elif self.basic_resource == tile_luxury_resources[4]:
+            self.resources.gold_per_turn_count += 3
 
         if self.feature == tile_features[0]:
             self.city_resources.production_per_turn_count += 1

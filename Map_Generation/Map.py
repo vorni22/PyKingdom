@@ -1,7 +1,7 @@
 # from Logic.Tile import Tile as tile
 import networkx as nx
 import numpy as np
-
+import Logic.Tile as Tile
 # Holds information about the map. Should be generated once using init_map, then information should be accessed directly
 # from the class container via get_tile
 # @param lines: the number of lines the map has
@@ -61,5 +61,5 @@ class Map:
         return Map.shortest_distances[start_line * Map.columns + start_col][end_line * Map.columns + end_col]
 
     @staticmethod
-    def get_tile(line, column):
+    def get_tile(line, column) -> Tile.Tile:
         return Map.tiles[line][column]
