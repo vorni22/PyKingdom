@@ -1,7 +1,6 @@
 import pyrr
 from OpenGL.GL import *
 import numpy as np
-from glm import float32
 from numpy import dtype
 
 from Graphics.Buffers import DynamicVBO
@@ -120,10 +119,10 @@ class Mesh:
             return
 
         if self.mem_id == -1:
-            self.mem_id = self.vbo.add_vertices(np.array(self.vertices, dtype=float32))
+            self.mem_id = self.vbo.add_vertices(np.array(self.vertices, dtype=np.float32))
         else:
             self.vbo.free_vertices(self.mem_id)
-            self.mem_id = self.vbo.add_vertices(np.array(self.vertices, dtype=float32))
+            self.mem_id = self.vbo.add_vertices(np.array(self.vertices, dtype=np.float32))
 
     def activate(self):
         if self.mem_id != -1:

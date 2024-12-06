@@ -1,10 +1,11 @@
+import ctypes
 import time
 import pygame as pg
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 import numpy as np
 import pyrr
 import sys
-
 
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
@@ -23,13 +24,24 @@ HEIGHT = 600
 # set up pygame
 pg.init()
 
+def surface_to_texture(surface, texture_id):
+    if surface is not None:
+        texture_data = pg.image.tostring(surface, "RGB", True)
+    else:
+        texture_data = None
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glBindTexture(GL_TEXTURE_2D, 0)
+
 
 def play():
-    global HEIGHT, WIDTH, screen
+    global HEIGHT, WIDTH
     pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
     pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
     pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
-    screen = pg.display.set_mode((1920, 1080), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE | pg.FULLSCREEN)
+    screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL | pg.DOUBLEBUF)
     # set up OpenGL
     glClearColor(0.6, 0.6, 0.6, 1)
     glEnable(GL_DEPTH_TEST)
@@ -44,7 +56,6 @@ def play():
     pg.event.set_grab(False)
 
     # create shader and VBO
-
     fbo = FrameBuffer(WIDTH, HEIGHT)
     if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
         print("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
@@ -101,6 +112,23 @@ def play():
     quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl", False)
     quad_shader.use_shader()
     quad_shader.set_int("screenTexture", 0)
+
+    font_size = 100
+    font = pg.font.Font(None, font_size)
+    black = (0, 0, 0)
+    text = "LOH"
+    text_color = black
+    text_rendered = font.render(text, True, text_color)
+    text_rect = text_rendered.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
+    texture_data = glGenTextures(1)
+    surface_to_texture(None, texture_data)
+
+    pbo = glGenBuffers(1)
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo)
+    glBufferData(GL_PIXEL_PACK_BUFFER, WIDTH * HEIGHT * 3, None, GL_STREAM_READ)
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0)
+
     while running:
         current_time = time.time()
         dt = (current_time - last_time) * 1000.0
@@ -155,27 +183,55 @@ def play():
         # STOP TEST
 
         fbo.unbind()
+
+        fbo.bind()
+        glReadBuffer(GL_COLOR_ATTACHMENT0)
+
+        glPixelStorei(GL_PACK_ALIGNMENT, 1)
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo)
+        glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, 0)
+
+        ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY)
+        screen_surf = pg.image.frombuffer(ctypes.string_at(ptr, WIDTH * HEIGHT * 3), (WIDTH, HEIGHT), "RGB")
+        glUnmapBuffer(GL_PIXEL_PACK_BUFFER)
+        screen_surf = pg.transform.flip(screen_surf, False, True)
+
+        # 3. Unbind the PBO
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0)
+
+        fbo.unbind()
+
+        # UI here
+
+        screen_surf.blit(text_rendered, text_rect)
+
+        # UI end here
+
+        surface_to_texture(screen_surf, texture_data)
+
         glClear(GL_COLOR_BUFFER_BIT)
 
         quad_vbo.bind()
         quad_shader.use_shader()
-        glBindTexture(GL_TEXTURE_2D, fbo.color_texture)
+        glBindTexture(GL_TEXTURE_2D, texture_data)
         quad_vbo.draw_vertices()
 
+
         pg.display.flip()
+
 
     shader.del_shader()
     pg.quit()
     sys.exit()
 
 def main_menu():
-
+    global WIDTH, HEIGHT
     background = pg.image.load("Assets/MainMenu/Background.jpg")
     font = "Assets/MainMenu/Font.ttf"
     play_button = pg.image.load("Assets/MainMenu/Play Rect.png")
     quit_button = pg.image.load("Assets/MainMenu/Quit Rect.png")
 
-    screen = pg.display.set_mode((1920, 1080), pg.FULLSCREEN)
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
 
     button_play = Button(background=play_button, x_coord=750, y_coord=300, text_input="PLAY", font=font, color="White", hover_color="Gray", size=75)
     button_quit = Button(background=quit_button, x_coord=750, y_coord=600, text_input="QUIT", font=font, color="White", hover_color="Gray", size=75)
