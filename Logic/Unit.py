@@ -32,12 +32,14 @@ class Unit:
     def __init__(self, type_id, name_id, position_line, position_column):
         self.position_line = position_line
         self.position_column = position_column
+        self.type_id = type_id
         self.type = unit_classes[type_id]
         self.name = None
-        self.display_name = self.name
+        self.name_id = name_id
         self.init_name(type_id, name_id)
         self.movement = 0
         self.init_movement(type_id, name_id)
+        self.remaining_movement = self.movement
         self.ranged_strength = 0
         self.init_ranged_strength(type_id, name_id)
         self.melee_strength = 0
@@ -188,13 +190,16 @@ class Unit:
             self.health_percentage -= 0.4 * (-diff) - 5
 
     def move(self, new_line, new_column):
-        distance = Map.Map.get_shortest_distance(self.position_line, self.position_column, new_line, new_column)
-        if distance < self.movement:
-            if distance % self.movement == 0:
-                return distance // self.movement
+        distance = Map.Map.get_unit_shortest_distance(self.position_line, self.position_column, new_line, new_column)
+        if distance < self.remaining_movement:
+            if distance % self.remaining_movement == 0:
+                return distance // self.remaining_movement
             else:
-                return distance // self.movement + 1
-        self.movement -= distance
+                return distance // self.remaining_movement + 1
+        self.remaining_movement -= distance
         self.position_line = new_line
         self.position_column = new_column
         return 0
+
+    def reset_movement(self):
+        self.remaining_movement = self.movement

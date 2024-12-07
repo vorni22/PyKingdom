@@ -62,9 +62,17 @@ class Player:
             self.cities[0].is_capital = True
             self.capital_line = city_line
             self.capital_column = city_column
+        # TODO render the city center
 
     def add_units(self, unit_name_id, unit_type_id, unit_line, unit_column):
         self.units.append(Unit.Unit(unit_name_id, unit_type_id, unit_line, unit_column))
+        #TODO call function for adding the unit on the map
+
+    def delete_units(self, location_line, location_column):
+        for unit in self.units:
+            if unit.position_line == location_line and unit.position_column == location_column:
+                self.units.remove(unit)
+                #TODO call function for removing the unit from the map
 
     def end_turn_resource_calculation(self):
         self.resources_per_turn.reset_resources_per_turn()
@@ -180,7 +188,9 @@ class Player:
     def build_unit_with_production(self, city_line, city_column, unit_type_id, unit_name_id):
         for city in self.cities:
             if city.city_line == city_line and city.city_column == city_column:
-                return city.build_unit_with_production(unit_type_id, unit_name_id, self)
+                ret_code = city.build_unit_with_production(unit_type_id, unit_name_id, self)
+                if not ret_code:
+                    self.add_units(unit_type_id, unit_name_id, city_line, city_column)
 
     def build_unit_with_gold(self, city_line, city_column, unit_type_id, unit_name_id):
         if unit_type_id == 0:
@@ -260,6 +270,10 @@ class Player:
         for unit in self.units:
             if unit.position_line == unit_position_line and unit.position_column == unit_position_column:
                 return unit.move(unit_new_line, unit_new_column)
+
+    def reset_units_movements(self):
+        for unit in self.units:
+            unit.reset_movement()
 
     def buy_tech(self, tech_id: int):
         for pred in self.tech_tree.G.predecessors(self.tech_tree.G[tech_id]):

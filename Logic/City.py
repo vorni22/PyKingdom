@@ -1,4 +1,3 @@
-import Logic.Player
 import Logic.Resources as Resources
 from Map_Generation import Map as Map
 import Logic.Unit as Unit
@@ -31,30 +30,29 @@ city_center_buildings_costs = [0, 40, 60, 60, 100]
 # @param location_line: the line on which the district is situated
 # @param location_column: the column on which the district is situated
 class District:
-    def __init__(self, district_type, location_line, location_column):
-        if district_type not in district_types:
-            raise TypeError("Invalid district type")
-        self.district_type = district_type
+    def __init__(self, district_type_id, location_line, location_column):
+        self.district_type_id = district_type_id
+        self.district_type = district_types[district_type_id]
         self.buildings = []
         self.location_line = location_line
         self.location_column = location_column
 
     def add_building(self, building_id):
-        if self.district_type == district_types[0]:
+        if self.district_type_id == 0:
             self.buildings.append(campus_buildings[building_id])
-        elif self.district_type == district_types[1]:
+        elif self.district_type_id == 1:
             self.buildings.append(theatre_square_buildings[building_id])
-        elif self.district_type == district_types[2]:
+        elif self.district_type_id == 2:
             self.buildings.append(commercial_hub_buildings[building_id])
-        elif self.district_type == district_types[3]:
+        elif self.district_type_id == 3:
             self.buildings.append(harbour_buildings[building_id])
-        elif self.district_type == district_types[4]:
+        elif self.district_type_id == 4:
             self.buildings.append(industrial_zone_buildings[building_id])
-        elif self.district_type == district_types[5]:
+        elif self.district_type_id == 5:
             self.buildings.append(neighborhood_buildings[building_id])
-        elif self.district_type == district_types[6]:
+        elif self.district_type_id == 6:
             raise TypeError("Invalid building type: Aqueducts have no buildings")
-        elif self.district_type == district_types[7]:
+        elif self.district_type_id == 7:
             self.buildings.append(city_center_buildings[building_id])
 
 
@@ -134,7 +132,7 @@ class District:
 class City:
     def __init__(self, city_name, center_line_location, center_column_location):
         self.city_name = city_name
-        self.districts = [District(district_types[7], center_line_location, center_column_location)]
+        self.districts = [District(7, center_line_location, center_column_location)]
         self.add_building(0, 0)
         self.housing = 3
         self.population = 1
@@ -177,12 +175,24 @@ class City:
             if ref not in self.tiles:
                 self.tiles.append(ref)
 
-    def add_district(self, district_name_id, location_line, location_column):
-        if district_types[district_name_id] in self.districts and district_name_id != 5:
+    def add_district(self, district_type_id, location_line, location_column):
+        if district_types[district_type_id] in self.districts and district_type_id != 5:
             raise ValueError("Can only build one district of this type in a city")
-        self.districts.append(District(district_types[district_name_id], location_line, location_column))
+        self.districts.append(District(district_type_id, location_line, location_column))
         self.add_tiles(location_line, location_column)
         self.melee_combat_strength += 5
+
+    def get_district_by_type(self, district_type_id) -> list[District] | District | None:
+        if district_type_id == 5:
+            districts = []
+            for district in self.districts:
+                if district.district_type == district_type_id:
+                    districts.append(district)
+            return districts
+        for district in self.districts:
+            if district.district_type_id == district_type_id:
+                return district
+        return None
 
     def get_district_id(self, district_location_line, district_location_column):
         for i, district in enumerate(self.districts):
@@ -265,17 +275,17 @@ class City:
         else:
             self.health_percentage -= 2.5 * (-diff) - 5
 
-    def build_district(self, district_name_id, district_location_line, district_location_column):
+    def build_district(self, district_type_id, district_location_line, district_location_column):
         if self.city_resources.production_count < district_cost:
             remaining_production = self.city_resources.production_count - district_cost
             return remaining_production / self.city_resources_per_turn.production_per_turn_count
-        self.add_district(district_name_id, district_location_line, district_location_column)
+        self.add_district(district_type_id, district_location_line, district_location_column)
         self.city_resources.production_count -= district_cost
         return 0
 
     def build_building_with_production(self, building_name_id, district_id):
         district = self.districts[district_id]
-        if district.district_type == district_types[0]:
+        if district.district_type_id == 0:
             if self.city_resources.production_count < campus_buildings_costs[building_name_id]:
                 remaining_production = self.city_resources.production_count - campus_buildings_costs[building_name_id]
                 if remaining_production % self.city_resources_per_turn.production_per_turn_count == 0:
@@ -284,7 +294,7 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= campus_buildings_costs[building_name_id]
-        elif district.district_type == district_types[1]:
+        elif district.district_type_id == 1:
             if self.city_resources.production_count < theatre_square_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         theatre_square_buildings_costs[building_name_id])
@@ -294,7 +304,7 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= theatre_square_buildings_costs[building_name_id]
-        elif district.district_type == district_types[2]:
+        elif district.district_type_id == 2:
             if self.city_resources.production_count < commercial_hub_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         commercial_hub_buildings_costs[building_name_id])
@@ -304,7 +314,7 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= commercial_hub_buildings_costs[building_name_id]
-        elif district.district_type == district_types[3]:
+        elif district.district_type_id == 3:
             if self.city_resources.production_count < harbour_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         harbour_buildings_costs[building_name_id])
@@ -314,7 +324,7 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= harbour_buildings_costs[building_name_id]
-        elif district.district_type == district_types[4]:
+        elif district.district_type_id == 4:
             if self.city_resources.production_count < industrial_zone_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         industrial_zone_buildings_costs[building_name_id])
@@ -324,7 +334,7 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= industrial_zone_buildings_costs[building_name_id]
-        elif district.district_type == district_types[5]:
+        elif district.district_type_id == 5:
             if self.city_resources.production_count < neighborhood_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         neighborhood_buildings_costs[building_name_id])
@@ -334,9 +344,9 @@ class City:
                     return remaining_production // self.city_resources_per_turn.production_per_turn_count + 1
             else:
                 self.city_resources.production_count -= neighborhood_buildings_costs[building_name_id]
-        elif district.district_type == district_types[6]:
+        elif district.district_type_id == 6:
             raise ValueError('Aqueducts do not have buildings')
-        elif district.district_type == district_types[7]:
+        elif district.district_type_id == 7:
             if self.city_resources.production_count < city_center_buildings_costs[building_name_id]:
                 remaining_production = (self.city_resources.production_count -
                                         city_center_buildings_costs[building_name_id])
@@ -350,7 +360,7 @@ class City:
         self.add_building(building_name_id, district_id)
         return 0
 
-    def build_unit_with_production(self, unit_type_id, unit_name_id, player_reference: Logic.Player.Player):
+    def build_unit_with_production(self, unit_type_id, unit_name_id):
         if unit_type_id == 0:
             if self.city_resources.production_count < Unit.melee_units_costs[unit_name_id]:
                 remaining_production = (self.city_resources.production_count -
@@ -422,6 +432,4 @@ class City:
             else:
                 self.city_resources.production_count -= Unit.civilian_units_costs
 
-        player_reference.units.append(Unit.Unit(unit_type_id, unit_name_id, self.center_line_location,
-                                                self.center_column_location))
         return 0
