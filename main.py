@@ -15,10 +15,8 @@ from Graphics.Shaders import Shader
 from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
+from Map_Generation.MapInterface import MapInterface
 from UI.Button import Button
-
-WIDTH = 1200
-HEIGHT = 600
 
 # set up pygame
 pg.init()
@@ -37,7 +35,13 @@ def surface_to_texture(surface, texture_id):
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
-screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL | pg.DOUBLEBUF)
+
+screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF)
+size = pg.display.get_surface().get_size()
+WIDTH = size[0]
+HEIGHT = size[1]
+print(WIDTH, HEIGHT)
+
 # set up OpenGL
 glClearColor(0.6, 0.6, 0.6, 1)
 glEnable(GL_DEPTH_TEST)
@@ -78,11 +82,7 @@ vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
 vbo_test = DynamicVBO(2 * total_size + 6 + 30 * (2 ** 20), 36)
-
-color_palette = ColorPalette(shader)
-assets = AssetsManager(vbo_test, color_palette, shader, size_x * size_y)
-builder = MapMesh(size_x, size_y, 0.0, 2.0, 10, vbo_test, shader, assets)
-color_palette.flush_texture_to_shader()
+map_interface = MapInterface(size_x, size_y, vbo_test, shader, fbo)
 
 dt = 0.0
 last_time = 0.0
@@ -108,7 +108,6 @@ quad_vbo = BasicVBO(quad_vertex.nbytes, quad_vertex)
 quad_shader = Shader("Shaders/quad_frag.glsl", "Shaders/quad_vert.glsl", False)
 quad_shader.use_shader()
 quad_shader.set_int("screenTexture", 0)
-
 
 texture_data = glGenTextures(1)
 surface_to_texture(None, texture_data)
@@ -189,20 +188,7 @@ while running:
     shader.use_shader()
     cameraManager.every_frame(shader, dt, True)
 
-    glBindVertexArray(builder.mesh.vbo.vao)
-    builder.draw()
-
-    # TEST
-    mouse_x, mouse_y = pg.mouse.get_pos()
-    mouse_y = HEIGHT - mouse_y
-
-    pixel = builder.get_tile_on_mouse(mouse_x, mouse_y, fbo)
-
-    if 0 <= pixel < builder.size_x * builder.size_y:
-        shader.set_float("highlight_id", pixel)
-        #builder.add_object_on_tile(pixel, "Theatre Square")
-
-    # STOP TEST
+    map_interface.every_frame()
 
     fbo.unbind()
 
@@ -237,6 +223,8 @@ while running:
         button_quit.change_color(mouse_pos)
         button_quit.update(screen_surf)
     else:
+        map_interface.activate()
+
         transparent_surface.fill(blue)
 
         screen_surf.blit(transparent_surface, (rect_center_x, rect_center_y))
@@ -253,7 +241,6 @@ while running:
     quad_shader.use_shader()
     glBindTexture(GL_TEXTURE_2D, texture_data)
     quad_vbo.draw_vertices()
-
 
     pg.display.flip()
 

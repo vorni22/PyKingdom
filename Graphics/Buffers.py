@@ -70,6 +70,7 @@ class DynamicVBO:
         self.used_memory.add(new_used_block)
         self.status.add(new_used_block.start)
 
+        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferSubData(GL_ARRAY_BUFFER, new_used_block.start, data_size, vertices)
 
         return new_used_block.start

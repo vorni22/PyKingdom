@@ -63,6 +63,10 @@ class Shader:
     def use_shader(self):
         glUseProgram(self.shader)
 
+    @staticmethod
+    def close_all_shaders():
+        glUseProgram(0)
+
     def set_int(self, uniform_name:str, value:int):
         glUniform1i(glGetUniformLocation(self.shader, uniform_name), value)
 

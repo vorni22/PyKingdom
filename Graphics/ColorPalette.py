@@ -32,12 +32,14 @@ class ColorPalette:
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-        self.shader.use_shader()
+        #self.shader.use_shader()
         texture_location = glGetUniformLocation(self.shader.shader, "color_palette_t")
 
         glActiveTexture(GL_TEXTURE1)
         glBindTexture(GL_TEXTURE_1D, self.color_texture)
         glUniform1i(texture_location, 1)
+
+        glActiveTexture(GL_TEXTURE0)
 
     def identify_color(self, color):
         key = (color[0], color[1], color[2])

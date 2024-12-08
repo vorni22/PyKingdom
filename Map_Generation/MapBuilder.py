@@ -28,7 +28,7 @@ tile_colors = {'Plains': 0,
 }
 
 class MapMesh:
-    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo, shader, assets):
+    def __init__(self, size_x, size_y, y_min, y_max, divs, vbo, shader, assets, seed):
         self.size_x = size_x
         self.size_y = size_y
         self.y_min = y_min
@@ -49,7 +49,6 @@ class MapMesh:
 
         self.len_x = R * np.cos(np.radians(30))
         self.len_y = R * np.sin(np.radians(30))
-        seed = random.randint(0, 0xffff)
         random.seed(seed)
         self.noise = PerlinNoise(octaves = 1, seed = seed)
 
