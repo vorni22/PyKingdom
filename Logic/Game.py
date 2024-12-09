@@ -1,3 +1,5 @@
+import random
+
 import Logic.Player as Player
 import Logic.City as City
 import Logic.Resources as Resources
@@ -5,11 +7,9 @@ import Logic.Unit as Unit
 import Logic.Tech as Tech
 import Logic.Civic as Civic
 import Map_Generation.Map as Map
+from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxury_resources
 
-test = [[], []]
-test[1].extend([1, 2, 3])
-print(test)
-
+# class that will be used for integrating the UI with the backend of the game
 class Game:
     def __init__(self, player_count, map_size_lines, map_size_columns):
         Map.Map.init_map(map_size_lines, map_size_columns)
@@ -20,7 +20,7 @@ class Game:
         self.cities_coordinates = []
         self.units_coordinates = []
         while Player.Player.player_count < player_count:
-            self.players.append(Player.Player())
+            self.players.append(Player.Player(self.players))
 
     def start_turn(self):
         if self.current_player == self.current_player - 1:
@@ -33,15 +33,14 @@ class Game:
         self.players[self.current_player].end_turn_resource_calculation()
 
     def identify_object(self, tile_line, tile_column):
+        objects = [0, ]
         if (tile_line, tile_column) in self.units_coordinates:
             # code for unit
-            return 1
+            objects.append(1)
         elif (tile_line, tile_column) in self.cities_coordinates:
             # code for city
-            return 2
-        else:
-            # code for tile. Since the click is always a tile, this can be ignored
-            return 0
+            objects.append(2)
+        return objects
 
     def current_player_is_owner(self, object_id, tile_line, tile_column):
         if object_id == 1:
@@ -73,10 +72,12 @@ class Game:
                         possible_actions.append(3)
         return possible_actions
 
-    def settle_city(self, tile_line, tile_column, city_name):
+    def settle_city(self, tile_line, tile_column):
         self.players[self.current_player].delete_units(tile_line, tile_column)
         self.units_coordinates.remove((tile_line, tile_column))
-        self.players[self.current_player].add_cities(city_name, tile_line, tile_column)
+        city_name = random.randint(0, len(City.city_names))
+        City.city_names.pop(city_name)
+        self.players[self.current_player].add_cities(City.city_names[city_name], tile_line, tile_column)
         self.cities_coordinates.append((tile_line, tile_column))
 
     def get_city_actions(self, tile_line, tile_column):
@@ -138,3 +139,34 @@ class Game:
                 purchasable_buildings[7].extend([0, 1, 2, 3, 4])
                 for building in city_center.buildings:
                     purchasable_buildings[7].remove(building)
+    @staticmethod
+    def get_tile(tile_line, tile_column):
+        tile = Map.Map.get_tile(tile_line, tile_column)
+        tile_type = tile.type_id
+        tile_basic_resource = tile.basic_resource_id
+        # basic resource id, -1 for no basic resource or basic resource not known by the player
+        if tile_basic_resource == 7:
+            tile_basic_resource = -1
+        tile_strategic_resource = tile.strategic_resource_id
+        # strategic resource id, -1 for no strategic resource or strategic resource not known by the player
+        if tile_strategic_resource == 4:
+            tile_strategic_resource = -1
+        tile_luxury_resource = tile.luxury_resource_id
+        # luxury resource id, -1 for no luxury resource
+        if tile_luxury_resource == 5:
+            tile_luxury_resource = -1
+        tile_feature_id = tile.feature_id
+        # feature id, -1 for no feature
+        if tile_feature_id == 4:
+            tile_feature_id = -1
+        food_yield = tile.city_resources.food_per_turn_count
+        production_yield = tile.city_resources.production_per_turn_count
+        science_yield = tile.resources.science_resource_per_turn_count
+        culture_yield = tile.resources.culture_per_turn_count
+        gold_yield = tile.resources.gold_resource_per_turn_count
+
+        return (tile_type, tile_basic_resource, tile_strategic_resource, tile_luxury_resource, tile_feature_id,
+                food_yield, production_yield, science_yield, culture_yield, gold_yield)
+
+    def get_owned_techs(self):
+        pass

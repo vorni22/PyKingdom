@@ -1,6 +1,7 @@
 import Logic.Resources as Resources
 from Map_Generation import Map as Map
 import Logic.Unit as Unit
+import random
 
 district_types = ['Campus', 'Theatre Square', 'Commercial Hub', 'Harbour', 'Industrial Zone',
                   'Neighborhood', 'Aqueduct', 'City Center']
@@ -12,6 +13,19 @@ harbour_buildings = ['Lighthouse', 'Shipyard']
 industrial_zone_buildings = ['Workshop', 'Factory']
 neighborhood_buildings = ['Food Market']
 city_center_buildings = ['Palace', 'Monument', 'Granary', 'Water Mill', 'Sewer']
+
+city_names = [
+    "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
+    "London", "Paris", "Berlin", "Madrid", "Rome",
+    "Tokyo", "Osaka", "Seoul", "Shanghai", "Beijing",
+    "Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad",
+    "Mexico City", "São Paulo", "Rio de Janeiro", "Buenos Aires", "Santiago",
+    "Cairo", "Lagos", "Johannesburg", "Nairobi", "Casablanca",
+    "Sydney", "Melbourne", "Brisbane", "Perth", "Auckland",
+    "Moscow", "Saint Petersburg", "Istanbul", "Dubai", "Tehran",
+    "Bangkok", "Kuala Lumpur", "Singapore", "Jakarta", "Manila",
+    "Toronto", "Vancouver", "Montreal", "Lima", "Bogotá"
+]
 
 district_cost = 120
 

@@ -1,4 +1,5 @@
 import Logic.City as City
+import Logic.Player
 import Logic.Resources as Resources
 import Logic.Unit as Unit
 import Logic.Tech as Tech
@@ -14,7 +15,7 @@ import random
 # to be updated at the start of the turn
 class Player:
     player_count = 0
-    def __init__(self):
+    def __init__(self, other_players):
         self.player_id = Player.player_count
         Player.player_count += 1
 
@@ -27,12 +28,16 @@ class Player:
         self.has_capital = False
         self.capital_line = None
         self.capital_column = None
-        self.set_starting_position()
+        self.set_starting_position(other_players)
 
-    def set_starting_position(self):
+    def set_starting_position(self, other_players : list[Logic.Player.Player]):
         while True:
             self.capital_line = random.randint(3, Map.Map.lines - 3)
             self.capital_column = random.randint(3, Map.Map.columns - 3)
+            for player in other_players:
+                if Map.Map.get_shortest_distance(player.capital_line, player.capital_column,
+                                                 self.capital_line, self.capital_column) < 8:
+                    continue
             if Map.Map.get_tile(self.capital_line, self.capital_column).type_id in [0, 1]:
                 # add starting settler
                 self.add_units(6, 0, self.capital_line, self.capital_column)
