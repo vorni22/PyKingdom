@@ -1,5 +1,4 @@
 import Logic.City as City
-import Logic.Player
 import Logic.Resources as Resources
 import Logic.Unit as Unit
 import Logic.Tech as Tech
@@ -30,10 +29,11 @@ class Player:
         self.capital_column = None
         self.set_starting_position(other_players)
 
-    def set_starting_position(self, other_players : list[Logic.Player.Player]):
+    def set_starting_position(self, other_players):
         while True:
             self.capital_line = random.randint(3, Map.Map.lines - 3)
             self.capital_column = random.randint(3, Map.Map.columns - 3)
+            # ensure at least 8 tiles between players
             for player in other_players:
                 if Map.Map.get_shortest_distance(player.capital_line, player.capital_column,
                                                  self.capital_line, self.capital_column) < 8:
