@@ -20,7 +20,7 @@ class Button:
 
         self.text_rect = self.text.get_rect(center=(self.x_coord, self.y_coord))
 
-    def update(self, screen):
+    def draw_button(self, screen):
         if self.image:
             screen.blit(self.image, self.rect)
         screen.blit(self.text, self.text_rect)
@@ -35,6 +35,10 @@ class Button:
             self.curr_color = self.color
 
         self.text = self.fnt.render(self.text_input, True, self.curr_color)
+
+    def update(self, screen, mouse_pos):
+        self.change_color(mouse_pos)
+        self.draw_button(screen)
 
     def get_font(self, size):
         return pg.font.Font(self.font, size)

@@ -1,7 +1,4 @@
-from turtledemo.paint import changecolor
-
 import pygame as pg
-from pygame.display import update
 
 from .Button import Button
 
@@ -32,7 +29,8 @@ class DropDownButton(Button):
                     color = self.options_background_color
                 pg.draw.rect(screen, color, option_rect)
                 option_text = self.options_font.render(option, True, self.options_color)
-                screen.blit(option_text, option_rect)
+                text_rect = option_text.get_rect(center=option_rect.center)
+                screen.blit(option_text, text_rect)
 
     def check_input(self, position):
         if self.check_for_input(position):

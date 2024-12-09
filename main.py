@@ -15,8 +15,7 @@ from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
 from Map_Generation.MapInterface import MapInterface
-from UI.Button import Button
-from UI.DropDownButton import DropDownButton
+from UI.MainMenu import MainMenu
 
 # set up pygame
 pg.init()
@@ -113,22 +112,7 @@ quad_shader.set_int("screenTexture", 0)
 texture_data = glGenTextures(1)
 surface_to_texture(None, texture_data)
 
-background = pg.image.load("Assets/MainMenu/Background.jpg")
-font = "Assets/MainMenu/Font.ttf"
-play_button = pg.image.load("Assets/MainMenu/Play Rect.png")
-quit_button = pg.image.load("Assets/MainMenu/Quit Rect.png")
-
-options = ["Option 1", "Option 2", "Option 3"]
-options1 = ["2", "3", "4", "5"]
-
-button_play = Button(background=play_button, x_coord=0.4*WIDTH, y_coord=0.27*HEIGHT, text_input="PLAY", font=font, color="White", hover_color="Gray", size=75)
-button_quit = Button(background=quit_button, x_coord=0.4*WIDTH, y_coord=0.55*HEIGHT, text_input="QUIT", font=font, color="White", hover_color="Gray", size=75)
-button_map_size = DropDownButton(background=quit_button, x_coord=WIDTH // 4, y_coord=HEIGHT // 4, text_input="MAP", font=font, color="White",
-                                 hover_color="Gray", size=75, options=options, options_background_color=(169, 169, 169))
-button_number_players = DropDownButton(background=quit_button, x_coord=3 * WIDTH // 4, y_coord=HEIGHT // 4, text_input="PLAYERS", font=font, color="White",
-                                 hover_color="Gray", size=75, options=options1, options_background_color=(169, 169, 169))
-button_start_game = Button(background=play_button, x_coord=WIDTH // 2, y_coord=HEIGHT // 2, text_input="START GAME", font=font, color="White", hover_color="Gray", size=75)
-
+main_menu = MainMenu(WIDTH, HEIGHT)
 
 pbo = glGenBuffers(1)
 glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo)
@@ -189,16 +173,15 @@ while running:
             if event.key == pg.K_ESCAPE:
                 running = False
         if event.type == pg.MOUSEBUTTONDOWN:
-            if button_play.check_for_input(mouse_pos) and game_state == 0:
-                game_state = 1
+            if main_menu.check_input_play(mouse_pos):
+                main_menu.set_game_state(1)
                 continue
-            if button_quit.check_for_input(mouse_pos) and game_state == 0:
+            if main_menu.check_input_quit(mouse_pos):
                 running = False
-            if game_state == 1:
-                button_map_size.check_input(mouse_pos)
-                button_number_players.check_input(mouse_pos)
-                if button_start_game.check_for_input(mouse_pos):
-                    game_state = 2
+            if main_menu.check_input_dropdown(mouse_pos):
+                main_menu.check_dropdown(mouse_pos)
+                if main_menu.check_input_start(mouse_pos):
+                    main_menu.set_game_state(2)
                     continue
 
 
@@ -227,34 +210,8 @@ while running:
     fbo.unbind()
 
     # UI here
-    if game_state == 0:
-        screen_surf.blit(background, (0, 0))
-        menu_text = button_play.get_font(100).render("PyKingdom", True, "#ffd700")
-        menu_rect = menu_text.get_rect(center=(0.5*WIDTH, 0.09*HEIGHT))
-
-        screen_surf.blit(menu_text, menu_rect)
-
-        button_play.change_color(mouse_pos)
-        button_play.update(screen_surf)
-
-        button_quit.change_color(mouse_pos)
-        button_quit.update(screen_surf)
-    elif game_state == 1:
-        screen_surf.blit(background, (0, 0))
-        menu_text = button_play.get_font(100).render("PyKingdom", True, "#ffd700")
-        menu_rect = menu_text.get_rect(center=(0.5*WIDTH, 0.09*HEIGHT))
-        screen_surf.blit(menu_text, menu_rect)
-
-        button_map_size.draw_dropdown(screen_surf, mouse_pos)
-        button_map_size.update(screen_surf)
-        button_map_size.change_color(mouse_pos)
-
-        button_number_players.draw_dropdown(screen_surf, mouse_pos)
-        button_number_players.update(screen_surf)
-        button_number_players.change_color(mouse_pos)
-
-        button_start_game.change_color(mouse_pos)
-        button_start_game.update(screen_surf)
+    if main_menu.get_game_state() != 2:
+        main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         map_interface.activate()
 
