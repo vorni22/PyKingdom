@@ -16,6 +16,8 @@ from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
 from Map_Generation.MapInterface import MapInterface
 from UI.MainMenu import MainMenu
+from Game_UI.GameUI import GameUI
+from Game_UI.PanelInterface import PanelInterface
 
 # set up pygame
 pg.init()
@@ -31,6 +33,8 @@ def surface_to_texture(surface, texture_id):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glBindTexture(GL_TEXTURE_2D, 0)
 
+def cursor_in_rect(position, rect):
+    return rect.x <= position[0] <= rect.x + rect.width and rect.y <= position[1] <= rect.y + rect.height
 
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
@@ -40,7 +44,7 @@ screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF)
 size = pg.display.get_surface().get_size()
 WIDTH = size[0]
 HEIGHT = size[1]
-print(WIDTH, HEIGHT)
+# print(WIDTH, HEIGHT)
 
 # set up OpenGL
 glClearColor(0.6, 0.6, 0.6, 1)
@@ -121,21 +125,10 @@ glBindBuffer(GL_PIXEL_PACK_BUFFER, 0)
 
 game_state = 0
 
-fnt_size = 100
-fnt = pg.font.Font(None, fnt_size)
-black = (0, 0, 0)
-blue = (0, 0, 255, 128)
-text = "LOH"
-text_color = black
+clicked = False
+sw = False
 
-text_r = fnt.render(text, True, text_color)
-rect_center_x = 3 * WIDTH // 4
-rect_center_y = 3 * HEIGHT // 4
-rect_width = WIDTH - rect_center_x
-rect_height = HEIGHT - rect_center_y
-transparent_surface = pg.Surface((rect_width, rect_height), pg.SRCALPHA)
-text_rect = text_r.get_rect()
-text_rect.center = (rect_center_x + rect_width // 2, rect_center_y + rect_height // 2)
+panels = PanelInterface(WIDTH, HEIGHT)
 
 while running:
     current_time = time.time()
@@ -154,7 +147,6 @@ while running:
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    clicked = False
     mouse_pos = pg.mouse.get_pos()
 
     # check events
@@ -173,23 +165,38 @@ while running:
             if event.key == pg.K_ESCAPE:
                 running = False
         if event.type == pg.MOUSEBUTTONDOWN:
-            if main_menu.check_input_play(mouse_pos):
-                main_menu.set_game_state(1)
-                continue
-            if main_menu.check_input_quit(mouse_pos):
-                running = False
-            if main_menu.check_input_dropdown(mouse_pos):
-                main_menu.check_dropdown(mouse_pos)
-                if main_menu.check_input_start(mouse_pos):
-                    main_menu.set_game_state(2)
+            if pg.mouse.get_pressed()[0]:
+                if main_menu.check_input_play(mouse_pos):
+                    main_menu.set_game_state(1)
                     continue
-
+                if main_menu.check_input_quit(mouse_pos):
+                    running = False
+                if main_menu.check_input_dropdown(mouse_pos):
+                    main_menu.check_dropdown(mouse_pos)
+                    if main_menu.check_input_start(mouse_pos):
+                        main_menu.set_game_state(2)
+                        continue
+                if main_menu.get_game_state() == 2:
+                    if not clicked:
+                        clicked = True
+                        sw = True
+                    else:
+                        break
 
     shader.use_shader()
     cameraManager.every_frame(shader, dt, True)
-
     map_interface.every_frame()
 
+    if map_interface.activated:
+        mouse_y = HEIGHT - mouse_pos[1]
+        mouse_x = mouse_pos[0]
+        tile_id = map_interface.tile_on_mouse(mouse_x, mouse_y)
+        if not 0 <= tile_id < mouse_x * mouse_y and sw:
+            clicked = False
+        elif 0 <= tile_id < mouse_x * mouse_y and sw:
+            panels.unit_panel.change_text("tile_id: " + str(tile_id))
+
+    sw = False
     fbo.unbind()
 
     fbo.bind()
@@ -214,12 +221,18 @@ while running:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         map_interface.activate()
-
-        transparent_surface.fill(blue)
-
-        screen_surf.blit(transparent_surface, (rect_center_x, rect_center_y))
-
-        screen_surf.blit(text_r, text_rect)
+        if clicked:
+            panels.unit_panel.draw_surf(screen_surf)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        running = False
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if pg.mouse.get_pressed()[0]:
+                        panels.unit_panel.close_surf(mouse_pos, screen_surf)
+                        clicked = False
 
     # UI end here
 

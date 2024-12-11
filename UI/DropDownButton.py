@@ -44,11 +44,3 @@ class DropDownButton(Button):
                     self.text_rect = self.text.get_rect(center=self.rect.center)
                     self.dropdown_open = False
                     break
-
-    def update_hover(self, position):
-        self.hovered_option_index = None
-        if self.dropdown_open:
-            for i, option_rect in enumerate(self.options_rects):
-                if option_rect.collidepoint(position):
-                    self.hovered_option_index = i
-                    break

@@ -51,7 +51,7 @@ void main() {
 
         gl_Position = projection * view * real_pos;
     } else {
-        id = round(aData.y);
+        id = int(round(aData.y));
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
 
