@@ -1,10 +1,10 @@
 import pygame as pg
 
-class GameUI:
-    def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color):
+class BasicPanel:
+    def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
         self.width = width
         self.height = height
-        self.surf = pg.image.load("Assets/MainMenu/x.png")
+        self.surf = surf
         self.font = font
         self.text_size = text_size
         self.text = text
@@ -27,9 +27,10 @@ class GameUI:
 
         self.close_rect = pg.Rect(437 + self.center_x, 7 + self.center_y, 40, 42)
 
-    def draw_surf(self, screen):
+    def draw_surf(self, screen, mouse_pos):
         screen.blit(self.surf, (self.center_x, self.center_y))
         screen.blit(self.text_rendered, self.text_rect)
+        self.clicked = True
 
     def change_text(self, new_text):
         self.text = new_text
@@ -43,3 +44,4 @@ class GameUI:
     def close_surf(self, position, screen):
         if self.close_rect.collidepoint(position):
             pg.draw.rect(screen, "Red", self.close_rect)
+            self.clicked = False

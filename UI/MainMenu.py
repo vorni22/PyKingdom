@@ -15,20 +15,19 @@ class MainMenu:
         options_map_size = ["Small", "Medium", "Large"]
         options_num_players = ["2", "3", "4", "5"]
         self.game_state = 0
-        self.button_play = Button(background=rect1, x_coord=self.width // 2, y_coord=self.height // 3, text_input="PLAY",
-                             font=self.font_main, color="White", hover_color="Gray", size=75)
-        self.button_quit = Button(background=rect2, x_coord=self.width // 2, y_coord=0.55*self.height, text_input="QUIT",
-                             font=self.font_main, color="White", hover_color="Gray", size=75)
-        self.button_map_size = DropDownButton(background=rect1, x_coord=self.width // 4, y_coord=self.height // 4,
-                                         text_input="MAP", font=self.font_options, color="White",
-                                         hover_color="Gray", size=75, options=options_map_size,
-                                         options_background_color=(169, 169, 169))
-        self.button_number_players = DropDownButton(background=rect2, x_coord=3 * self.width // 4, y_coord=self.height // 4,
-                                               text_input="PLAYERS", font=self.font_options, color="White",
-                                               hover_color="Gray", size=75, options=options_num_players,
-                                               options_background_color=(169, 169, 169))
-        self.button_start_game = Button(background=rect1, x_coord=self.width // 2, y_coord=self.height // 2,
-                                   text_input="START GAME", font=self.font_options, color="White", hover_color="Gray", size=75)
+        self.button_play = Button(rect1, self.width // 2, self.height // 3, "PLAY",
+                             self.font_main, "White", "Gray", 75)
+        self.button_quit = Button(rect2, self.width // 2, 0.55*self.height, "QUIT",
+                             self.font_main, "White", "Gray", 75)
+        self.button_map_size = DropDownButton(rect1, self.width // 4, self.height // 4,
+                                         "MAP", self.font_options, "White",
+                                         "Gray", 75, options_map_size,(169, 169, 169))
+        self.button_number_players = DropDownButton(rect2, 3 * self.width // 4, self.height // 4,
+                                               "PLAYERS", self.font_options, "White",
+                                               "Gray", 75, options_num_players,
+                                               (169, 169, 169))
+        self.button_start_game = Button(rect1, self.width // 2, self.height // 2,
+                                   "START GAME", self.font_options, "White", "Gray", 75)
 
     def draw_game_name(self, screen):
         screen.blit(self.background, (0, 0))

@@ -16,7 +16,6 @@ from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
 from Map_Generation.MapInterface import MapInterface
 from UI.MainMenu import MainMenu
-from Game_UI.GameUI import GameUI
 from Game_UI.PanelInterface import PanelInterface
 
 # set up pygame
@@ -35,6 +34,7 @@ def surface_to_texture(surface, texture_id):
 
 def cursor_in_rect(position, rect):
     return rect.x <= position[0] <= rect.x + rect.width and rect.y <= position[1] <= rect.y + rect.height
+
 
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
@@ -153,14 +153,6 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-        if event.type == pg.VIDEORESIZE:
-            HEIGHT = event.h
-            WIDTH = event.w
-            screen = pg.display.set_mode((WIDTH, HEIGHT), pg.OPENGL|pg.DOUBLEBUF|pg.RESIZABLE)
-            camera.screen_height = HEIGHT
-            camera.screen_width = WIDTH
-            glViewport(0, 0, WIDTH, HEIGHT)
-            fbo.resize(WIDTH, HEIGHT)
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 running = False
@@ -185,6 +177,7 @@ while running:
 
     shader.use_shader()
     cameraManager.every_frame(shader, dt, True)
+
     map_interface.every_frame()
 
     if map_interface.activated:
@@ -194,7 +187,7 @@ while running:
         if not 0 <= tile_id < mouse_x * mouse_y and sw:
             clicked = False
         elif 0 <= tile_id < mouse_x * mouse_y and sw:
-            panels.unit_panel.change_text("tile_id: " + str(tile_id))
+            panels.city_panel.change_text("tile_id: " + str(tile_id))
 
     sw = False
     fbo.unbind()
@@ -222,7 +215,7 @@ while running:
     else:
         map_interface.activate()
         if clicked:
-            panels.unit_panel.draw_surf(screen_surf)
+            panels.city_panel.draw_surf(screen_surf, mouse_pos)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -231,8 +224,8 @@ while running:
                         running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
-                        panels.unit_panel.close_surf(mouse_pos, screen_surf)
-                        clicked = False
+                        panels.city_panel.close_surf(mouse_pos, screen_surf)
+                        clicked = panels.city_panel.clicked
 
     # UI end here
 
@@ -250,3 +243,6 @@ while running:
 
 shader.del_shader()
 pg.quit()
+
+
+
