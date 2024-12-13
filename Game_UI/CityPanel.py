@@ -15,6 +15,7 @@ class CityPanel(BasicPanel):
         super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
 
         self.close_rect = pg.Rect(437 + 3 * width // 4 - 100, 7, 40, 42)
+        self.return_rect = pg.Rect(392 + 3 * width // 4 - 100, 7, 40, 42)
 
         rect = self.surf.get_rect()
         w = rect.width // 2 + self.center_x
@@ -34,8 +35,8 @@ class CityPanel(BasicPanel):
         for i, building_name in enumerate(district_types[:-1]):
             self.buy_buildings_buttons.append(Button(self.bg, w, h - i * 50, self.format_text(building_name, str(self.units_cost[i]), 350, 30), None, "White", "Gray", 30))
 
-        self.buy_units_button = Button(None, w, 100, "Units", None, "Black", "Gray", 60)
-        self.buy_buildings_button = Button(None, w, 200, "Buildings", None, "Black", "Gray", 60)
+        self.buy_units_button = Button(None, w, 100, "Units", None, "White", "Gray", 60)
+        self.buy_buildings_button = Button(None, w, 200, "Buildings", None, "White", "Gray", 60)
 
     def draw_surf(self, screen, mouse_pos):
         screen.blit(self.surf, (self.center_x, self.center_y))
@@ -88,9 +89,10 @@ class CityPanel(BasicPanel):
         else:
             close = close and self.buy_buildings_button.check_for_input(position)
 
-        if self.close_rect.collidepoint(position) and not close:
-            self.buy_units = True
-            self.buy_buildings = True
+        if self.return_rect.collidepoint(position) and not close:
+            pg.draw.rect(screen, "Blue", self.return_rect)
+            self.buy_units = False
+            self.buy_buildings = False
 
     def format_text(self, unit, cost, width, font_size):
         font = pg.font.Font(None, font_size)

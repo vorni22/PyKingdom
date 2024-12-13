@@ -216,11 +216,6 @@ while running:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         map_interface.activate()
-        if f:
-            print(panels.city_panel.buy_units_buttons[0].rect)
-            print(panels.city_panel.buy_units_buttons[0].text_rect)
-            print(panels.city_panel.num_chars)
-            f = False
         if clicked:
             panels.city_panel.draw_surf(screen_surf, mouse_pos)
             for event in pg.event.get():
@@ -236,6 +231,7 @@ while running:
                         if panels.city_panel.buy_buildings_button.check_for_input(mouse_pos):
                             panels.city_panel.buy_buildings = True
                         panels.city_panel.close_surf(mouse_pos, screen_surf)
+                        panels.city_panel.return_to_init_surf(mouse_pos, screen_surf)
                         clicked = panels.city_panel.clicked
 
     # UI end here
