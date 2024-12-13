@@ -130,6 +130,8 @@ sw = False
 
 panels = PanelInterface(WIDTH, HEIGHT)
 
+f = True
+
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
@@ -214,6 +216,11 @@ while running:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         map_interface.activate()
+        if f:
+            print(panels.city_panel.buy_units_buttons[0].rect)
+            print(panels.city_panel.buy_units_buttons[0].text_rect)
+            print(panels.city_panel.num_chars)
+            f = False
         if clicked:
             panels.city_panel.draw_surf(screen_surf, mouse_pos)
             for event in pg.event.get():
@@ -224,6 +231,10 @@ while running:
                         running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
+                        if panels.city_panel.buy_units_button.check_for_input(mouse_pos):
+                            panels.city_panel.buy_units = True
+                        if panels.city_panel.buy_buildings_button.check_for_input(mouse_pos):
+                            panels.city_panel.buy_buildings = True
                         panels.city_panel.close_surf(mouse_pos, screen_surf)
                         clicked = panels.city_panel.clicked
 

@@ -7,7 +7,7 @@ cavalry_units = ['Horseman', 'Heavy Chariot', 'Knight']
 siege_units = ['Catapult', 'Trebuchet', 'Bombard']
 naval_melee_units = ['Galley', 'Caravel']
 naval_ranged_units = ['Quadrireme', 'Frigate']
-civilian_units = ['Settler']
+civilian_units = ['Settler', ]
 
 melee_units_costs = [50, 70, 90]
 ranged_units_costs = [50, 70, 90]

@@ -7,8 +7,9 @@ from .CityPanel import CityPanel
 
 class PanelInterface:
     def __init__(self, width, height):
-        city_panel_back = pg.image.load("Assets/MainMenu/ct2.png")
+        city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
         basic_panel_back = pg.image.load("Assets/MainMenu/basic_panel.png")
+        print(city_panel_back.get_size())
         self.tile_panel = BasicPanel(width, height, None, 60, "Black", "LOH",
                                  0, 3 * height // 4 - 100, "Red", basic_panel_back)
         self.unit_panel = BasicPanel(width, height, None, 60, "Black", "LOH",
