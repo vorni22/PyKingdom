@@ -44,3 +44,6 @@ class DropDownButton(Button):
                     self.text_rect = self.text.get_rect(center=self.rect.center)
                     self.dropdown_open = False
                     break
+
+    def get_text_input(self):
+        return self.text_input

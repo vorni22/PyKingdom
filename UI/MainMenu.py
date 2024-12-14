@@ -12,19 +12,24 @@ class MainMenu:
         rect2 = pg.image.load("Assets/MainMenu/Quit Rect.png")
         self.font_main = "Assets/MainMenu/Font.ttf"
         self.font_options = None
-        options_map_size = ["Small", "Medium", "Large"]
-        options_num_players = ["2", "3", "4", "5"]
+        self.options_map_size = {"Small": (32, 24), "Normal": (48, 36), "Large": (64, 48)}
+        # self.options_map_size = {"Small": (20, 10), "Normal": (48, 36), "Large": (100, 50)}
+        self.options_num_players = ["2", "3", "4", "5"]
+        self.default_number_players_value = "PLAYERS"
+        self.default_map_size_value = "MAP SIZE"
+        self.map_size = (48, 36)
+        self.num_players = 3
         self.game_state = 0
         self.button_play = Button(rect1, self.width // 2, self.height // 3, "PLAY",
                              self.font_main, "White", "Gray", 75)
         self.button_quit = Button(rect2, self.width // 2, 0.55*self.height, "QUIT",
                              self.font_main, "White", "Gray", 75)
         self.button_map_size = DropDownButton(rect1, self.width // 4, self.height // 4,
-                                         "MAP", self.font_options, "White",
-                                         "Gray", 75, options_map_size,(169, 169, 169))
+                                         self.default_map_size_value, self.font_options, "White",
+                                         "Gray", 75, list(self.options_map_size.keys()),(169, 169, 169))
         self.button_number_players = DropDownButton(rect2, 3 * self.width // 4, self.height // 4,
-                                               "PLAYERS", self.font_options, "White",
-                                               "Gray", 75, options_num_players,
+                                               self.default_number_players_value, self.font_options, "White",
+                                               "Gray", 75, self.options_num_players,
                                                (169, 169, 169))
         self.button_start_game = Button(rect1, self.width // 2, self.height // 2,
                                    "START GAME", self.font_options, "White", "Gray", 75)
@@ -84,4 +89,18 @@ class MainMenu:
 
     def check_input_dropdown(self, mouse_pos):
         return self.game_state == 1
+
+    def get_game_constants(self):
+        if self.button_map_size.get_text_input() != self.default_map_size_value:
+            selected_size = self.button_map_size.get_text_input()
+            if selected_size in self.options_map_size:
+                self.map_size = self.options_map_size[selected_size]
+
+        if self.button_number_players.get_text_input() != self.default_number_players_value:
+            selected_players = self.button_number_players.get_text_input()
+            if selected_players in self.options_num_players:
+                self.num_players = int(selected_players)
+
+        return self.map_size, self.num_players
+
 

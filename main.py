@@ -80,8 +80,8 @@ shader.set_3float("lightColor", 0.9, 0.8, 0.8)
 shader.set_float("ambientStrength", 0.5)
 shader.set_float("highlight_id", -1.0)
 
-size_x = 60
-size_y = 40
+size_x = 48
+size_y = 36
 vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
@@ -130,8 +130,6 @@ clicked = False
 sw = False
 
 panels = PanelInterface(WIDTH, HEIGHT)
-
-f = True
 
 while running:
     current_time = time.time()
@@ -216,7 +214,8 @@ while running:
     if main_menu.get_game_state() != 2:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
-        ret = map_interface.activate(size_x, size_y, 4, 0)
+        size, num_players = main_menu.get_game_constants()
+        ret = map_interface.activate(size[0], size[1], num_players, 0)
         if ret is not None:
             game = ret
 
