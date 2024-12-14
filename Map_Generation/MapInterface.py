@@ -6,6 +6,7 @@ from OpenGL.GLUT import *
 import numpy as np
 from Graphics.ColorPalette import ColorPalette
 from Graphics.Shaders import Shader
+from Logic.Game import Game
 from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.MapBuilder import MapMesh
 
@@ -39,7 +40,7 @@ class MapInterface:
 
     def activate(self, size_x, size_y, num_players, seed):
         if self.activated:
-            return
+            return None
 
         self.activated = True
 
@@ -54,6 +55,9 @@ class MapInterface:
         self.seed = seed
         self.builder = MapMesh(self.size_x, self.size_y, 0.0, 2.0, 10, self.vbo, self.shader, self.assets, self.seed)
         self.color_palette.flush_texture_to_shader()
+
+        #return Game(num_players, size_y, size_x, self)
+        return None
 
     def clr_object_on_tile(self, tile_id):
         self.builder.clear_object_on_tile(tile_id)

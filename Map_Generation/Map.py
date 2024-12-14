@@ -1,6 +1,12 @@
 # from Logic.Tile import Tile as tile
+from typing import Optional
+
 import networkx as nx
 import numpy as np
+from pyexpat import features
+
+from glm import column
+
 import Logic.Tile as Tile
 # Holds information about the map. Should be generated once using init_map, then information should be accessed directly
 # from the class container via get_tile
@@ -21,25 +27,71 @@ class Map:
     lines = 0
     columns = 0
     tiles = []
+    tile_first_init = False
     G = nx.DiGraph()
     G_unit_distance = nx.DiGraph()
     shortest_distances = []
     unit_shortest_distances = []
 
     @staticmethod
-    def init_map(lines, columns):
+    def init_map(lines, columns, map_interface):
         Map.lines = lines
         Map.columns = columns
-        Map.init_tiles()
+        Map.init_tiles(map_interface)
         Map.init_graph()
         Map.init_unit_graph()
 
+    @staticmethod
+    def update_tile(map_interface, map_interface_id):
+        if not Map.tile_first_init:
+            return
+
+        column = map_interface_id // Map.lines
+        line = map_interface_id % Map.lines
+        this_map_id = line * Map.columns + column
+
+        resource_name = map_interface.builder.types[map_interface_id]
+
+        tile_basic_resources_id = -1
+        if resource_name in Tile.tile_basic_resources:
+            tile_basic_resources_id = Tile.tile_features.index(resource_name)
+
+        tile_features_id = -1
+        if resource_name in Tile.tile_features:
+            tile_features_id = Tile.tile_features.index(resource_name)
+
+        tile_strategic_resources_id = -1
+        if resource_name in Tile.tile_strategic_resources:
+            tile_strategic_resources_id = Tile.tile_strategic_resources.index(resource_name)
+
+        tile_luxury_resources_id = -1
+        if resource_name in Tile.tile_luxury_resources:
+            tile_luxury_resources_id = Tile.tile_luxury_resources.index(resource_name)
+
+        tile = Tile.Tile(line, column,
+                         map_interface.builder.types[map_interface_id],
+                         tile_basic_resources_id,
+                         tile_features_id,
+                         tile_strategic_resources_id,
+                         tile_luxury_resources_id)
+
+        Map.tiles[this_map_id] = tile
+
+        pass
 
     @staticmethod
-    def init_tiles():
-        # TODO Add implementation for map tiles generation, type attribution, resource and feature distribution, to be
-        #  done after the map heights distribution
-        pass
+    def init_tiles(map_interface):
+        if not map_interface.activated:
+            return
+
+        Map.tiles = [Optional[Tile]] * (Map.lines * Map.columns)
+        Map.tile_first_init = True
+
+        for column in range(map_interface.size_x):
+            for line in range(map_interface.size_y):
+                map_interface_id = column * map_interface.size_y + line
+                Map.update_tile(map_interface, map_interface_id)
+
 
     @staticmethod
     def init_graph():
@@ -106,4 +158,4 @@ class Map:
 
     @staticmethod
     def get_tile(line, column) -> Tile.Tile:
-        return Map.tiles[line][column]
+        return Map.tiles[line * Map.columns + column]

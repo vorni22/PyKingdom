@@ -11,8 +11,9 @@ from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxu
 
 # class that will be used for integrating the UI with the backend of the game
 class Game:
-    def __init__(self, player_count, map_size_lines, map_size_columns):
-        Map.Map.init_map(map_size_lines, map_size_columns)
+    def __init__(self, player_count, map_size_lines, map_size_columns, map_interface):
+        self.map_interface = map_interface
+        Map.Map.init_map(map_size_lines, map_size_columns, map_interface)
         self.player_count = player_count
         self.current_player = -1
         self.is_player_turn = False
