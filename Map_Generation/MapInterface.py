@@ -38,6 +38,16 @@ class MapInterface:
 
         Shader.close_all_shaders()
 
+    def id_convertor(self, external_id):
+        line = external_id // self.size_x
+        column = external_id % self.size_y
+        return self.convert_coordinates_to_mine(line, column)
+
+    def convert_coordinates_to_mine(self, line, column):
+        if not self.activated:
+            return -1
+        return column * self.size_y + line
+
     def activate(self, size_x, size_y, num_players, seed):
         if self.activated:
             return None
@@ -104,6 +114,9 @@ class MapInterface:
 
     def highlight_tile(self, tile_id):
         self.shader.set_float("highlight_id", tile_id)
+
+    def set_visibility(self, tile_id, vis: float):
+        self.builder.set_visibility(tile_id, vis)
 
     def tile_on_mouse(self, mouse_x, mouse_y):
         return self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
