@@ -32,9 +32,6 @@ def surface_to_texture(surface, texture_id):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glBindTexture(GL_TEXTURE_2D, 0)
 
-def cursor_in_rect(position, rect):
-    return rect.x <= position[0] <= rect.x + rect.width and rect.y <= position[1] <= rect.y + rect.height
-
 
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
@@ -131,6 +128,8 @@ sw = False
 
 panels = PanelInterface(WIDTH, HEIGHT)
 
+objects = [0, 1, 2]
+
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
@@ -173,6 +172,12 @@ while running:
                     if not clicked:
                         clicked = True
                         sw = True
+                        if panels.unit_is_moving:
+                            clicked = False
+                            panels.clicks_unit_is_moving += 1
+                            if panels.clicks_unit_is_moving == 1:
+                                panels.unit_is_moving = False
+                                panels.clicks_unit_is_moving = 0
                     else:
                         break
 
@@ -220,7 +225,7 @@ while running:
             game = ret
 
         if clicked:
-            panels.city_panel.draw_surf(screen_surf, mouse_pos)
+            panels.draw_interface(screen_surf, mouse_pos, objects)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -229,13 +234,8 @@ while running:
                         running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
-                        if panels.city_panel.buy_units_button.check_for_input(mouse_pos):
-                            panels.city_panel.buy_units = True
-                        if panels.city_panel.buy_buildings_button.check_for_input(mouse_pos):
-                            panels.city_panel.buy_buildings = True
-                        panels.city_panel.close_surf(mouse_pos, screen_surf)
-                        panels.city_panel.return_to_init_surf(mouse_pos, screen_surf)
-                        clicked = panels.city_panel.clicked
+                        panels.close_interface(mouse_pos, screen_surf)
+                        clicked = panels.clicked
 
     # UI end here
 

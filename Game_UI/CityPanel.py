@@ -101,3 +101,9 @@ class CityPanel(BasicPanel):
         space_width = width - unit_width - cost_width
         num_spaces = max(0, space_width // font.size(" ")[0] - 5)
         return unit + " " * num_spaces + cost
+
+    def switch_to_buy_units_buildings(self, position):
+        if self.buy_units_button.check_for_input(position):
+            self.buy_units = True
+        if self.buy_buildings_button.check_for_input(position):
+            self.buy_buildings = True
