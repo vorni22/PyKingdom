@@ -86,7 +86,7 @@ vertices_per_hex = 17 * 3
 total_size = vertices_per_hex * size_x * size_y * 36
 
 vbo_test = DynamicVBO(2 * total_size + 6 + 30 * (2 ** 20), 36)
-map_interface = MapInterface(size_x, size_y, vbo_test, shader, fbo)
+map_interface = MapInterface(vbo_test, shader, fbo)
 
 dt = 0.0
 last_time = 0.0
@@ -215,7 +215,7 @@ while running:
     if main_menu.get_game_state() != 2:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
-        map_interface.activate()
+        map_interface.activate(size_x, size_y, 4, 0)
         if clicked:
             panels.city_panel.draw_surf(screen_surf, mouse_pos)
             for event in pg.event.get():

@@ -1,6 +1,5 @@
 
 import pygame as pg
-from openpyxl.packaging.manifest import Override
 
 from .BasicPanel import BasicPanel
 from .CityPanel import CityPanel

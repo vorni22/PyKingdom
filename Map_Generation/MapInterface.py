@@ -28,27 +28,31 @@ class MapInterface:
     color_palette = None
     builder = None
 
-    def __init__(self, size_x, size_y, vbo, shader, fbo):
-        self.size_x = size_x
-        self.size_y = size_y
+    def __init__(self, vbo, shader, fbo):
         self.vbo = vbo
         self.fbo = fbo
         self.shader = shader
-        self.color_palette = ColorPalette(self.shader)
-        self.assets = AssetsManager(vbo, self.color_palette, shader, size_x * size_y)
-        self.units = [0] * (size_y  * size_x)
         self.unit_count = 0
         self.activated = False
 
         Shader.close_all_shaders()
 
-    def activate(self):
+    def activate(self, size_x, size_y, num_players, seed):
         if self.activated:
             return
 
         self.activated = True
-        seed = random.randint(0, 0xffff)
-        self.builder = MapMesh(self.size_x, self.size_y, 0.0, 2.0, 10, self.vbo, self.shader, self.assets, seed)
+
+        self.num_players = num_players
+        self.size_x = size_x
+        self.size_y = size_y
+
+        self.color_palette = ColorPalette(self.shader)
+        self.assets = AssetsManager(self.vbo, self.color_palette, self.shader, size_x * size_y)
+        self.units = [0] * (size_y  * size_x)
+
+        self.seed = seed
+        self.builder = MapMesh(self.size_x, self.size_y, 0.0, 2.0, 10, self.vbo, self.shader, self.assets, self.seed)
         self.color_palette.flush_texture_to_shader()
 
     def clr_object_on_tile(self, tile_id):
