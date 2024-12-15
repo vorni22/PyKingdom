@@ -3,7 +3,6 @@ import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import numpy as np
-import pyrr
 
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO

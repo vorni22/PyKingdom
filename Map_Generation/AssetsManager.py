@@ -115,12 +115,22 @@ class AssetsManager:
         self.shader.use_shader()
         self.__bind_texture()
         for asset_name in self.meshes:
-            if len(self.tile_ids_draw[asset_name]):
+            if len(self.tile_ids_draw[asset_name]) and asset_name != "Wall":
                 self.shader.set_float("resourceId", self.asset_id[asset_name])
                 self.meshes[asset_name].apply_transform_only(self.shader)
                 count = len(self.tile_ids_draw[asset_name])
                 location = self.meshes[asset_name].get_location()
                 glDrawArraysInstanced(GL_TRIANGLES, location[0], location[1], count)
+
+        if len(self.tile_ids_draw["Wall"]):
+            self.shader.set_float("resourceId", self.asset_id["Wall"])
+            self.shader.set_float("isWall", np.float32(1.0))
+            count = len(self.tile_ids_draw["Wall"])
+            location = self.meshes["Wall"].get_location()
+            glDrawArraysInstanced(GL_TRIANGLES, location[0], location[1], count)
+            self.shader.set_float("isWall", np.float32(0.0))
+
+        self.shader.set_float("resourceId", np.float32(-1.0))
 
     def __get_mesh_at(self, triangles, position, tile_id):
         mesh = Mesh(self.vbo)

@@ -1,6 +1,9 @@
 import time
 import random
+from math import radians
+
 import pygame as pg
+import pyrr
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import numpy as np
@@ -8,8 +11,7 @@ from Graphics.ColorPalette import ColorPalette
 from Graphics.Shaders import Shader
 from Logic.Game import Game
 from Map_Generation.AssetsManager import AssetsManager
-from Map_Generation.MapBuilder import MapMesh
-
+from Map_Generation.MapBuilder import *
 
 class MapInterface:
     size_x = 0
@@ -18,6 +20,7 @@ class MapInterface:
     fbo = None
     shape = None
 
+    owner = []
     units = []
     unit_types = dict()
     unit_pos = dict()
@@ -29,7 +32,11 @@ class MapInterface:
     color_palette = None
     builder = None
 
+    tile_border = []
+
     def __init__(self, vbo, shader, fbo):
+        self.seed = 0
+        self.num_players = 0
         self.vbo = vbo
         self.fbo = fbo
         self.shader = shader
@@ -54,9 +61,53 @@ class MapInterface:
 
         self.activated = True
 
+        if num_players > 8:
+            num_players = 8
+
         self.num_players = num_players
         self.size_x = size_x
         self.size_y = size_y
+
+        self.owner = [-1] * (size_x * size_y)
+        for i in range(size_x * size_y):
+            self.tile_border.append([-1, -1, -1, -1, -1, -1])
+
+        self.shader.use_shader()
+
+        angles = [0, 60, -60, 0, 60, -60]
+        l = R - 0.2
+        positions = [[-(l + 0.1) * np.cos(np.radians(30)), 0.0, 0.0],
+                     [-l * np.cos(np.radians(60)), 0.0, -l * np.cos(np.radians(30))],
+                     [l * np.cos(np.radians(60)), 0.0, -l * np.cos(np.radians(30))],
+                     [(l + 0.1) * np.cos(np.radians(30)), 0.0, 0.0],
+                     [l * np.cos(np.radians(60)), 0.0, l * np.cos(np.radians(30))],
+                     [-l * np.cos(np.radians(60)), 0.0, l * np.cos(np.radians(30))]]
+
+        for side in range(6):
+            side_mat = pyrr.matrix44.create_identity(dtype=np.float32)
+            side_mat = pyrr.matrix44.multiply(
+                m1=side_mat,
+                m2=pyrr.matrix44.create_from_scale(
+                    scale=np.array([0.8, 1.0, 0.8]),
+                    dtype=np.float32
+                )
+            )
+            side_mat = pyrr.matrix44.multiply(
+                m1=side_mat,
+                m2=pyrr.matrix44.create_from_eulers(
+                    eulers=np.array([0.0, 0.0, np.radians(angles[side])]),
+                    dtype=np.float32
+                )
+            )
+            side_mat = pyrr.matrix44.multiply(
+                m1=side_mat,
+                m2=pyrr.matrix44.create_from_translation(
+                    vec=np.array(positions[side]),
+                    dtype=np.float32
+                )
+            )
+
+            self.shader.set_mat4(f"side_mat[{side}]", side_mat)
 
         self.color_palette = ColorPalette(self.shader)
         self.assets = AssetsManager(self.vbo, self.color_palette, self.shader, size_x * size_y)
@@ -112,6 +163,88 @@ class MapInterface:
         self.clr_unit(unit_id)
         self.add_unit_on_tile(new_tile_id, unit_name)
 
+    def __add_border_on_side(self, tile_id, side, player_id):
+        if tile_id < 0 or tile_id >= self.size_x * self.size_y or not self.activated:
+            return
+
+        if self.tile_border[tile_id][side] != -1:
+            return
+
+        self.tile_border[tile_id][side] = player_id
+
+        wall_id = tile_id | (side << 12) | (player_id << 15)
+        self.assets.add_instance_of_at("Wall", wall_id, self.builder.heights[tile_id])
+
+    def __remove_border_on_side(self, tile_id, side):
+        if tile_id < 0 or tile_id >= self.size_x * self.size_y or not self.activated:
+            return
+
+        if self.tile_border[tile_id][side] == -1:
+            return
+
+        player_id = self.tile_border[tile_id][side]
+        self.tile_border[tile_id][side] = -1
+
+        wall_id = tile_id | (side << 12) | (player_id << 15)
+        self.assets.remove_instance_of_at("Wall", wall_id)
+
+    def add_tile_owner(self, tile_id, player_id):
+        if not self.activated or self.owner[tile_id] != -1 or self.owner[player_id] == player_id:
+            return
+
+        self.owner[tile_id] = player_id
+
+        x = tile_id // self.size_y
+        y = tile_id % self.size_y
+
+        # side 0
+        x_id = x - 1; y_id = y
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 0, player_id)
+        else:
+            self.__remove_border_on_side(nid, 3)
+
+        # side 1
+        x_id = x - (y & 1 == 0); y_id = y - 1
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 1, player_id)
+        else:
+            self.__remove_border_on_side(nid, 4)
+
+        # side 2
+        x_id = x + 1 - (y & 1 == 0); y_id = y - 1
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 2, player_id)
+        else:
+            self.__remove_border_on_side(nid, 5)
+
+        # side 3
+        x_id = x + 1; y_id = y
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 3, player_id)
+        else:
+            self.__remove_border_on_side(nid, 0)
+
+        # side 4
+        x_id = x + 1 - (y & 1 == 0); y_id = y + 1
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 4, player_id)
+        else:
+            self.__remove_border_on_side(nid, 1)
+
+        # side 5
+        x_id = x - (y & 1 == 0); y_id = y + 1
+        nid = x_id * self.size_y + y_id
+        if self.owner[nid] != player_id:
+            self.__add_border_on_side(tile_id, 5, player_id)
+        else:
+            self.__remove_border_on_side(nid, 2)
+
     def highlight_tile(self, tile_id):
         self.shader.set_float("highlight_id", tile_id)
 
@@ -143,5 +276,6 @@ class MapInterface:
 
         if 0 <= pixel < self.size_x * self.size_y:
             self.highlight_tile(pixel)
+            self.add_tile_owner(pixel, 0)
 
         # LOGIC ENDS HERE
