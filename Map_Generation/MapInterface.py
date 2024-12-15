@@ -266,6 +266,61 @@ class MapInterface:
         else:
             self.__remove_border_on_side(nid, 2)
 
+    def remove_owner(self, tile_id):
+        if not self.activated or self.owner[tile_id] == -1:
+            return
+
+        for i in range(6):
+            self.__remove_border_on_side(tile_id, i)
+
+        self.owner[tile_id] = -1
+
+        x = tile_id // self.size_y
+        y = tile_id % self.size_y
+
+        # side 0
+        x_id = x - 1; y_id = y
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 3, player_id)
+
+        # side 1
+        x_id = x - (y & 1 == 0); y_id = y - 1
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 4, player_id)
+
+        # side 2
+        x_id = x + 1 - (y & 1 == 0); y_id = y - 1
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 5, player_id)
+
+        # side 3
+        x_id = x + 1; y_id = y
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 0, player_id)
+
+        # side 4
+        x_id = x + 1 - (y & 1 == 0); y_id = y + 1
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 1, player_id)
+
+        # side 5
+        x_id = x - (y & 1 == 0); y_id = y + 1
+        nid = x_id * self.size_y + y_id
+        player_id = self.owner[nid]
+        if self.owner[nid] != -1:
+            self.__add_border_on_side(nid, 2, player_id)
+
+
     def highlight_tile(self, tile_id):
         self.shader.set_float("highlight_id", tile_id)
 
