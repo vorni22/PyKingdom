@@ -1,4 +1,5 @@
 import pygame as pg
+import time
 
 from UI.Button import Button
 from .BasicPanel import BasicPanel
@@ -19,12 +20,15 @@ class CityPanel(BasicPanel):
 
         rect = self.surf.get_rect()
         w = rect.width // 2 + self.center_x
-        h = rect.height // 2 + self.center_y
+        h = rect.height // 2 + self.center_y + 30
         self.buy_units = False
         self.buy_buildings = False
         self.buy_units_buttons = []
         self.buy_buildings_buttons = []
         self.bg = pg.image.load("Assets/MainMenu/cnt2.png")
+        self.bg_buy = pg.transform.scale(self.bg, (self.bg.get_rect().width, self.bg.get_rect().height + 20))
+        self.error_message_time = 0
+        self.error_message = "Not enough production to buy this"
 
         self.bg = pg.transform.scale(self.bg, (self.bg.get_rect().width + 50, self.bg.get_rect().height))
 
@@ -35,25 +39,28 @@ class CityPanel(BasicPanel):
         for i, building_name in enumerate(district_types[:-1]):
             self.buy_buildings_buttons.append(Button(self.bg, w, h - i * 50, self.format_text(building_name, str(self.units_cost[i]), 350, 30), None, "White", "Gray", 30))
 
-        self.buy_units_button = Button(None, w, 100, "Units", None, "White", "Gray", 60)
-        self.buy_buildings_button = Button(None, w, 200, "Buildings", None, "White", "Gray", 60)
-
-    def draw_surf(self, screen, mouse_pos):
+        self.buy_units_button = Button(self.bg_buy, w, 100, "Units", None, "White", "Gray", 60)
+        self.buy_buildings_button = Button(self.bg_buy, w, 200, "Buildings", None, "White", "Gray", 60)
+    def draw_surf(self, screen, position):
         screen.blit(self.surf, (self.center_x, self.center_y))
         # screen.blit(self.text_rendered, self.text_rect)
         if not self.buy_buildings and not self.buy_units:
-            self.buy_units_button.update(screen, mouse_pos)
-            self.buy_buildings_button.update(screen, mouse_pos)
+            self.buy_units_button.update(screen, position)
+            self.buy_buildings_button.update(screen, position)
+            self.clicked = True
 
         if self.buy_units:
             for i, unit in enumerate(self.buy_units_buttons):
-                unit.update(screen, mouse_pos)
+                unit.update(screen, position)
+            self.clicked = True
+            return
 
         if self.buy_buildings:
             for building in self.buy_buildings_buttons:
-                building.update(screen, mouse_pos)
+                building.update(screen, position)
+            self.clicked = True
+            return
 
-        self.clicked = True
 
     def close_surf(self, position, screen):
         close = True
@@ -103,7 +110,42 @@ class CityPanel(BasicPanel):
         return unit + " " * num_spaces + cost
 
     def switch_to_buy_units_buildings(self, position):
-        if self.buy_units_button.check_for_input(position):
+        if self.buy_units_button.check_for_input(position) and not self.buy_buildings:
             self.buy_units = True
-        if self.buy_buildings_button.check_for_input(position):
+        if self.buy_buildings_button.check_for_input(position) and not self.buy_units:
             self.buy_buildings = True
+
+    def draw_error_box(self, screen, start_time, duration=1000):
+
+        current_time = time.time()
+        if current_time - start_time < duration:
+
+            box_rect = pg.Rect(self.width // 4, self.height // 2 - 50, self.width // 2, 100)
+
+            text = self.fnt.render(self.error_message, True, "Red")
+            text_rect = text.get_rect(center=box_rect.center)
+            screen.blit(text, text_rect)
+            return True
+        return False
+
+    def try_to_buy_something(self, position, production):
+        if self.buy_units:
+            for i, unit in enumerate(self.buy_units_buttons):
+                if unit.check_for_input(position):
+                    if self.units_cost[i] > production:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Unit purchased!")
+                        self.error_message_time = None
+            return
+
+        if self.buy_buildings:
+            for i, building in enumerate(self.buy_buildings_buttons):
+                if building.check_for_input(position):
+                    if self.units_cost[i] > production:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Building purchased!")
+                        self.error_message_time = None
+            return
+

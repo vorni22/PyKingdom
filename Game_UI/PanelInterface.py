@@ -1,4 +1,4 @@
-
+import time
 import pygame as pg
 
 from .BasicPanel import BasicPanel
@@ -51,6 +51,9 @@ class PanelInterface:
                 self.city_panel.draw_surf(screen, position)
 
             self.clicked = True
+
+        if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:  # 1 second duration
+            self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
     def close_interface(self, position ,screen):
         if self.clicked_options[0]:

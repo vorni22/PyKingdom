@@ -236,6 +236,7 @@ while running:
                     if pg.mouse.get_pressed()[0]:
                         panels.close_interface(mouse_pos, screen_surf)
                         clicked = panels.clicked
+                        panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here
 
