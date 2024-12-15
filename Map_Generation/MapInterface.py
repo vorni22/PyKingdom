@@ -334,7 +334,7 @@ class MapInterface:
     def __first_frame(self):
         self.first_frame = False
 
-    def every_frame(self):
+    def every_frame(self, tile_on_mouse_func):
         # DO NOT MODIFY
         if not self.activated:
             return
@@ -352,6 +352,11 @@ class MapInterface:
         tile_now = self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
         if 0 <= tile_now < self.size_x * self.size_y:
             self.selected_tile = tile_now
+
+        if tile_on_mouse_func(pg.mouse.get_pos()):
+            self.selected_tile = -1
+            self.highlight_tile(-1)
+
         # DO NOT MODIFY ENDS HERE
 
         # TEST LOGIC STARTS HERE

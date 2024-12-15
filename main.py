@@ -127,7 +127,7 @@ sw = False
 
 panels = PanelInterface(WIDTH, HEIGHT)
 
-objects = [0, 1]
+objects = [0, 1, 2]
 
 while running:
     current_time = time.time()
@@ -169,7 +169,7 @@ while running:
     shader.use_shader()
     cameraManager.every_frame(shader, dt, True)
 
-    map_interface.every_frame()
+    map_interface.every_frame(panels.cursor_is_on_ui)
 
     if map_interface.activated:
         mouse_y = HEIGHT - mouse_pos[1]
@@ -177,7 +177,7 @@ while running:
         tile_id = map_interface.tile_on_mouse(mouse_x, mouse_y)
         panels.click_is_out_of_map(tile_id, mouse_x, mouse_y)
 
-    print(panels.cursor_is_on_ui(mouse_pos), panels.clicked_options)
+    #print(panels.cursor_is_on_ui(mouse_pos), panels.clicked_options)
 
     panels.set_update_every_frame(False)
     fbo.unbind()
