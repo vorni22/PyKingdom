@@ -7,11 +7,24 @@ import pyrr
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import numpy as np
+from select import select
+
 from Graphics.ColorPalette import ColorPalette
 from Graphics.Shaders import Shader
 from Logic.Game import Game
 from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.MapBuilder import *
+
+player_colors = [
+    [0.941, 0.047, 0.047],
+    [1.000, 0.467, 0.200],
+    [1.000, 0.953, 0.200],
+    [0.071, 0.800, 0.302],
+    [0.200, 0.510, 0.922],
+    [0.784, 0.075, 0.851],
+    [0.337, 0.980, 0.925],
+    [0.553, 1.000, 0.576]
+]
 
 class MapInterface:
     size_x = 0
@@ -32,6 +45,8 @@ class MapInterface:
     color_palette = None
     builder = None
 
+    selected_tile = -1
+
     tile_border = []
 
     def __init__(self, vbo, shader, fbo):
@@ -42,6 +57,8 @@ class MapInterface:
         self.shader = shader
         self.unit_count = 0
         self.activated = False
+
+        random.shuffle(player_colors)
 
         Shader.close_all_shaders()
 
@@ -108,6 +125,10 @@ class MapInterface:
             )
 
             self.shader.set_mat4(f"side_mat[{side}]", side_mat)
+
+        for i in range(8):
+            color = player_colors[i]
+            self.shader.set_3float(f"player_color[{i}]", color[0], color[1], color[2])
 
         self.color_palette = ColorPalette(self.shader)
         self.assets = AssetsManager(self.vbo, self.color_palette, self.shader, size_x * size_y)
@@ -252,12 +273,14 @@ class MapInterface:
         self.builder.set_visibility(tile_id, vis)
 
     def tile_on_mouse(self, mouse_x, mouse_y):
-        return self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
+        #return self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
+        return self.selected_tile
 
     def __first_frame(self):
         self.first_frame = False
 
     def every_frame(self):
+        # DO NOT MODIFY
         if not self.activated:
             return
 
@@ -267,15 +290,19 @@ class MapInterface:
         glBindVertexArray(self.builder.mesh.vbo.vao)
         self.builder.draw()
 
-        # LOGIC STARTS HERE
         screen_size = pg.display.get_surface().get_size()
         mouse_x, mouse_y = pg.mouse.get_pos()
         mouse_y = screen_size[1] - mouse_y
 
+        tile_now = self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
+        if 0 <= tile_now < self.size_x * self.size_y:
+            self.selected_tile = tile_now
+        # DO NOT MODIFY ENDS HERE
+
+        # TEST LOGIC STARTS HERE
         pixel = self.tile_on_mouse(mouse_x, mouse_y)
 
         if 0 <= pixel < self.size_x * self.size_y:
             self.highlight_tile(pixel)
-            self.add_tile_owner(pixel, 0)
 
-        # LOGIC ENDS HERE
+        # TEST LOGIC ENDS HERE

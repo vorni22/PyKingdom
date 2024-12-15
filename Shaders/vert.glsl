@@ -36,6 +36,7 @@ out float visibility;
 out float id;
 
 uniform mat4 side_mat[6];
+uniform vec3 player_color[8];
 
 vec4 real_pos_calc(float id, float h) {
     float id_x = floor(id / size_y);
@@ -66,6 +67,7 @@ void main() {
             real_pos += real_pos_calc(id, h);
 
             gl_Position = projection * view * real_pos;
+            Color = player_color[Player];
         } else {
             vec4 real_pos = model * vec4(aPos, 1.0);
 
@@ -90,5 +92,7 @@ void main() {
 	Normal = normMatrix * aNormalVector;
 
 	//Color = color_palet[int(aData.x)];
-	Color = texelFetch(color_palette_t, int(aData.x), 0).rgb;
+    if (isWall <= 0) {
+	    Color = texelFetch(color_palette_t, int(aData.x), 0).rgb;
+	}
 }

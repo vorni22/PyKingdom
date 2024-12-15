@@ -1,9 +1,6 @@
 import os
-from imghdr import tests
-
-import numpy as np
 from plyfile import PlyData
-from Graphics.Mesh import Vertex, Mesh
+from Graphics.Mesh import *
 from OpenGL.GL import *
 
 class Asset:

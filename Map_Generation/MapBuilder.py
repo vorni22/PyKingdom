@@ -125,7 +125,7 @@ class MapMesh:
         pixel = glReadPixels(mouse_x, mouse_y, 1, 1, GL_RED_INTEGER, GL_INT)
         if 0 <= pixel[0][0] <= 4294967295:
             pixel = struct.unpack('f', struct.pack('I', pixel[0][0]))[0]
-            if abs(pixel - round(pixel)) <= 0.01:
+            if abs(pixel - round(pixel)) <= 0.00:
                 return round(pixel)
             else:
                 return -1
