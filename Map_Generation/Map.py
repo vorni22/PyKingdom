@@ -1,11 +1,8 @@
-# from Logic.Tile import Tile as tile
 from typing import Optional
 
 import networkx as nx
 import numpy as np
-from pyexpat import features
 
-from glm import column
 
 import Logic.Tile as Tile
 # Holds information about the map. Should be generated once using init_map, then information should be accessed directly

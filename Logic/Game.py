@@ -8,8 +8,6 @@ import Logic.Tech as Tech
 import Logic.Civic as Civic
 import Map_Generation.Map as Map
 from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxury_resources
-from main import map_interface
-
 
 # class that will be used for integrating the UI with the backend of the game
 class Game:
@@ -93,9 +91,9 @@ class Game:
         for unit in self.players[self.current_player].units:
             if unit.position_line == tile_line and unit.position_column == tile_column:
                 moved_unit = unit
-        coords = map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
+        coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
         if move_result == 0:
-            map_interface.move_unit(moved_unit.unit_id, coords)
+            self.map_interface.move_unit(moved_unit.unit_id, coords)
             return True
         return False
 
@@ -112,8 +110,8 @@ class Game:
         self.players[self.current_player].add_cities(City.city_names[city_name], tile_line, tile_column)
         self.cities_coordinates.append((tile_line, tile_column))
         for tile in self.players[self.current_player].cities[len(self.cities_coordinates) - 1]:
-            coords = map_interface.convert_coordinates_to_mine(tile.line, tile.column)
-            map_interface.add_tile_owner(coords, self.current_player)
+            coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+            self.map_interface.add_tile_owner(coords, self.current_player)
 
     def get_city_actions(self, tile_line, tile_column):
         purchasable_units = [[], [], [], [], [], [], []]
