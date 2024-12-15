@@ -77,8 +77,6 @@ class Map:
 
         Map.tiles[this_map_id] = tile
 
-        pass
-
     @staticmethod
     def init_tiles(map_interface):
         if not map_interface.activated:
@@ -124,31 +122,63 @@ class Map:
     def init_unit_graph():
         for i, j in np.ndindex(Map.lines, Map.columns):
             if j > 0:
-                Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j - 1,
-                                             weight=Map.get_tile(i, j - 1).movement_cost)
+                if Map.get_tile(i, j - 1).movement_cost == 'Unpassable':
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j - 1,
+                                                 weight=float('inf'))
+                else:
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j - 1,
+                                                 weight=Map.get_tile(i, j - 1).movement_cost)
             if j < Map.columns - 1:
-                Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j + 1,
-                                             weight=Map.get_tile(i, j + 1).movement_cost)
+                if Map.get_tile(i, j + 1).movement_cost == 'Unpassable':
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j + 1,
+                                                 weight=float('inf'))
+                else:
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j + 1,
+                                                 weight=Map.get_tile(i, j + 1).movement_cost)
             if i < Map.lines - 1:
-                Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j,
-                                             weight=Map.get_tile(i + 1, j).movement_cost)
+                if Map.get_tile(i + 1, j).movement_cost == 'Unpassable':
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j,
+                                                 weight=float('inf'))
+                else:
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j,
+                                                 weight=Map.get_tile(i + 1, j).movement_cost)
             if i > 0:
-                Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j,
-                                             weight=Map.get_tile(i - 1, j).movement_cost)
+                if Map.get_tile(i - 1, j).movement_cost == 'Unpassable':
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j,
+                                                 weight=float('inf'))
+                else:
+                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j,
+                                                 weight=Map.get_tile(i - 1, j).movement_cost)
             if i % 2:
                 if i < Map.lines - 1 and j < Map.columns - 1:
-                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j + 1,
-                                                 weight=Map.get_tile(i + 1, j + 1).movement_cost)
+                    if Map.get_tile(i + 1, j + 1).movement_cost == 'Unpassable':
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j + 1,
+                                                     weight=float('inf'))
+                    else:
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j + 1,
+                                                     weight=Map.get_tile(i + 1, j + 1).movement_cost)
                 if i > 0 and j < Map.columns - 1:
-                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j + 1,
-                                                 weight=Map.get_tile(i - 1, j + 1).movement_cost)
+                    if Map.get_tile(i - 1, j + 1).movement_cost == 'Unpassable':
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j + 1,
+                                                     weight=float('inf'))
+                    else:
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j + 1,
+                                                     weight=Map.get_tile(i - 1, j + 1).movement_cost)
             else:
                 if i < Map.lines - 1 and j > 0:
-                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j - 1,
-                                                 weight=Map.get_tile(i + 1, j - 1).movement_cost)
+                    if Map.get_tile(i + 1, j - 1).movement_cost == 'Unpassable':
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j - 1,
+                                                     weight=float('inf'))
+                    else:
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j - 1,
+                                                     weight=Map.get_tile(i + 1, j - 1).movement_cost)
                 if i > 0 and j > 0:
-                    Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
-                                                 weight=Map.get_tile(i - 1, j - 1).movement_cost)
+                    if Map.get_tile(i - 1, j - 1).movement_cost == 'Unpassable':
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
+                                                     weight=float('inf'))
+                    else:
+                        Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
+                                                     weight=Map.get_tile(i - 1, j - 1).movement_cost)
         for i in range(0, Map.lines * Map.columns):
             Map.unit_shortest_distances.append(nx.single_source_dijkstra_path_length(Map.G_unit_distance, i))
 

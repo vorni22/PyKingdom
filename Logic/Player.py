@@ -24,6 +24,7 @@ class Player:
         self.civic_tree = Civic.CivicTree()
         self.cities = []
         self.units = []
+        self.tiles = []
         self.has_capital = False
         self.capital_line = None
         self.capital_column = None
@@ -67,17 +68,15 @@ class Player:
             self.cities[0].is_capital = True
             self.capital_line = city_line
             self.capital_column = city_column
-        # TODO render the city center
+        self.tiles.extend(self.cities[len(self.cities) - 1].tiles)
 
     def add_units(self, unit_name_id, unit_type_id, unit_line, unit_column):
         self.units.append(Unit.Unit(unit_name_id, unit_type_id, unit_line, unit_column))
-        #TODO call function for adding the unit on the map
 
     def delete_units(self, location_line, location_column):
         for unit in self.units:
             if unit.position_line == location_line and unit.position_column == location_column:
                 self.units.remove(unit)
-                #TODO call function for removing the unit from the map
 
     def end_turn_resource_calculation(self):
         self.resources_per_turn.reset_resources_per_turn()
@@ -95,6 +94,12 @@ class Player:
     def is_unit_owner(self, unit_line, unit_column):
         for unit in self.units:
             if unit.unit_line == unit_line and unit.unit_column == unit_column:
+                return True
+        return False
+
+    def is_tile_owner(self, tile_line, tile_column):
+        for tile in self.tiles:
+            if tile.tile_line == tile_line and tile.tile_column == tile_column:
                 return True
         return False
 

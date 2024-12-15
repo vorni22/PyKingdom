@@ -64,7 +64,7 @@ class MapInterface:
 
     def id_convertor(self, external_id):
         line = external_id // self.size_x
-        column = external_id % self.size_y
+        column = external_id % self.size_x
         return self.convert_coordinates_to_mine(line, column)
 
     def convert_coordinates_to_mine(self, line, column):
@@ -138,8 +138,8 @@ class MapInterface:
         self.builder = MapMesh(self.size_x, self.size_y, 0.0, 2.0, 10, self.vbo, self.shader, self.assets, self.seed)
         self.color_palette.flush_texture_to_shader()
 
-        #return Game(num_players, size_y, size_x, self)
-        return None
+        return Game(num_players, size_y, size_x, self)
+        # return None
 
     def clr_object_on_tile(self, tile_id):
         self.builder.clear_object_on_tile(tile_id)

@@ -1,7 +1,6 @@
 import Logic.Resources as Resources
 from Map_Generation import Map as Map
 import Logic.Unit as Unit
-import random
 
 district_types = ['Campus', 'Theatre Square', 'Commercial Hub', 'Harbour', 'Industrial Zone',
                   'Neighborhood', 'Aqueduct', 'City Center']
@@ -249,6 +248,8 @@ class City:
         temp_resources_per_turn, temp_city_resources_per_turn = self.calculate_yields_districts()
         self.resources_per_turn += temp_resources_per_turn
         self.city_resources_per_turn += temp_city_resources_per_turn
+
+        self.resources_per_turn += Resources.ResourcesPerTurn(self.population, self.population, self.population)
 
         if self.housing - self.population == 1:
             self.city_resources_per_turn.food_per_turn_count *= 0.75

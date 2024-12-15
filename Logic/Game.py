@@ -8,6 +8,8 @@ import Logic.Tech as Tech
 import Logic.Civic as Civic
 import Map_Generation.Map as Map
 from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxury_resources
+from main import map_interface
+
 
 # class that will be used for integrating the UI with the backend of the game
 class Game:
@@ -22,9 +24,14 @@ class Game:
         self.units_coordinates = []
         while Player.Player.player_count < player_count:
             self.players.append(Player.Player(self.players))
+        for player in self.players:
+            for unit in player.units:
+                coord = map_interface.convert_coordinates_to_mine(unit.position_line, unit.position_column)
+                unit_id = map_interface.add_unit_on_tile(coord, unit.type)
+                unit.unit_id = unit_id
 
     def start_turn(self):
-        if self.current_player == self.current_player - 1:
+        if self.current_player == self.player_count - 1:
             self.current_player = 0
         else:
             self.current_player = self.current_player + 1
@@ -32,8 +39,9 @@ class Game:
 
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()
+        self.start_turn()
 
-    def identify_object(self, tile_line, tile_column):
+    def identify_object(self, tile_line, tile_column) -> list[int]:
         objects = [0, ]
         if (tile_line, tile_column) in self.units_coordinates:
             # code for unit
@@ -43,11 +51,16 @@ class Game:
             objects.append(2)
         return objects
 
-    def current_player_is_owner(self, object_id, tile_line, tile_column):
-        if object_id == 1:
-            return self.players[self.current_player].is_unit_owner(tile_line, tile_column)
-        elif object_id == 2:
-            return self.players[self.current_player].is_city_owner(tile_line, tile_column)
+    def current_player_is_owner(self, tile_line, tile_column) -> list[dict[int, bool]]:
+        objects = self.identify_object(tile_line, tile_column)
+        ownerships = []
+        if 0 in objects:
+            ownerships.append({0: self.players[self.current_player].is_tile_owner(tile_line, tile_column)})
+        if 1 in objects:
+            ownerships.append({1: self.players[self.current_player].is_unit_owner(tile_line, tile_column)})
+        if 2 in objects:
+            ownerships.append({2: self.players[self.current_player].is_city_owner(tile_line, tile_column)})
+        return ownerships
 
     def get_unit_actions(self, tile_line, tile_column):
         possible_actions = []
@@ -73,16 +86,37 @@ class Game:
                         possible_actions.append(3)
         return possible_actions
 
+    def move_unit(self, tile_line, tile_column, new_tile_line, new_tile_column):
+        move_result = self.players[self.current_player].move_unit(tile_line, tile_column,
+                                                                  new_tile_line, new_tile_column)
+        moved_unit = None
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == tile_line and unit.position_column == tile_column:
+                moved_unit = unit
+        coords = map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
+        if move_result == 0:
+            map_interface.move_unit(moved_unit.unit_id, coords)
+            return True
+        return False
+
     def settle_city(self, tile_line, tile_column):
-        self.players[self.current_player].delete_units(tile_line, tile_column)
+        settler = None
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == tile_line and unit.position_column == tile_column:
+                settler = unit
+        self.map_interface.clr_unit(settler.unit_id)
         self.units_coordinates.remove((tile_line, tile_column))
+        self.players[self.current_player].delete_units(tile_line, tile_column)
         city_name = random.randint(0, len(City.city_names))
         City.city_names.pop(city_name)
         self.players[self.current_player].add_cities(City.city_names[city_name], tile_line, tile_column)
         self.cities_coordinates.append((tile_line, tile_column))
+        for tile in self.players[self.current_player].cities[len(self.cities_coordinates) - 1]:
+            coords = map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+            map_interface.add_tile_owner(coords, self.current_player)
 
     def get_city_actions(self, tile_line, tile_column):
-        purchasable_units = []
+        purchasable_units = [[], [], [], [], [], [], []]
         purchasable_districts = []
         purchasable_buildings = [[], [], [], [], [], [], []]
         for city in self.players[self.current_player].cities:
@@ -91,46 +125,46 @@ class Game:
                 if not campus:
                     purchasable_districts.append(0)
                 elif len(campus.buildings) == 0:
-                    purchasable_buildings[0].append(0)
+                    purchasable_buildings[0].extend([0])
                 else:
-                    purchasable_buildings[0].append(1)
+                    purchasable_buildings[0].extend([1])
 
                 theatre_square = city.get_district_by_type(1)
                 if not theatre_square:
-                    purchasable_districts.append(1)
+                    purchasable_districts.extend([1])
                 elif len(theatre_square.buildings) == 0:
-                    purchasable_buildings[1].append(0)
+                    purchasable_buildings[1].extend([0])
                 else:
-                    purchasable_buildings[1].append(1)
+                    purchasable_buildings[1].extend([1])
 
                 commercial_hub = city.get_district_by_type(2)
                 if not commercial_hub:
                     purchasable_districts.append(0)
                 elif len(commercial_hub.buildings) == 0:
-                    purchasable_buildings[2].append(0)
+                    purchasable_buildings[2].extend([0])
                 else:
-                    purchasable_buildings[2].append(1)
+                    purchasable_buildings[2].extend([1])
 
                 harbour = city.get_district_by_type(3)
                 if not harbour:
                     purchasable_districts.append(0)
                 elif len(harbour.buildings) == 0:
-                    purchasable_buildings[3].append(0)
+                    purchasable_buildings[3].extend([0])
                 else:
-                    purchasable_buildings[3].append(1)
+                    purchasable_buildings[3].extend([1])
 
                 industrial_zone = city.get_district_by_type(4)
                 if not industrial_zone:
                     purchasable_districts.append(0)
                 elif len(industrial_zone.buildings) == 0:
-                    purchasable_buildings[4].append(0)
+                    purchasable_buildings[4].extend([0])
                 else:
-                    purchasable_buildings[4].append(1)
+                    purchasable_buildings[4].extend([1])
 
                 neighborhoods = city.get_district_by_type(5)
                 purchasable_districts.append(5)
                 for _ in range(len(neighborhoods)):
-                    purchasable_buildings[5].append(0)
+                    purchasable_buildings[5].extend([0])
 
                 aqueduct = city.get_district_by_type(6)
                 if not aqueduct:
@@ -140,6 +174,10 @@ class Game:
                 purchasable_buildings[7].extend([0, 1, 2, 3, 4])
                 for building in city_center.buildings:
                     purchasable_buildings[7].remove(building)
+                for i in range(0, len(purchasable_units)):
+                    purchasable_units[i].extend([0])
+        return purchasable_units, purchasable_districts, purchasable_buildings
+
     @staticmethod
     def get_tile(tile_line, tile_column):
         tile = Map.Map.get_tile(tile_line, tile_column)
@@ -168,6 +206,3 @@ class Game:
 
         return (tile_type, tile_basic_resource, tile_strategic_resource, tile_luxury_resource, tile_feature_id,
                 food_yield, production_yield, science_yield, culture_yield, gold_yield)
-
-    def get_owned_techs(self):
-        pass

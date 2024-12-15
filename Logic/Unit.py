@@ -45,6 +45,8 @@ class Unit:
         self.melee_strength = 0
         self.init_melee_strength(type_id, name_id)
         self.health_percentage = 100
+        # id used for rendering the unit
+        self.unit_id = None
 
     def rest(self):
         self.health_percentage = min(100, self.health_percentage + 20)
