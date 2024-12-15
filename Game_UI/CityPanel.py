@@ -19,6 +19,7 @@ class CityPanel(BasicPanel):
         self.return_rect = pg.Rect(392 + 3 * width // 4 - 100, 7, 40, 42)
 
         rect = self.surf.get_rect()
+        rect.center = self.text_rect.center
         w = rect.width // 2 + self.center_x
         h = rect.height // 2 + self.center_y + 30
         self.buy_units = False
@@ -41,6 +42,7 @@ class CityPanel(BasicPanel):
 
         self.buy_units_button = Button(self.bg_buy, w, 100, "Units", None, "White", "Gray", 60)
         self.buy_buildings_button = Button(self.bg_buy, w, 200, "Buildings", None, "White", "Gray", 60)
+
     def draw_surf(self, screen, position):
         screen.blit(self.surf, (self.center_x, self.center_y))
         # screen.blit(self.text_rendered, self.text_rect)

@@ -127,7 +127,7 @@ sw = False
 
 panels = PanelInterface(WIDTH, HEIGHT)
 
-objects = [0, 1, 2]
+objects = [0, 1]
 
 while running:
     current_time = time.time()
@@ -154,31 +154,17 @@ while running:
             running = False
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                running = False
+                main_menu.set_game_state(2)
         if event.type == pg.MOUSEBUTTONDOWN:
             if pg.mouse.get_pressed()[0]:
-                if main_menu.check_input_play(mouse_pos):
-                    main_menu.set_game_state(1)
+                action = main_menu.check_input_main_menu(mouse_pos)
+                if action == 1:
                     continue
-                if main_menu.check_input_quit(mouse_pos):
+                elif action == 2:
+                    panels.update_interface()
+                elif action == 0:
                     running = False
-                if main_menu.check_input_dropdown(mouse_pos):
-                    main_menu.check_dropdown(mouse_pos)
-                    if main_menu.check_input_start(mouse_pos):
-                        main_menu.set_game_state(2)
-                        continue
-                if main_menu.get_game_state() == 2:
-                    if not clicked:
-                        clicked = True
-                        sw = True
-                        if panels.unit_is_moving:
-                            clicked = False
-                            panels.clicks_unit_is_moving += 1
-                            if panels.clicks_unit_is_moving == 1:
-                                panels.unit_is_moving = False
-                                panels.clicks_unit_is_moving = 0
-                    else:
-                        break
+
 
     shader.use_shader()
     cameraManager.every_frame(shader, dt, True)
@@ -189,12 +175,11 @@ while running:
         mouse_y = HEIGHT - mouse_pos[1]
         mouse_x = mouse_pos[0]
         tile_id = map_interface.tile_on_mouse(mouse_x, mouse_y)
-        if not 0 <= tile_id < mouse_x * mouse_y and sw:
-            clicked = False
-        elif 0 <= tile_id < mouse_x * mouse_y and sw:
-            panels.city_panel.change_text("tile_id: " + str(tile_id))
+        panels.click_is_out_of_map(tile_id, mouse_x, mouse_y)
 
-    sw = False
+    print(panels.cursor_is_on_ui(mouse_pos), panels.clicked_options)
+
+    panels.set_update_every_frame(False)
     fbo.unbind()
 
     fbo.bind()
@@ -215,7 +200,7 @@ while running:
     fbo.unbind()
 
     # UI here
-    if main_menu.get_game_state() != 2:
+    if main_menu.get_game_state() != 3:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         size, num_players = main_menu.get_game_constants()
@@ -223,18 +208,17 @@ while running:
         if ret is not None:
             game = ret
 
-        if clicked:
+        if panels.clicked:
             panels.draw_interface(screen_surf, mouse_pos, objects)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
-                        running = False
+                        main_menu.set_game_state(2)
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
                         panels.close_interface(mouse_pos, screen_surf)
-                        clicked = panels.clicked
                         panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here

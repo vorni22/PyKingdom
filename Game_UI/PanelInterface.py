@@ -11,17 +11,18 @@ class PanelInterface:
         city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
         basic_panel_back = pg.image.load("Assets/MainMenu/basic_panel.png")
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
-
+        self.width = width
+        self.height = height
         self.clicked = False
         self.clicked_options = [False, False, False]
         self.sw = True
-
-        self.tile_panel = BasicPanel(width, height, None, 60, "Black", "LOH",
-                                 0, height - basic_panel_back.get_rect().height, "Red", basic_panel_back)
-        self.unit_panel = UnitPanel(width, height, None, 60, "Black", "LOH",
+        self.update_every_frame = False
+        self.tile_panel = BasicPanel(self.width, self.height, None, 60, "Black", "LOH",
+                                 0, self.height - basic_panel_back.get_rect().height, "Red", basic_panel_back)
+        self.unit_panel = UnitPanel(self.width, self.height, None, 60, "Black", "LOH",
                                  0, 0, "Red", unit_panel_back)
-        self.city_panel = CityPanel(width, height, None, 60, "Black", "LOH",
-                                 width - city_panel_back.get_rect().width, 0, "Red", city_panel_back)
+        self.city_panel = CityPanel(self.width, self.height, None, 60, "Black", "LOH",
+                                    self.width - city_panel_back.get_rect().width, 0, "Red", city_panel_back)
 
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
@@ -81,7 +82,52 @@ class PanelInterface:
             self.sw = True
 
 
+    def update_interface(self):
+        if not self.clicked:
+            self.clicked = True
+            self.update_every_frame = True
+            if self.unit_is_moving:
+                self.clicked = False
+                self.clicks_unit_is_moving += 1
+                if self.clicks_unit_is_moving == 1:
+                    self.unit_is_moving = False
+                    self.clicks_unit_is_moving = 0
+            return 1
 
+        return 0
+
+    def set_clicked(self, clicked):
+        self.clicked = clicked
+
+    def click_is_out_of_map(self, tile, mouse_x, mouse_y):
+        if not 0 <= tile < mouse_x * mouse_y and self.update_every_frame:
+            self.set_clicked(False)
+        elif 0 <= tile < mouse_x * mouse_y and self.update_every_frame:
+            self.city_panel.change_text("tile_id: " + str(tile))
+
+    def set_update_every_frame(self, update_every_frame):
+        self.update_every_frame = update_every_frame
+
+    def cursor_is_on_ui(self, position):
+        if self.clicked_options[0]:
+            temp = self.tile_panel.surf.get_rect()
+            temp.center = self.tile_panel.text_rect.center
+            if temp.collidepoint(position):
+                return True
+
+        if self.clicked_options[1]:
+            temp = self.unit_panel.surf.get_rect()
+            temp.center = self.unit_panel.text_rect.center
+            if temp.collidepoint(position):
+                return True
+
+        if self.clicked_options[2]:
+            temp = self.city_panel.surf.get_rect()
+            temp.center = self.city_panel.text_rect.center
+            if temp.collidepoint(position):
+                return True
+
+        return False
 
 
 

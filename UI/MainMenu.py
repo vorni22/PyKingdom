@@ -13,7 +13,6 @@ class MainMenu:
         self.font_main = "Assets/MainMenu/Font.ttf"
         self.font_options = None
         self.options_map_size = {"Small": (32, 24), "Normal": (48, 36), "Large": (64, 48)}
-        # self.options_map_size = {"Small": (20, 10), "Normal": (48, 36), "Large": (100, 50)}
         self.options_num_players = ["2", "3", "4", "5"]
         self.default_number_players_value = "PLAYERS"
         self.default_map_size_value = "MAP SIZE"
@@ -33,6 +32,10 @@ class MainMenu:
                                                (169, 169, 169))
         self.button_start_game = Button(rect1, self.width // 2, self.height // 2,
                                    "START GAME", self.font_options, "White", "Gray", 75)
+        self.button_resume_game = Button(rect1, self.width // 2, self.height // 3,
+                                        "RESUME", self.font_options, "White", "Gray", 75)
+        self.button_quit_game = Button(rect1, self.width // 2, 0.55*self.height,
+                                        "QUIT GAME", self.font_options, "White", "Gray", 75)
 
     def draw_game_name(self, screen):
         screen.blit(self.background, (0, 0))
@@ -62,6 +65,11 @@ class MainMenu:
             self.button_number_players.update(screen, mouse_pos)
 
             self.button_start_game.update(screen, mouse_pos)
+        elif self.game_state == 2:
+            self.draw_game_name(screen)
+
+            self.button_resume_game.update(screen, mouse_pos)
+            self.button_quit_game.update(screen, mouse_pos)
 
     def get_game_state(self):
         return self.game_state
@@ -90,6 +98,24 @@ class MainMenu:
     def check_input_dropdown(self, mouse_pos):
         return self.game_state == 1
 
+    def check_input_resume(self, mouse_pos):
+        if self.button_play.check_for_input(mouse_pos) and self.game_state == 2:
+            return True
+
+        return False
+
+    def check_input_quit_game(self, mouse_pos):
+        if self.button_quit.check_for_input(mouse_pos) and self.game_state == 2:
+            return True
+
+        return False
+
+    def check_game_is_running(self, mouse_pos):
+        return self.game_state == 3
+
+    def check_game_is_paused(self, mouse_pos):
+        return self.game_state == 2
+
     def get_game_constants(self):
         if self.button_map_size.get_text_input() != self.default_map_size_value:
             selected_size = self.button_map_size.get_text_input()
@@ -102,5 +128,31 @@ class MainMenu:
                 self.num_players = int(selected_players)
 
         return self.map_size, self.num_players
+
+    def check_input_main_menu(self, mouse_pos):
+        if self.check_input_play(mouse_pos):
+            self.set_game_state(1)
+            return 1
+
+        if self.check_input_quit(mouse_pos):
+              return 0
+
+        if self.check_input_dropdown(mouse_pos):
+            self.check_dropdown(mouse_pos)
+            if self.check_input_start(mouse_pos):
+                self.set_game_state(3)
+                return 1
+
+        if self.check_game_is_paused(mouse_pos):
+            if self.check_input_resume(mouse_pos):
+                self.set_game_state(3)
+                return 1
+            if self.check_input_quit_game(mouse_pos):
+                return 0
+
+        if self.check_game_is_running(mouse_pos):
+            return 2
+
+        return None
 
 
