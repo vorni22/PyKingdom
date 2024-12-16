@@ -198,9 +198,9 @@ class Game:
             tile_feature_id = -1
         food_yield = tile.city_resources.food_per_turn_count
         production_yield = tile.city_resources.production_per_turn_count
-        science_yield = tile.resources.science_resource_per_turn_count
+        science_yield = tile.resources.science_per_turn_count
         culture_yield = tile.resources.culture_per_turn_count
-        gold_yield = tile.resources.gold_resource_per_turn_count
+        gold_yield = tile.resources.gold_per_turn_count
 
         return (tile_type, tile_basic_resource, tile_strategic_resource, tile_luxury_resource, tile_feature_id,
                 food_yield, production_yield, science_yield, culture_yield, gold_yield)

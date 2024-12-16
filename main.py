@@ -128,6 +128,11 @@ sw = False
 panels = PanelInterface(WIDTH, HEIGHT)
 
 objects = [0, 1, 2]
+tile = None
+
+# rect = pg.rect.Rect(0, 0, WIDTH - 150, HEIGHT - 150)
+# im = pg.image.load("Assets/MainMenu/next_turn_button.png")
+tile_id = -1
 
 while running:
     current_time = time.time()
@@ -161,6 +166,14 @@ while running:
                 if action == 1:
                     continue
                 elif action == 2:
+                    if map_interface.activated and not panels.clicked:
+                        mouse_y = HEIGHT - mouse_pos[1]
+                        mouse_x = mouse_pos[0]
+                        tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
+                        tile_line = tid % size[1]
+                        tile_column = tid // size[1]
+                        objects = game.identify_object(tile_line, tile_column)
+                        tile = game.get_tile(tile_line, tile_column)
                     panels.update_interface()
                 elif action == 0:
                     running = False
@@ -177,7 +190,6 @@ while running:
         tile_id = map_interface.tile_on_mouse(mouse_x, mouse_y)
         panels.click_is_out_of_map(tile_id, mouse_x, mouse_y)
 
-    #print(panels.cursor_is_on_ui(mouse_pos), panels.clicked_options)
 
     panels.set_update_every_frame(False)
     fbo.unbind()
@@ -208,8 +220,10 @@ while running:
         if ret is not None:
             game = ret
 
+        # screen_surf.blit(im, (WIDTH - 150, HEIGHT - 150))
+        panels.status_panel.draw(screen_surf)
         if panels.clicked:
-            panels.draw_interface(screen_surf, mouse_pos, objects)
+            panels.draw_interface(screen_surf, mouse_pos, objects, tile)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False

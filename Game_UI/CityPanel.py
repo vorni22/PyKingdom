@@ -7,7 +7,7 @@ from Logic.Unit import unit_classes, naval_ranged_units_costs
 from Logic.Unit import melee_units, ranged_units, cavalry_units
 from Logic.Unit import siege_units, naval_melee_units, naval_ranged_units, civilian_units
 from Logic.Unit import melee_units_costs, ranged_units_costs, cavalry_units_costs
-from Logic.Unit import siege_units_costs, naval_melee_units_costs, civilian_units_costs
+from Logic.Unit import siege_units_costs, naval_melee_units_costs
 from Logic.Unit import civilian_units_costs
 from Logic.City import district_types
 
@@ -15,13 +15,13 @@ class CityPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
         super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
 
-        self.close_rect = pg.Rect(437 + 3 * width // 4 - 100, 7, 40, 42)
-        self.return_rect = pg.Rect(392 + 3 * width // 4 - 100, 7, 40, 42)
+        self.close_rect = pg.Rect(437 + 3 * width // 4 - 100, 57, 40, 42)
+        self.return_rect = pg.Rect(392 + 3 * width // 4 - 100, 57, 40, 42)
 
         rect = self.surf.get_rect()
         rect.center = self.text_rect.center
         w = rect.width // 2 + self.center_x
-        h = rect.height // 2 + self.center_y + 30
+        h = rect.height // 2 + self.center_y
         self.buy_units = False
         self.buy_buildings = False
         self.buy_units_buttons = []
@@ -40,10 +40,10 @@ class CityPanel(BasicPanel):
         for i, building_name in enumerate(district_types[:-1]):
             self.buy_buildings_buttons.append(Button(self.bg, w, h - i * 50, self.format_text(building_name, str(self.units_cost[i]), 350, 30), None, "White", "Gray", 30))
 
-        self.buy_units_button = Button(self.bg_buy, w, 100, "Units", None, "White", "Gray", 60)
-        self.buy_buildings_button = Button(self.bg_buy, w, 200, "Buildings", None, "White", "Gray", 60)
+        self.buy_units_button = Button(self.bg_buy, w, 150, "Units", None, "White", "Gray", 60)
+        self.buy_buildings_button = Button(self.bg_buy, w, 250, "Buildings", None, "White", "Gray", 60)
 
-    def draw_surf(self, screen, position):
+    def draw_surf(self, screen, position, tile):
         screen.blit(self.surf, (self.center_x, self.center_y))
         # screen.blit(self.text_rendered, self.text_rect)
         if not self.buy_buildings and not self.buy_units:

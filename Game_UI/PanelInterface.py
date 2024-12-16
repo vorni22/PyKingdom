@@ -4,6 +4,7 @@ import pygame as pg
 from .BasicPanel import BasicPanel
 from .CityPanel import CityPanel
 from .UnitPanel import UnitPanel
+from .PermanentPanel import PermanentPanel
 
 
 class PanelInterface:
@@ -20,14 +21,15 @@ class PanelInterface:
         self.tile_panel = BasicPanel(self.width, self.height, None, 60, "Black", "LOH",
                                  0, self.height - basic_panel_back.get_rect().height, "Red", basic_panel_back)
         self.unit_panel = UnitPanel(self.width, self.height, None, 60, "Black", "LOH",
-                                 0, 0, "Red", unit_panel_back)
+                                 0, 50, "Red", unit_panel_back)
         self.city_panel = CityPanel(self.width, self.height, None, 60, "Black", "LOH",
-                                    self.width - city_panel_back.get_rect().width, 0, "Red", city_panel_back)
+                                    self.width - city_panel_back.get_rect().width, 50, "Red", city_panel_back)
+        self.status_panel = PermanentPanel()
 
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
 
-    def draw_interface(self, screen, position, objects):
+    def draw_interface(self, screen, position, objects, tile):
         if not self.unit_panel.is_unit_moved or self.clicks_unit_is_moving != 2:
             if self.sw:
                 for obj in objects:
@@ -43,17 +45,17 @@ class PanelInterface:
                 self.sw = False
 
             if self.clicked_options[0]:
-                self.tile_panel.draw_surf(screen, position)
+                self.tile_panel.draw_surf(screen, position, tile)
 
             if self.clicked_options[1]:
-                self.unit_panel.draw_surf(screen, position)
+                self.unit_panel.draw_surf(screen, position, tile)
 
             if self.clicked_options[2]:
-                self.city_panel.draw_surf(screen, position)
+                self.city_panel.draw_surf(screen, position, tile)
 
             self.clicked = True
 
-        if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:  # 1 second duration
+        if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
             self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
     def close_interface(self, position ,screen):
@@ -126,6 +128,10 @@ class PanelInterface:
             temp.center = self.city_panel.text_rect.center
             if temp.collidepoint(position):
                 return True
+
+        status_rect = pg.rect.Rect(0, 0, self.width, 50)
+        if status_rect.collidepoint(position):
+            return True
 
         return False
 
