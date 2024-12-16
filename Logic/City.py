@@ -195,13 +195,7 @@ class City:
         self.add_tiles(location_line, location_column)
         self.melee_combat_strength += 5
 
-    def get_district_by_type(self, district_type_id) -> list[District] | District | None:
-        if district_type_id == 5:
-            districts = []
-            for district in self.districts:
-                if district.district_type == district_type_id:
-                    districts.append(district)
-            return districts
+    def get_district_by_type(self, district_type_id) -> District | None:
         for district in self.districts:
             if district.district_type_id == district_type_id:
                 return district
@@ -212,9 +206,6 @@ class City:
             if (district.location_line == district_location_line and
                     district.location_column == district_location_column):
                 return i
-
-    def add_building(self, building_name_id, district_id):
-        self.districts[district_id].add_building(building_name_id)
 
     def calculate_yields_districts(self):
         total_resources_per_turn = Resources.ResourcesPerTurn(0, 0, 0)
@@ -298,8 +289,8 @@ class City:
         self.city_resources.production_count -= district_cost
         return 0
 
-    def build_building_with_production(self, building_name_id, district_id):
-        district = self.districts[district_id]
+    def build_building_with_production(self, building_name_id, district_type_id):
+        district = self.get_district_by_type(district_type_id)
         if district.district_type_id == 0:
             if self.city_resources.production_count < campus_buildings_costs[building_name_id]:
                 remaining_production = self.city_resources.production_count - campus_buildings_costs[building_name_id]
@@ -372,7 +363,7 @@ class City:
             else:
                 self.city_resources.production_count -= city_center_buildings_costs[building_name_id]
 
-        self.add_building(building_name_id, district_id)
+        district.add_building(building_name_id)
         return 0
 
     def build_unit_with_production(self, unit_type_id, unit_name_id):

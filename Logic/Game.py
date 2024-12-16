@@ -9,7 +9,7 @@ import Logic.Civic as Civic
 import Map_Generation.Map as Map
 from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxury_resources
 
-# class that will be used for integrating the UI with the backend of the game
+# class that will be used for integrating the UI and the graphics with the backend of the game
 class Game:
     def __init__(self, player_count, map_size_lines, map_size_columns, map_interface):
         self.map_interface = map_interface
@@ -27,6 +27,7 @@ class Game:
                 coord = map_interface.convert_coordinates_to_mine(unit.position_line, unit.position_column)
                 unit_id = map_interface.add_unit_on_tile(coord, unit.type, player.player_id)
                 unit.unit_id = unit_id
+                self.units_coordinates.append((unit.position_line, unit.position_column))
 
     def start_turn(self):
         if self.current_player == self.player_count - 1:
@@ -49,19 +50,25 @@ class Game:
             objects.append(2)
         return objects
 
-    def current_player_is_owner(self, tile_line, tile_column) -> list[dict[int, bool]]:
+    def current_player_is_owner(self, tile_line, tile_column) -> dict[int, bool]:
         objects = self.identify_object(tile_line, tile_column)
-        ownerships = []
+        ownerships = {}
         if 0 in objects:
-            ownerships.append({0: self.players[self.current_player].is_tile_owner(tile_line, tile_column)})
+            ownerships[0] = self.players[self.current_player].is_tile_owner(tile_line, tile_column)
         if 1 in objects:
-            ownerships.append({1: self.players[self.current_player].is_unit_owner(tile_line, tile_column)})
+            ownerships[1] = self.players[self.current_player].is_unit_owner(tile_line, tile_column)
         if 2 in objects:
-            ownerships.append({2: self.players[self.current_player].is_city_owner(tile_line, tile_column)})
+            ownerships[2] = self.players[self.current_player].is_city_owner(tile_line, tile_column)
         return ownerships
 
     def get_unit_actions(self, tile_line, tile_column):
         possible_actions = []
+        # if the player whose turn it currently is doesn't own the unit, they get no actions
+        ownerships = self.current_player_is_owner(tile_line, tile_column)
+        if 1 in ownerships.keys():
+            if not ownerships[1]:
+                return possible_actions
+
         for unit in self.players[self.current_player].units:
             if unit.position_line == tile_line and unit.position_column == tile_column:
                 # all units can move, so 0 is code for can_move
@@ -84,7 +91,31 @@ class Game:
                         possible_actions.append(3)
         return possible_actions
 
+    def purchase_unit_with_production(self, tile_line, tile_column, unit_type_id):
+        purchase_result = self.players[self.current_player].build_unit_with_production(tile_line, tile_column,
+                                                                                       unit_type_id, 0)
+        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
+        if purchase_result == 0:
+            unit_id = self.map_interface.add_unit_on_tile(coords, Unit.unit_classes[unit_type_id], self.current_player)
+            self.players[self.current_player].units[len(self.players[self.current_player].units) - 1].unit_id = unit_id
+            return True
+        # some error happened, not supposed to be able to call this function if the resources aren't in possession
+        return False
+
+    def purchase_unit_with_gold(self, tile_line, tile_column, unit_type_id):
+        purchase_result = self.players[self.current_player].build_unit_with_gold(tile_line, tile_column,
+                                                                                 unit_type_id, 0)
+        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
+        if purchase_result == 0:
+            unit_id = self.map_interface.add_unit_on_tile(coords, Unit.unit_classes[unit_type_id], self.current_player)
+            self.players[self.current_player].units[len(self.players[self.current_player].units) - 1].unit_id = unit_id
+            return True
+        # some error happened, not supposed to be able to call this function if the resources aren't in possession
+        return False
+
     def move_unit(self, tile_line, tile_column, new_tile_line, new_tile_column):
+        # add stuff for triggering attack if there is an enemy city or unit on the new tile
+
         move_result = self.players[self.current_player].move_unit(tile_line, tile_column,
                                                                   new_tile_line, new_tile_column)
         moved_unit = None
@@ -117,64 +148,186 @@ class Game:
         purchasable_units = [[], [], [], [], [], [], []]
         purchasable_districts = []
         purchasable_buildings = [[], [], [], [], [], [], []]
+        purchasable_units_gold = [[], [], [], [], [], [], []]
+        purchasable_districts_gold = []
+        purchasable_buildings_gold = [[], [], [], [], [], [], []]
+
+        ownerships = self.current_player_is_owner(tile_line, tile_column)
+        if 2 in ownerships.keys():
+            if not ownerships[2]:
+                return (False, purchasable_units, purchasable_districts, purchasable_buildings,
+                        purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
+
         for city in self.players[self.current_player].cities:
             if city.position_line == tile_line and city.position_column == tile_column:
                 campus = city.get_district_by_type(0)
                 if not campus:
                     purchasable_districts.append(0)
+                    purchasable_districts_gold.append(0)
                 elif len(campus.buildings) == 0:
-                    purchasable_buildings[0].extend([0])
+                    if city.city_resources.production_count >= City.campus_buildings_costs[0]:
+                        purchasable_buildings[0].extend([0])
+                    if self.players[self.current_player].resources.gold_count >= City.campus_buildings_costs[0] * 2:
+                        purchasable_buildings_gold[0].extend([0])
                 else:
-                    purchasable_buildings[0].extend([1])
+                    if city.city_resources.production_count >= City.campus_buildings_costs[1]:
+                        purchasable_buildings[0].extend([1])
+                    if self.players[self.current_player].resources.gold_count >= City.campus_buildings_costs[1]:
+                        purchasable_buildings_gold[0].extend([1])
 
                 theatre_square = city.get_district_by_type(1)
                 if not theatre_square:
-                    purchasable_districts.extend([1])
+                    purchasable_districts.append(1)
+                    purchasable_districts_gold.append(1)
                 elif len(theatre_square.buildings) == 0:
-                    purchasable_buildings[1].extend([0])
+                    if city.city_resources.production_count >= City.theatre_square_buildings_costs[0]:
+                        purchasable_buildings[1].extend([0])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.theatre_square_buildings_costs[0] * 2):
+                        purchasable_buildings_gold[1].extend([0])
                 else:
-                    purchasable_buildings[1].extend([1])
+                    if city.city_resources.production_count >= City.theatre_square_buildings_costs[1]:
+                        purchasable_buildings[1].extend([1])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.theatre_square_buildings_costs[1] * 2):
+                        purchasable_buildings_gold[1].extend([1])
 
                 commercial_hub = city.get_district_by_type(2)
                 if not commercial_hub:
-                    purchasable_districts.append(0)
+                    purchasable_districts.append(2)
+                    purchasable_districts_gold.append(2)
                 elif len(commercial_hub.buildings) == 0:
-                    purchasable_buildings[2].extend([0])
+                    if city.city_resources.production_count >= City.commercial_hub_buildings_costs[0]:
+                        purchasable_buildings[2].extend([0])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.commercial_hub_buildings_costs[0] * 2):
+                        purchasable_buildings_gold[2].extend([0])
                 else:
-                    purchasable_buildings[2].extend([1])
+                    if city.city_resources.production_count >= City.commercial_hub_buildings_costs[1]:
+                        purchasable_buildings[2].extend([1])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.commercial_hub_buildings_costs[1] * 2):
+                        purchasable_buildings_gold[2].extend([1])
 
                 harbour = city.get_district_by_type(3)
                 if not harbour:
-                    purchasable_districts.append(0)
+                    purchasable_districts.append(3)
+                    purchasable_districts_gold.append(3)
                 elif len(harbour.buildings) == 0:
-                    purchasable_buildings[3].extend([0])
+                    if city.city_resources.production_count >= City.harbour_buildings_costs[0]:
+                        purchasable_buildings[3].extend([0])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.harbour_buildings_costs[0] * 2):
+                        purchasable_buildings_gold[3].extend([0])
                 else:
-                    purchasable_buildings[3].extend([1])
+                    if city.city_resources.production_count >= City.harbour_buildings_costs[1]:
+                        purchasable_buildings[3].extend([1])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.harbour_buildings_costs[1] * 2):
+                        purchasable_buildings_gold[3].extend([1])
 
                 industrial_zone = city.get_district_by_type(4)
                 if not industrial_zone:
-                    purchasable_districts.append(0)
+                    purchasable_districts.append(4)
+                    purchasable_districts_gold.append(4)
                 elif len(industrial_zone.buildings) == 0:
-                    purchasable_buildings[4].extend([0])
+                    if city.city_resources.production_count >= City.industrial_zone_buildings_costs[0]:
+                        purchasable_buildings[4].extend([0])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.industrial_zone_buildings_costs[0] * 2):
+                        purchasable_buildings_gold[4].extend([0])
                 else:
-                    purchasable_buildings[4].extend([1])
+                    if city.city_resources.production_count >= City.industrial_zone_buildings_costs[1]:
+                        purchasable_buildings[4].extend([1])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.industrial_zone_buildings_costs[1] * 2):
+                        purchasable_buildings_gold[4].extend([1])
 
-                neighborhoods = city.get_district_by_type(5)
-                purchasable_districts.append(5)
-                for _ in range(len(neighborhoods)):
-                    purchasable_buildings[5].extend([0])
+                neighborhood = city.get_district_by_type(5)
+                if not neighborhood:
+                    purchasable_districts.append(5)
+                    purchasable_districts_gold.append(5)
+                else:
+                    if city.city_resources.production_count >= City.neighborhood_buildings_costs[0]:
+                        purchasable_buildings[5].extend([0])
+                    if (self.players[self.current_player].resources.gold_count >=
+                        City.neighborhood_buildings_costs[0] * 2):
+                        purchasable_buildings_gold[5].extend([0])
 
                 aqueduct = city.get_district_by_type(6)
                 if not aqueduct:
                     purchasable_districts.append(6)
+                    purchasable_districts_gold.append(6)
 
                 city_center = city.get_district_by_type(7)
-                purchasable_buildings[7].extend([0, 1, 2, 3, 4])
-                for building in city_center.buildings:
-                    purchasable_buildings[7].remove(building)
-                for i in range(0, len(purchasable_units)):
-                    purchasable_units[i].extend([0])
-        return purchasable_units, purchasable_districts, purchasable_buildings
+                if ("Monument" not in city_center.buildings and city.city_resources.production_count >=
+                        City.city_center_buildings_costs[1]):
+                    purchasable_buildings[7].extend([1])
+                if ("Monument" not in city_center.buildings and self.players[self.current_player].resources.gold_count
+                    >= City.city_center_buildings_costs[1] * 2):
+                    purchasable_buildings_gold[7].extend([1])
+                if ("Granary" not in city_center.buildings and city.city_resources.production_count >=
+                    City.city_center_buildings_costs[2]):
+                    purchasable_buildings[7].extend([2])
+                if ("Granary" not in city_center.buildings and self.players[self.current_player].resources.gold_count
+                    >= City.city_center_buildings_costs[2] * 2):
+                    purchasable_buildings_gold[7].extend([2])
+                if ("Water Mill" not in city_center.buildings and city.city_resources.production_count >=
+                    City.city_center_buildings_costs[3]):
+                    purchasable_buildings[7].extend([3])
+                if ("Water Mill" not in city_center.buildings and self.players[self.current_player].resources.gold_count
+                    >= City.city_center_buildings_costs[3] * 2):
+                    purchasable_buildings_gold[7].extend([3])
+                if ("Sewer" not in city_center.buildings and city.city_resources.production_count >=
+                    City.city_center_buildings_costs[4]):
+                    purchasable_buildings[7].extend([4])
+                if ("Sewer" not in city_center.buildings and self.players[self.current_player].resources.gold_count >=
+                    City.city_center_buildings_costs[4] * 2):
+                    purchasable_buildings_gold[7].extend([4])
+
+                if city.city_resources.production_count < City.district_cost:
+                    purchasable_districts = []
+                if self.players[self.current_player].resources.gold_count < City.district_cost * 2:
+                    purchasable_districts_gold = []
+
+                if city.city_resources.production_count >= Unit.melee_units_costs[0]:
+                    purchasable_units[0].extend([0])
+                if city.city_resources.production_count >= Unit.ranged_units_costs[0]:
+                    purchasable_units[1].extend([0])
+                if city.city_resources.production_count >= Unit.cavalry_units_costs[0]:
+                    purchasable_units[2].extend([0])
+                if city.city_resources.production_count >= Unit.siege_units_costs[0]:
+                    purchasable_units[3].extend([0])
+                if city.city_resources.production_count >= Unit.naval_melee_units_costs[0]:
+                    purchasable_units[4].extend([0])
+                if city.city_resources.production_count >= Unit.naval_ranged_units_costs[0]:
+                    purchasable_units[5].extend([0])
+                if city.city_resources.production_count > Unit.civilian_units_costs:
+                    purchasable_units[6].extend([0])
+
+                if self.players[self.current_player].resources.gold_count >= Unit.melee_units_costs[0] * 2:
+                    purchasable_units_gold[0].extend([0])
+                if self.players[self.current_player].resources.gold_count >= Unit.ranged_units_costs[0] * 2:
+                    purchasable_units_gold[1].extend([0])
+                if self.players[self.current_player].resources.gold_count >= Unit.cavalry_units_costs[0] * 2:
+                    purchasable_units_gold[2].extend([0])
+                if self.players[self.current_player].resources.gold_count >= Unit.siege_units_costs[0] * 2:
+                    purchasable_units_gold[3].extend([0])
+                if self.players[self.current_player].resources.gold_count >= Unit.naval_melee_units_costs[0] * 2:
+                    purchasable_units_gold[4].extend([0])
+                if self.players[self.current_player].resources.gold_count >= Unit.naval_ranged_units_costs[0] * 2:
+                    purchasable_units_gold[5].extend([0])
+
+        return (True, purchasable_units, purchasable_districts, purchasable_buildings,
+               purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
+
+    def purchase_building_with_production(self, tile_line, tile_column, district_id, building_id):
+        self.players[self.current_player].build_building_with_production(tile_line, tile_column,
+                                                                         district_id, building_id)
+
+    def purchase_building_with_gold(self, tile_line, tile_column, district_id, building_id):
+        self.players[self.current_player].build_building_with_gold(tile_line, tile_column,
+                                                                   district_id, building_id)
 
     @staticmethod
     def get_tile(tile_line, tile_column):

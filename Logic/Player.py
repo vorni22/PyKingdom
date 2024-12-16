@@ -109,18 +109,15 @@ class Player:
             if city.city_line == city_line and city.city_column == city_column:
                 return city.build_district(district_name_id, district_location_line, district_location_column)
 
-    def build_building_with_production(self, city_line, city_column, district_location_line, district_location_column,
-                                       building_name_id):
+    def build_building_with_production(self, city_line, city_column, district_type_id, building_name_id):
         for city in self.cities:
             if city.city_line == city_line and city.city_column == city_column:
-                return city.build_building_with_production(building_name_id, city.get_district_id(district_location_line,
-                                                                                           district_location_column))
+                return city.build_building_with_production(building_name_id, district_type_id)
 
-    def build_building_with_gold(self, city_line, city_column, district_location_line, district_location_column,
-                                 building_name_id):
+    def build_building_with_gold(self, city_line, city_column, district_type_id, building_name_id):
         for city in self.cities:
             if city.city_line == city_line and city.city_column == city_column:
-                district = city.districts[city.get_district_id(district_location_line, district_location_column)]
+                district = city.get_district_by_type(district_type_id)
                 if district.district_type == City.district_types[0]:
                     if self.resources.gold_count < City.campus_buildings_costs[building_name_id] * 2:
                         remaining_gold = City.campus_buildings_costs[building_name_id] * 2 - self.resources.gold_count
