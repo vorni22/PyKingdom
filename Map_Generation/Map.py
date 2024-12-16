@@ -47,11 +47,11 @@ class Map:
         line = map_interface_id % Map.lines
         this_map_id = line * Map.columns + column
 
-        resource_name = map_interface.builder.types[map_interface_id]
+        resource_name = map_interface.builder.resource_type[map_interface_id]
 
         tile_basic_resources_id = -1
         if resource_name in Tile.tile_basic_resources:
-            tile_basic_resources_id = Tile.tile_features.index(resource_name)
+            tile_basic_resources_id = Tile.tile_basic_resources.index(resource_name)
 
         tile_features_id = -1
         if resource_name in Tile.tile_features:
