@@ -2,6 +2,7 @@ import time
 import random
 from math import radians
 
+import networkx as nx
 import pygame as pg
 import pyrr
 from OpenGL.GL import *
@@ -13,6 +14,7 @@ from Graphics.ColorPalette import ColorPalette
 from Graphics.Shaders import Shader
 from Logic.Game import Game
 from Map_Generation.AssetsManager import AssetsManager
+from Map_Generation.Map import Map
 from Map_Generation.MapBuilder import *
 
 player_colors = [
@@ -37,7 +39,8 @@ class MapInterface:
     units = []
     unit_types = dict()
     unit_pos = dict()
-    unit_count = 0
+    unit_player = dict()
+    next_unit_id = 0
 
     first_frame = True
     activated = False
@@ -49,13 +52,16 @@ class MapInterface:
 
     tile_border = []
 
+    visibility = []
+    active_player = -1
+
     def __init__(self, vbo, shader, fbo):
         self.seed = 0
         self.num_players = 0
         self.vbo = vbo
         self.fbo = fbo
         self.shader = shader
-        self.unit_count = 0
+        self.next_unit_id = 0
         self.activated = False
 
         random.shuffle(player_colors)
@@ -84,6 +90,13 @@ class MapInterface:
         self.num_players = num_players
         self.size_x = size_x
         self.size_y = size_y
+
+        # == -1 invisible
+        # >= 0 -> reference count:
+        #   == 0 - shadowed
+        #   >= 1 - visible
+        for i in range(num_players):
+            self.visibility.append([-1] * (size_x * size_y))
 
         self.owner = [-1] * (size_x * size_y)
         for i in range(size_x * size_y):
@@ -138,30 +151,118 @@ class MapInterface:
         self.builder = MapMesh(self.size_x, self.size_y, 0.0, 2.0, 10, self.vbo, self.shader, self.assets, self.seed)
         self.color_palette.flush_texture_to_shader()
 
-        return Game(num_players, size_y, size_x, self)
+        ret = Game(num_players, size_y, size_x, self)
+
+        return ret
         # return None
 
+    def __apply_vis(self, visibility, tile_id):
+        if self.activated is False:
+            return
+
+        if visibility < 0:
+            self.set_visibility(tile_id, 0.0)
+        elif visibility == 0:
+            self.set_visibility(tile_id, 0.7)
+        else:
+            self.set_visibility(tile_id, 1.0)
+
+    def switch_context(self, player_id, camera):
+        if self.active_player == player_id or self.activated is False:
+            return
+
+        self.active_player = player_id
+
+        for tile_id in range(self.size_x * self.size_y):
+            visibility = self.visibility[player_id][tile_id]
+
+            self.__apply_vis(visibility, tile_id)
+
     def clr_object_on_tile(self, tile_id):
+        if not self.activated:
+            return
+
         self.builder.clear_object_on_tile(tile_id)
 
     def add_object_on_tile(self, tile_id, asset_name):
+        if not self.activated:
+            return
+
         self.builder.add_object_on_tile(tile_id, asset_name)
 
-    def add_unit_on_tile(self, tile_id, unit_name):
-        if self.activated is False:
+    def add_visibility_source_here(self, tile_id, player_id):
+        if not self.activated:
             return
+
+        x_id = tile_id // self.size_y
+        y_id = tile_id % self.size_y
+        source_node = y_id * self.size_x + x_id
+
+        nodes_at_distance = [
+            node for node, dist in nx.single_source_shortest_path_length(Map.G, source_node).items()
+            if dist <= 3
+        ]
+
+        for external_id in nodes_at_distance:
+            my_id = self.id_convertor(external_id)
+
+            if self.visibility[player_id][my_id] < 0:
+                self.visibility[player_id][my_id] = 0
+
+            self.visibility[player_id][my_id] += 1
+
+            if self.active_player == player_id:
+                self.__apply_vis(self.visibility[player_id][my_id], my_id)
+
+
+    def rmv_visibility_source_here(self, tile_id, player_id):
+        if not self.activated:
+            return
+
+        x_id = tile_id // self.size_y
+        y_id = tile_id % self.size_y
+        source_node = y_id * self.size_x + x_id
+
+        nodes_at_distance = [
+            node for node, dist in nx.single_source_shortest_path_length(Map.G, source_node).items()
+            if dist <= 3
+        ]
+
+        for external_id in nodes_at_distance:
+            my_id = self.id_convertor(external_id)
+
+            if self.visibility[player_id][my_id] > 0:
+                self.visibility[player_id][my_id] -= 1
+
+            if self.active_player == player_id:
+                self.__apply_vis(self.visibility[player_id][my_id], my_id)
+
+    def __add_unit__(self, tile_id, unit_name, player_id, unit_id):
+        if self.activated is False:
+            return -1
 
         if self.units[tile_id] != 0:
             self.clr_unit(self.units[tile_id])
 
         self.assets.add_instance_of_at(unit_name, tile_id, self.builder.heights[tile_id])
-        self.unit_count += 1
-        unit_id = self.unit_count
+
         self.units[tile_id] = unit_id
         self.unit_pos[unit_id] = tile_id
         self.unit_types[unit_id] = unit_name
+        self.unit_player[unit_id] = player_id
+
+        self.add_visibility_source_here(tile_id, player_id)
 
         return unit_id
+
+    def add_unit_on_tile(self, tile_id, unit_name, player_id):
+        if self.activated is False:
+            return -1
+
+        self.next_unit_id += 1
+        unit_id = self.next_unit_id
+
+        return self.__add_unit__(tile_id, unit_name, player_id, unit_id)
 
     def clr_unit(self, unit_id):
         if self.activated is False or unit_id not in self.unit_pos:
@@ -176,13 +277,19 @@ class MapInterface:
         self.unit_pos.pop(unit_id)
         self.unit_types.pop(unit_id)
 
+        self.rmv_visibility_source_here(tile_id, self.unit_player[unit_id])
+
+        self.unit_player.pop(unit_id)
+
     def move_unit(self, unit_id, new_tile_id):
-        if unit_id not in self.unit_pos:
-            return False
+        if unit_id not in self.unit_pos or self.activated is False:
+            return -1
 
         unit_name = self.unit_types[unit_id]
+        player_id = self.unit_player[unit_id]
+
         self.clr_unit(unit_id)
-        self.add_unit_on_tile(new_tile_id, unit_name)
+        self.__add_unit__(new_tile_id, unit_name, player_id, unit_id)
 
     def __add_border_on_side(self, tile_id, side, player_id):
         if tile_id < 0 or tile_id >= self.size_x * self.size_y or not self.activated:
@@ -217,6 +324,8 @@ class MapInterface:
 
         x = tile_id // self.size_y
         y = tile_id % self.size_y
+
+        self.add_visibility_source_here(tile_id, player_id)
 
         # side 0
         x_id = x - 1; y_id = y
@@ -272,6 +381,8 @@ class MapInterface:
 
         for i in range(6):
             self.__remove_border_on_side(tile_id, i)
+
+        self.rmv_visibility_source_here(tile_id, self.owner[tile_id])
 
         self.owner[tile_id] = -1
 
@@ -357,6 +468,10 @@ class MapInterface:
             self.selected_tile = -1
             self.highlight_tile(-1)
 
+        if self.size_y * self.size_x >= tile_now >= 0 > self.visibility[self.active_player][tile_now] and self.active_player != -1:
+            self.selected_tile = -1
+            self.highlight_tile(-1)
+
         # DO NOT MODIFY ENDS HERE
 
         # TEST LOGIC STARTS HERE
@@ -364,5 +479,10 @@ class MapInterface:
 
         if 0 <= pixel < self.size_x * self.size_y:
             self.highlight_tile(pixel)
+
+        keys = pg.key.get_pressed()
+
+        if keys[pg.K_0]:
+            self.switch_context(0, None)
 
         # TEST LOGIC ENDS HERE

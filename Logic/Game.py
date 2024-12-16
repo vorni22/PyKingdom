@@ -25,7 +25,7 @@ class Game:
         for player in self.players:
             for unit in player.units:
                 coord = map_interface.convert_coordinates_to_mine(unit.position_line, unit.position_column)
-                unit_id = map_interface.add_unit_on_tile(coord, unit.type)
+                unit_id = map_interface.add_unit_on_tile(coord, unit.type, player.player_id)
                 unit.unit_id = unit_id
 
     def start_turn(self):
