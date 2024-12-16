@@ -174,7 +174,6 @@ while running:
                         tile_column = tid // size[1]
                         objects = game.identify_object(tile_line, tile_column)
                         tile = game.get_tile(tile_line, tile_column)
-                        print(tile)
                     panels.update_interface()
                 elif action == 0:
                     running = False

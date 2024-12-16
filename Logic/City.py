@@ -189,7 +189,7 @@ class City:
                 self.tiles.append(ref)
 
     def add_district(self, district_type_id, location_line, location_column):
-        if district_types[district_type_id] in self.districts and district_type_id != 5:
+        if district_types[district_type_id] in self.districts:
             raise ValueError("Can only build one district of this type in a city")
         self.districts.append(District(district_type_id, location_line, location_column))
         self.add_tiles(location_line, location_column)
@@ -281,13 +281,9 @@ class City:
         else:
             self.health_percentage -= 2.5 * (-diff) - 5
 
-    def build_district(self, district_type_id, district_location_line, district_location_column):
-        if self.city_resources.production_count < district_cost:
-            remaining_production = self.city_resources.production_count - district_cost
-            return remaining_production / self.city_resources_per_turn.production_per_turn_count
+    def build_district_with_production(self, district_type_id, district_location_line, district_location_column):
         self.add_district(district_type_id, district_location_line, district_location_column)
         self.city_resources.production_count -= district_cost
-        return 0
 
     def build_building_with_production(self, building_name_id, district_type_id):
         district = self.get_district_by_type(district_type_id)

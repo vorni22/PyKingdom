@@ -103,11 +103,18 @@ class Player:
                 return True
         return False
 
-    def build_district(self, city_line, city_column, district_name_id,
+    def build_district_with_production(self, city_line, city_column, district_name_id,
                        district_location_line, district_location_column):
         for city in self.cities:
             if city.city_line == city_line and city.city_column == city_column:
-                return city.build_district(district_name_id, district_location_line, district_location_column)
+                city.build_district_with_production(district_name_id, district_location_line, district_location_column)
+
+    def build_district_with_gold(self, city_line, city_column, district_name_id,
+                       district_location_line, district_location_column):
+        for city in self.cities:
+            if city.city_line == city_line and city.city_column == city_column:
+                city.add_district(district_name_id, district_location_line, district_location_column)
+        self.resources.gold_count -= City.district_cost * 2
 
     def build_building_with_production(self, city_line, city_column, district_type_id, building_name_id):
         for city in self.cities:
