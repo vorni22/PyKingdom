@@ -1,17 +1,7 @@
-import time
-import random
-from math import radians
-
 import networkx as nx
 import pygame as pg
 import pyrr
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-import numpy as np
-from select import select
 
-from Graphics.ColorPalette import ColorPalette
-from Graphics.Shaders import Shader
 from Logic.Game import Game
 from Map_Generation.AssetsManager import AssetsManager
 from Map_Generation.Map import Map
@@ -479,10 +469,5 @@ class MapInterface:
 
         if 0 <= pixel < self.size_x * self.size_y:
             self.highlight_tile(pixel)
-
-        keys = pg.key.get_pressed()
-
-        if keys[pg.K_0]:
-            self.switch_context(0, None)
 
         # TEST LOGIC ENDS HERE
