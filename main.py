@@ -130,8 +130,6 @@ panels = PanelInterface(WIDTH, HEIGHT)
 objects = [0, 1, 2]
 tile = None
 
-# rect = pg.rect.Rect(0, 0, WIDTH - 150, HEIGHT - 150)
-# im = pg.image.load("Assets/MainMenu/next_turn_button.png")
 tile_id = -1
 
 while running:
@@ -174,6 +172,7 @@ while running:
                         tile_column = tid // size[1]
                         objects = game.identify_object(tile_line, tile_column)
                         tile = game.get_tile(tile_line, tile_column)
+
                     panels.update_interface()
                 elif action == 0:
                     running = False
@@ -220,7 +219,6 @@ while running:
         if ret is not None:
             game = ret
 
-        # screen_surf.blit(im, (WIDTH - 150, HEIGHT - 150))
         panels.status_panel.draw(screen_surf)
         if panels.clicked:
             panels.draw_interface(screen_surf, mouse_pos, objects, tile)

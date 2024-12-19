@@ -10,7 +10,7 @@ from .PermanentPanel import PermanentPanel
 class PanelInterface:
     def __init__(self, width, height):
         city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
-        basic_panel_back = pg.image.load("Assets/MainMenu/basic_panel.png")
+        basic_panel_back = pg.image.load("Assets/MainMenu/tile_panel.png")
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
         self.width = width
         self.height = height
@@ -18,11 +18,11 @@ class PanelInterface:
         self.clicked_options = [False, False, False]
         self.sw = True
         self.update_every_frame = False
-        self.tile_panel = BasicPanel(self.width, self.height, None, 60, "Black", "LOH",
+        self.tile_panel = BasicPanel(self.width, self.height, None, 60, "Black", "",
                                  0, self.height - basic_panel_back.get_rect().height, "Red", basic_panel_back)
-        self.unit_panel = UnitPanel(self.width, self.height, None, 60, "Black", "LOH",
+        self.unit_panel = UnitPanel(self.width, self.height, None, 60, "Black", "",
                                  0, 50, "Red", unit_panel_back)
-        self.city_panel = CityPanel(self.width, self.height, None, 60, "Black", "LOH",
+        self.city_panel = CityPanel(self.width, self.height, None, 60, "Black", "",
                                     self.width - city_panel_back.get_rect().width, 50, "Red", city_panel_back)
         self.status_panel = PermanentPanel()
 
@@ -58,7 +58,15 @@ class PanelInterface:
         if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
             self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
-    def close_interface(self, position ,screen):
+    def close_interface(self, position, screen):
+        if not self.cursor_is_on_ui(position):
+            for option in self.clicked_options:
+                option = False
+
+            self.clicked = False
+            self.sw = True
+            return
+
         if self.clicked_options[0]:
             self.tile_panel.close_surf(position, screen)
             self.clicked_options[0] = self.tile_panel.clicked
@@ -83,7 +91,6 @@ class PanelInterface:
             self.clicked = False
             self.sw = True
 
-
     def update_interface(self):
         if not self.clicked:
             self.clicked = True
@@ -104,8 +111,6 @@ class PanelInterface:
     def click_is_out_of_map(self, tile, mouse_x, mouse_y):
         if not 0 <= tile < mouse_x * mouse_y and self.update_every_frame:
             self.set_clicked(False)
-        elif 0 <= tile < mouse_x * mouse_y and self.update_every_frame:
-            self.city_panel.change_text("tile_id: " + str(tile))
 
     def set_update_every_frame(self, update_every_frame):
         self.update_every_frame = update_every_frame
