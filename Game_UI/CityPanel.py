@@ -43,7 +43,7 @@ class CityPanel(BasicPanel):
         self.buy_units_button = Button(self.bg_buy, w, 150, "Units", None, "White", "Gray", 60)
         self.buy_buildings_button = Button(self.bg_buy, w, 250, "Buildings", None, "White", "Gray", 60)
 
-    def draw_surf(self, screen, position, tile):
+    def draw_surf(self, screen, position, tile, unit):
         screen.blit(self.surf, (self.center_x, self.center_y))
         # screen.blit(self.text_rendered, self.text_rect)
         if not self.buy_buildings and not self.buy_units:

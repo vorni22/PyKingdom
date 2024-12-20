@@ -93,7 +93,7 @@ class Player:
 
     def is_unit_owner(self, unit_line, unit_column):
         for unit in self.units:
-            if unit.unit_line == unit_line and unit.unit_column == unit_column:
+            if unit.position_line == unit_line and unit.position_column == unit_column:
                 return True
         return False
 

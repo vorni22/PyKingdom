@@ -29,7 +29,7 @@ class PanelInterface:
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
 
-    def draw_interface(self, screen, position, objects, tile):
+    def draw_interface(self, screen, position, objects, tile, unit):
         if not self.unit_panel.is_unit_moved or self.clicks_unit_is_moving != 2:
             if self.sw:
                 for obj in objects:
@@ -45,20 +45,20 @@ class PanelInterface:
                 self.sw = False
 
             if self.clicked_options[0]:
-                self.tile_panel.draw_surf(screen, position, tile)
+                self.tile_panel.draw_surf(screen, position, tile, unit)
 
             if self.clicked_options[1]:
-                self.unit_panel.draw_surf(screen, position, tile)
+                self.unit_panel.draw_surf(screen, position, tile, unit)
 
             if self.clicked_options[2]:
-                self.city_panel.draw_surf(screen, position, tile)
+                self.city_panel.draw_surf(screen, position, tile, unit)
 
             self.clicked = True
 
         if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
             self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
-    def close_interface(self, position, screen):
+    def close_interface(self, position, screen, unit, settle_func):
         if not self.cursor_is_on_ui(position):
             for option in self.clicked_options:
                 option = False
@@ -75,6 +75,7 @@ class PanelInterface:
             self.unit_panel.close_surf(position, screen)
             if self.unit_panel.move_unit(position, screen):
                 self.unit_is_moving = True
+            self.unit_panel.settle_city(position, screen, unit, settle_func)
             self.clicked_options[1] = self.unit_panel.clicked
 
         if self.clicked_options[2]:
@@ -121,17 +122,27 @@ class PanelInterface:
             temp.center = self.tile_panel.text_rect.center
             if temp.collidepoint(position):
                 return True
+            if self.tile_panel.close_rect.collidepoint(position):
+                return True
 
         if self.clicked_options[1]:
             temp = self.unit_panel.surf.get_rect()
             temp.center = self.unit_panel.text_rect.center
             if temp.collidepoint(position):
                 return True
+            if self.unit_panel.close_rect.collidepoint(position):
+                return True
+            if self.unit_panel.move_unit_rect.collidepoint(position):
+                return True
+            if self.unit_panel.settler_rect.collidepoint(position):
+                return True
 
         if self.clicked_options[2]:
             temp = self.city_panel.surf.get_rect()
             temp.center = self.city_panel.text_rect.center
             if temp.collidepoint(position):
+                return True
+            if self.city_panel.close_rect.collidepoint(position):
                 return True
 
         status_rect = pg.rect.Rect(0, 0, self.width, 50)

@@ -129,6 +129,7 @@ panels = PanelInterface(WIDTH, HEIGHT)
 
 objects = [0, 1, 2]
 tile = None
+unit = None
 
 tile_id = -1
 
@@ -172,7 +173,9 @@ while running:
                         tile_column = tid // size[1]
                         objects = game.identify_object(tile_line, tile_column)
                         tile = game.get_tile(tile_line, tile_column)
-
+                        unit_t = game.get_unit_actions(tile_line, tile_column)
+                        unit = (unit_t, tile_line, tile_column)
+                        print(unit)
                     panels.update_interface()
                 elif action == 0:
                     running = False
@@ -221,7 +224,7 @@ while running:
 
         panels.status_panel.draw(screen_surf)
         if panels.clicked:
-            panels.draw_interface(screen_surf, mouse_pos, objects, tile)
+            panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -230,7 +233,7 @@ while running:
                         main_menu.set_game_state(2)
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
-                        panels.close_interface(mouse_pos, screen_surf)
+                        panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
                         panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here
