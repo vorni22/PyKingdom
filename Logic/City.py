@@ -146,7 +146,7 @@ class City:
     def __init__(self, city_name, center_line_location, center_column_location):
         self.city_name = city_name
         self.districts = [District(7, center_line_location, center_column_location)]
-        self.add_building(0, 0)
+        self.districts[0].add_building(0)
         self.housing = 3
         self.population = 1
         self.tiles = [Map.Map.get_tile(center_line_location, center_column_location)]
@@ -174,23 +174,21 @@ class City:
         if ref not in self.tiles:
             self.tiles.append(ref)
         if line % 2:
-            ref = Map.Map.get_tile(line + 1, column - 1)
-            if ref not in self.tiles:
-                self.tiles.append(ref)
-            ref = Map.Map.get_tile(line - 1, column - 1)
-            if ref not in self.tiles:
-                self.tiles.append(ref)
-        else:
             ref = Map.Map.get_tile(line + 1, column + 1)
             if ref not in self.tiles:
                 self.tiles.append(ref)
             ref = Map.Map.get_tile(line - 1, column + 1)
             if ref not in self.tiles:
                 self.tiles.append(ref)
+        else:
+            ref = Map.Map.get_tile(line + 1, column - 1)
+            if ref not in self.tiles:
+                self.tiles.append(ref)
+            ref = Map.Map.get_tile(line - 1, column - 1)
+            if ref not in self.tiles:
+                self.tiles.append(ref)
 
     def add_district(self, district_type_id, location_line, location_column):
-        if district_types[district_type_id] in self.districts:
-            raise ValueError("Can only build one district of this type in a city")
         self.districts.append(District(district_type_id, location_line, location_column))
         self.add_tiles(location_line, location_column)
         self.melee_combat_strength += 5

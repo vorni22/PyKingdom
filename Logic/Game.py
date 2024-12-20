@@ -36,10 +36,12 @@ class Game:
         else:
             self.current_player = self.current_player + 1
         self.players[self.current_player].reset_units_movements()
+        self.is_player_turn = True
 
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()
         self.start_turn()
+        self.is_player_turn = False
 
     def identify_object(self, tile_line, tile_column) -> list[int]:
         objects = [0, ]
@@ -142,6 +144,8 @@ class Game:
         self.players[self.current_player].add_cities(City.city_names[city_name], tile_line, tile_column)
         self.cities_coordinates.append((tile_line, tile_column))
         self.districts_coordinates.append((tile_line, tile_column))
+        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
+        self.map_interface.add_object_on_tile(coords, "City Center")
         for tile in self.players[self.current_player].tiles:
             coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
             self.map_interface.add_tile_owner(coords, self.current_player)

@@ -87,7 +87,7 @@ class Player:
 
     def is_city_owner(self, city_line, city_column):
         for city in self.cities:
-            if city.city_line == city_line and city.city_column == city_column:
+            if city.center_line_location == city_line and city.center_column_location == city_column:
                 return True
         return False
 
@@ -99,7 +99,7 @@ class Player:
 
     def is_tile_owner(self, tile_line, tile_column):
         for tile in self.tiles:
-            if tile.tile_line == tile_line and tile.tile_column == tile_column:
+            if tile.line == tile_line and tile.column == tile_column:
                 return True
         return False
 
