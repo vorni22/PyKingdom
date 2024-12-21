@@ -92,15 +92,15 @@ class Tile:
 
         if self.luxury_resource == tile_luxury_resources[0]:
             self.resources.science_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[1]:
+        elif self.luxury_resource == tile_luxury_resources[1]:
             self.resources.culture_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[2]:
+        elif self.luxury_resource == tile_luxury_resources[2]:
             self.resources.gold_per_turn_count += 1
             self.city_resources.food_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[3]:
+        elif self.luxury_resource == tile_luxury_resources[3]:
             self.resources.gold_per_turn_count += 1
             self.city_resources.production_per_turn_count += 1
-        elif self.basic_resource == tile_luxury_resources[4]:
+        elif self.luxury_resource == tile_luxury_resources[4]:
             self.resources.gold_per_turn_count += 3
 
         if self.feature == tile_features[0]:

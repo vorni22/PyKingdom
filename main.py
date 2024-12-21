@@ -182,7 +182,7 @@ while running:
                         objects = game.identify_object(tile_line, tile_column)
                         tile = game.get_tile(tile_line, tile_column)
                         unit_t = game.get_unit_actions(tile_line, tile_column)
-                        # purchasable = game.get_city_actions(tile_line, tile_column)
+                        purchasable = game.get_city_actions(tile_line, tile_column)
                         unit = (unit_t, tile_line, tile_column)
                     panels.update_interface()
                 elif action == 0:
@@ -229,7 +229,8 @@ while running:
         ret = map_interface.activate(size[0], size[1], num_players, 0)
         if ret is not None:
             game = ret
-
+        if not game.is_player_turn:
+            game.start_turn()
         panels.status_panel.draw(screen_surf)
         if panels.clicked:
             panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)

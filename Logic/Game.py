@@ -7,7 +7,6 @@ import Logic.Unit as Unit
 import Logic.Tech as Tech
 import Logic.Civic as Civic
 import Map_Generation.Map as Map
-from Logic.Tile import tile_basic_resources, tile_strategic_resources, tile_luxury_resources
 
 # class that will be used for integrating the UI and the graphics with the backend of the game
 class Game:
@@ -37,6 +36,8 @@ class Game:
             self.current_player = self.current_player + 1
         self.players[self.current_player].reset_units_movements()
         self.is_player_turn = True
+        # Do not touch yet, not fully implemented
+        # self.map_interface.switch_context(self.current_player, None)
 
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()
@@ -165,7 +166,7 @@ class Game:
                         purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 
         for city in self.players[self.current_player].cities:
-            if city.position_line == tile_line and city.position_column == tile_column:
+            if city.center_line_location == tile_line and city.center_column_location == tile_column:
                 campus = city.get_district_by_type(0)
                 if not campus:
                     purchasable_districts.append(0)
