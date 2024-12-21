@@ -29,7 +29,7 @@ class PanelInterface:
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
 
-    def draw_interface(self, screen, position, objects, tile, unit):
+    def draw_interface(self, screen, position, objects, tile, unit, purchasable):
         if not self.unit_panel.is_unit_moved or self.clicks_unit_is_moving != 2:
             if self.sw:
                 for obj in objects:
@@ -45,18 +45,18 @@ class PanelInterface:
                 self.sw = False
 
             if self.clicked_options[0]:
-                self.tile_panel.draw_surf(screen, position, tile, unit)
+                self.tile_panel.draw_surf(screen, position, tile, unit, purchasable)
 
             if self.clicked_options[1]:
-                self.unit_panel.draw_surf(screen, position, tile, unit)
+                self.unit_panel.draw_surf(screen, position, tile, unit, purchasable)
 
             if self.clicked_options[2]:
-                self.city_panel.draw_surf(screen, position, tile, unit)
+                self.city_panel.draw_surf(screen, position, tile, unit, purchasable)
 
             self.clicked = True
 
-        if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
-            self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
+        # if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
+        #     self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
     def close_interface(self, position, screen, unit, settle_func):
         if not self.cursor_is_on_ui(position):
@@ -81,7 +81,7 @@ class PanelInterface:
         if self.clicked_options[2]:
             self.city_panel.close_surf(position, screen)
             self.city_panel.return_to_init_surf(position, screen)
-            self.city_panel.switch_to_buy_units_buildings(position)
+            self.city_panel.switch_to_buy_units_districts(position)
             self.clicked_options[2] = self.city_panel.clicked
 
         all_panels_closed = False

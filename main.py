@@ -133,6 +133,14 @@ unit = None
 
 tile_id = -1
 
+purchasable_units = [[0], [], [0], [0], [], [0], []]
+purchasable_districts = [0, 1, 3, 5]
+purchasable_buildings = [[0], [0], [], [0], [], [], []]
+purchasable_units_gold = [[0], [0], [], [], [0], [], []]
+purchasable_districts_gold = [2, 4, 6]
+purchasable_buildings_gold = [[], [0], [0], [], [], [], []]
+purchasable = (True, purchasable_units, purchasable_districts, purchasable_buildings, purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
+
 while running:
     current_time = time.time()
     dt = (current_time - last_time) * 1000.0
@@ -174,8 +182,8 @@ while running:
                         objects = game.identify_object(tile_line, tile_column)
                         tile = game.get_tile(tile_line, tile_column)
                         unit_t = game.get_unit_actions(tile_line, tile_column)
+                        # purchasable = game.get_city_actions(tile_line, tile_column)
                         unit = (unit_t, tile_line, tile_column)
-                        # print(unit)
                     panels.update_interface()
                 elif action == 0:
                     running = False
@@ -222,11 +230,9 @@ while running:
         if ret is not None:
             game = ret
 
-        if not game.is_player_turn:
-            game.start_turn()
         panels.status_panel.draw(screen_surf)
         if panels.clicked:
-            panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit)
+            panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -236,7 +242,7 @@ while running:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
                         panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
-                        panels.city_panel.try_to_buy_something(mouse_pos, 100)
+                        # panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here
 

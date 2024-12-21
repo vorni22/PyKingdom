@@ -20,7 +20,7 @@ class UnitPanel(BasicPanel):
 
         return False
 
-    def draw_surf(self, screen, mouse_pos, tile, unit):
+    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable):
         if 3 in unit[0]:
             self.is_settler = True
             screen.blit(self.settler_surf, (self.center_x, self.center_y))

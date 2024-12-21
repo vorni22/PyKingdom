@@ -1,3 +1,5 @@
+from inspect import signature
+
 import pygame as pg
 
 from Logic.Tile import tile_types
@@ -33,7 +35,7 @@ class BasicPanel:
 
         self.close_rect = pg.Rect(437 + self.center_x, 7 + self.center_y, 40, 42)
 
-    def draw_surf(self, screen, mouse_pos, tile, unit):
+    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable):
         screen.blit(self.surf, (self.center_x, self.center_y))
         self.draw_title_text(f"Tile type: {tile_types[tile[0]]}", 45)
         screen.blit(self.text_rendered, self.text_rect)

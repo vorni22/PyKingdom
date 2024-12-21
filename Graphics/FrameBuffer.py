@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+import pygame as pg
 
 class FrameBuffer:
     def __init__(self, width:int, height:int):
@@ -52,4 +53,15 @@ class FrameBuffer:
         glBindRenderbuffer(GL_RENDERBUFFER, self.rbo)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, self.width, self.height)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, self.rbo)
+
+    def surface_to_texture(self, surface, texture_id):
+        if surface is not None:
+            texture_data = pg.image.tostring(surface, "RGB", True)
+        else:
+            texture_data = None
+        glBindTexture(GL_TEXTURE_2D, texture_id)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, self.width, self.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glBindTexture(GL_TEXTURE_2D, 0)
 

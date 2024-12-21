@@ -42,3 +42,9 @@ class Button:
 
     def get_font(self, size):
         return pg.font.Font(self.font, size)
+
+    def set_colors(self, color, hover):
+        self.color = color
+        self.curr_color = color
+        self.hover_color = hover
+        self.text = self.fnt.render(self.text_input, True, self.curr_color)
