@@ -43,7 +43,7 @@ class BasicPanel:
         i = 1
         tile_information = [
             ("Basic Resource", tile_basic_resources[tile[1]]), ("Strategic Resource", tile_strategic_resources[tile[2]]),
-            ("Luxury Resource", tile_luxury_resources[tile[3]], ("Tile Features", tile_features[tile[4]]))
+            ("Luxury Resource", tile_luxury_resources[tile[3]]), ("Tile Features", tile_features[tile[4]])
         ]
 
         for information in tile_information:

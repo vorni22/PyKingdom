@@ -4,6 +4,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 import numpy as np
 
+import Logic.Tile
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
 from Graphics.Camera import Camera, CameraManager, StrategicCamera
