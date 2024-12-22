@@ -64,11 +64,13 @@ class PanelInterface:
 
     def close_interface(self, position, screen, unit, settle_func):
         if not self.cursor_is_on_ui(position):
-            for option in self.clicked_options:
-                option = False
+            self.clicked_options = [False for _ in self.clicked_options]
 
             self.clicked = False
             self.sw = True
+            self.city_panel.clicked = False
+            self.tile_panel.clicked = False
+            self.unit_panel.clicked = False
             return
 
         if self.clicked_options[0]:

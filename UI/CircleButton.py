@@ -9,11 +9,6 @@ class CircleButton:
         self.rendered = False
 
     def circle_collidepoint(self, position):
-        # dist = sqrt((position[0] - self.center[0]) ** 2 + (position[1] - self.center[1]) ** 2)
-        # print(dist)
-        # return dist <= self.radius
-        dist = ((position[0] - self.center[0] // 2) ** 2 + (position[1] - self.center[1] // 2) ** 2)
-        print(sqrt(dist))
         return ((position[0] - (self.center[0] + self.radius // 2)) ** 2 + (position[1] - (self.center[1] + self.radius // 2)) ** 2) <= self.radius ** 2
 
     def draw(self, screen):
