@@ -175,17 +175,21 @@ while running:
                     continue
                 elif action == 2:
                     if map_interface.activated and not panels.clicked:
-                        mouse_y = HEIGHT - mouse_pos[1]
-                        mouse_x = mouse_pos[0]
-                        tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
-                        tile_line = tid % size[1]
-                        tile_column = tid // size[1]
-                        objects = game.identify_object(tile_line, tile_column)
-                        print(objects)
-                        tile = game.get_tile(tile_line, tile_column)
-                        unit_t = game.get_unit_actions(tile_line, tile_column)
-                        purchasable = game.get_city_actions(tile_line, tile_column)
-                        unit = (unit_t, tile_line, tile_column)
+                        if not panels.cursor_is_on_ui(mouse_pos):
+                            mouse_y = HEIGHT - mouse_pos[1]
+                            mouse_x = mouse_pos[0]
+                            tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
+                            tile_line = tid % size[1]
+                            tile_column = tid // size[1]
+                            objects = game.identify_object(tile_line, tile_column)
+                            print(objects)
+                            tile = game.get_tile(tile_line, tile_column)
+                            unit_t = game.get_unit_actions(tile_line, tile_column)
+                            purchasable = game.get_city_actions(tile_line, tile_column)
+                            unit = (unit_t, tile_line, tile_column)
+
+                    if game.is_player_turn:
+                        panels.end_turn(mouse_pos, game.end_turn)
                     panels.update_interface()
                 elif action == 0:
                     running = False
@@ -246,8 +250,6 @@ while running:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
                         panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
-                        if game.is_player_turn:
-                            panels.end_turn(mouse_pos, game.end_turn)
                         # panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here

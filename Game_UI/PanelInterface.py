@@ -164,10 +164,10 @@ class PanelInterface:
         return False
 
     def end_turn(self, position, player_end_turn):
-        if self.end_turn_button.rendered:
-            if self.end_turn_button.circle_collidepoint(position):
-                print("end turn")
-                player_end_turn()
+        # if self.end_turn_button.rendered:
+        if self.end_turn_button.circle_collidepoint(position):
+            print("end turn")
+            player_end_turn()
 
 
 
