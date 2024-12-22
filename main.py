@@ -233,17 +233,20 @@ while running:
         if not game.is_player_turn:
             game.start_turn()
         panels.status_panel.draw(screen_surf)
+        panels.end_turn_button.draw(screen_surf)
         if panels.clicked:
             panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)
             for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    running = False
+                # if event.type == pg.QUIT:
+                #     running = False
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         main_menu.set_game_state(2)
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if pg.mouse.get_pressed()[0]:
                         panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
+                        if game.is_player_turn:
+                            panels.end_turn(mouse_pos, game.end_turn)
                         # panels.city_panel.try_to_buy_something(mouse_pos, 100)
 
     # UI end here

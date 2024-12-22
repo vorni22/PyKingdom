@@ -5,6 +5,7 @@ from .BasicPanel import BasicPanel
 from .CityPanel import CityPanel
 from .UnitPanel import UnitPanel
 from .PermanentPanel import PermanentPanel
+from UI.CircleButton import CircleButton
 
 
 class PanelInterface:
@@ -12,6 +13,7 @@ class PanelInterface:
         city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
         basic_panel_back = pg.image.load("Assets/MainMenu/tile_panel.png")
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
+        next_turn_back = pg.image.load("Assets/MainMenu/next_turn_button.png")
         self.width = width
         self.height = height
         self.clicked = False
@@ -25,6 +27,8 @@ class PanelInterface:
         self.city_panel = CityPanel(self.width, self.height, None, 60, "Black", "",
                                     self.width - city_panel_back.get_rect().width, 50, "Red", city_panel_back)
         self.status_panel = PermanentPanel()
+        self.end_turn_button = CircleButton(next_turn_back, 75, (self.width - next_turn_back.get_rect().width, self.height - next_turn_back.get_rect().height))
+        # self.end_turn_button = CircleButton(next_turn_back, 75, (next_turn_back.get_rect().width, next_turn_back.get_rect().height))
 
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
@@ -149,7 +153,19 @@ class PanelInterface:
         if status_rect.collidepoint(position):
             return True
 
+        if self.end_turn_button.rendered:
+            temp = self.end_turn_button.surf.get_rect()
+            temp.topleft = self.end_turn_button.center
+            if temp.collidepoint(position):
+                return True
+
         return False
+
+    def end_turn(self, position, player_end_turn):
+        if self.end_turn_button.rendered:
+            if self.end_turn_button.circle_collidepoint(position):
+                print("end turn")
+                player_end_turn()
 
 
 
