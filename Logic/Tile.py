@@ -114,4 +114,3 @@ class Tile:
             self.movement_cost = 2
         elif self.feature == tile_features[3]:
             self.resources.science_per_turn_count += 1
-

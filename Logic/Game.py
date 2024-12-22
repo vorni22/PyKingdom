@@ -42,7 +42,6 @@ class Game:
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()
         self.start_turn()
-        self.is_player_turn = False
 
     def identify_object(self, tile_line, tile_column) -> list[int]:
         objects = [0, ]

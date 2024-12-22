@@ -12,6 +12,7 @@ class Resources:
         self.science_count += other.science_count
         self.culture_count += other.culture_count
         self.gold_count += other.gold_count
+        return self
 
 # Holds information about resources that should be gained by the player this turn
 # @param science_per_turn_count science that should be gained this turn
@@ -32,6 +33,7 @@ class ResourcesPerTurn:
         self.science_per_turn_count += other.science_per_turn_count
         self.culture_per_turn_count += other.culture_per_turn_count
         self.gold_per_turn_count += other.gold_per_turn_count
+        return self
 
 # Holds information about the city-specific resources held by this city
 # @param production_count: total production the city accumulated
@@ -44,6 +46,7 @@ class CityResources:
     def __iadd__(self, other):
         self.production_count += other.production_count
         self.food_count += other.food_count
+        return self
 
 # Holds information about the city-specific resources that should be gained by the city this turn
 # @param production_per_turn_count: production the city should earn this turn
@@ -56,3 +59,4 @@ class CityResourcesPerTurn:
     def __iadd__(self, other):
         self.production_per_turn_count += other.production_per_turn_count
         self.food_per_turn_count += other.food_per_turn_count
+        return self
