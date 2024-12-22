@@ -360,6 +360,35 @@ class Game:
             coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
             self.map_interface.add_tile_owner(coords, self.current_player)
 
+    def get_city_information(self, city_tile_line, city_tile_column):
+        for city in self.players[self.current_player].cities:
+            if city_tile_line == city.center_line_location and city_tile_column == city.center_column_location:
+                player_resources_per_turn, city_resources_per_turn = city.get_resources()
+                food_per_turn = city_resources_per_turn.food_per_turn_count
+                production_per_turn = city_resources_per_turn.production_per_turn_count
+                gold_per_turn = player_resources_per_turn.gold_per_turn_count
+                culture_per_turn = player_resources_per_turn.culture_per_turn_count
+                science_per_turn = player_resources_per_turn.science_per_turn_count
+                total_food = city.city_resources.food_count
+                total_production = city.city_resources.production_count
+                housing = city.housing
+                population = city.population
+                health = city.health_percentage
+                combat_strength = city.melee_combat_strength
+                city_name = city.city_name
+                return (food_per_turn, production_per_turn, gold_per_turn, culture_per_turn, science_per_turn,
+                        total_food, total_production, housing, population, health, combat_strength, city_name)
+
+    def get_unit_information(self, unit_line, unit_column):
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == unit_line and unit.position_column == unit_column:
+                unit_health = unit.health_percentage
+                melee_strength = unit.melee_strength
+                ranged_strength = unit.ranged_strength
+                movement = unit.remaining_movement
+                unit_name = unit.name
+                return unit_health, melee_strength, ranged_strength, movement, unit_name
+
     @staticmethod
     def get_tile(tile_line, tile_column):
         tile = Map.Map.get_tile(tile_line, tile_column)

@@ -248,15 +248,36 @@ class City:
             self.city_resources_per_turn.food_per_turn_count *= 0.5
         elif self.housing - self.population < 0:
             self.city_resources_per_turn.food_per_turn_count *= 0.15
-        if district_types[6] in self.districts:
+        if self.get_district_by_type(6) is not None:
             self.city_resources_per_turn.food_per_turn_count *= 1.25
 
         self.city_resources.food_count += self.city_resources_per_turn.food_per_turn_count
         self.city_resources_per_turn.production_per_turn_count += self.city_resources_per_turn.production_per_turn_count
 
         self.health_percentage = min(100, self.health_percentage + 20)
+        # update population
+        if self.city_resources.food_count >= self.population * 11 + 4:
+            self.city_resources.food_count -= self.population * 11 + 4
+            self.population += 1
 
         return self.resources_per_turn
+
+    def get_resources(self):
+        temp_resources_per_turn, temp_city_resources_per_turn = self.calculate_yields_tiles()
+        temp2_resources_per_turn, temp2_city_resources_per_turn = self.calculate_yields_districts()
+        temp_resources_per_turn += temp2_resources_per_turn
+        temp_city_resources_per_turn += temp2_city_resources_per_turn
+
+        if self.housing - self.population == 1:
+            temp_city_resources_per_turn.food_per_turn_count *= 0.75
+        elif self.housing - self.population == 0:
+            temp_city_resources_per_turn.food_per_turn_count *= 0.5
+        elif self.housing - self.population < 0:
+            temp_city_resources_per_turn.food_per_turn_count *= 0.15
+        if self.get_district_by_type(6) is not None:
+            temp_city_resources_per_turn.food_per_turn_count *= 1.25
+
+        return temp_resources_per_turn, temp_city_resources_per_turn
 
     def health_strength_loss(self):
         return 0.1 * (100 - self.health_percentage)
