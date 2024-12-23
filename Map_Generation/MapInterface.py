@@ -46,6 +46,7 @@ class MapInterface:
     active_player = -1
 
     def __init__(self, vbo, shader, fbo):
+        self.camera_manager = None
         self.seed = 0
         self.num_players = 0
         self.vbo = vbo
@@ -68,11 +69,12 @@ class MapInterface:
             return -1
         return column * self.size_y + line
 
-    def activate(self, size_x, size_y, num_players, seed):
+    def activate(self, size_x, size_y, num_players, seed, camera_manager):
         if self.activated:
             return None
 
         self.activated = True
+        self.camera_manager = camera_manager
 
         if num_players > 8:
             num_players = 8
@@ -157,11 +159,14 @@ class MapInterface:
         else:
             self.set_visibility(tile_id, 1.0)
 
-    def switch_context(self, player_id, camera):
+    def switch_context(self, player_id, player_position):
         if self.active_player == player_id or self.activated is False:
             return
 
         self.active_player = player_id
+
+        x_real, y_real = self.builder.real_coords(player_position[1], player_position[0])
+        self.camera_manager.camera.pos = [x_real, 15, y_real + 15]
 
         for tile_id in range(self.size_x * self.size_y):
             visibility = self.visibility[player_id][tile_id]
@@ -444,7 +449,7 @@ class MapInterface:
             self.__first_frame()
 
         glBindVertexArray(self.builder.mesh.vbo.vao)
-        self.builder.draw()
+        self.builder.draw(self.active_player)
 
         screen_size = pg.display.get_surface().get_size()
         mouse_x, mouse_y = pg.mouse.get_pos()

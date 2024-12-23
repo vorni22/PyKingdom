@@ -3,6 +3,9 @@ from plyfile import PlyData
 from Graphics.Mesh import *
 from OpenGL.GL import *
 
+from Logic.Unit import unit_classes
+
+
 class Asset:
     def __init__(self):
         self.i = 0
@@ -108,16 +111,22 @@ class AssetsManager:
             data  # Pixel data
         )
 
-    def draw(self):
+    def draw(self, player_id):
         self.shader.use_shader()
         self.__bind_texture()
         for asset_name in self.meshes:
             if len(self.tile_ids_draw[asset_name]) and asset_name != "Wall":
                 self.shader.set_float("resourceId", self.asset_id[asset_name])
+
+                if asset_name in unit_classes:
+                    self.shader.set_float("isUnit", player_id)
+
                 self.meshes[asset_name].apply_transform_only(self.shader)
                 count = len(self.tile_ids_draw[asset_name])
                 location = self.meshes[asset_name].get_location()
                 glDrawArraysInstanced(GL_TRIANGLES, location[0], location[1], count)
+
+                self.shader.set_float("isUnit", -1.0)
 
         if len(self.tile_ids_draw["Wall"]):
             self.shader.set_float("resourceId", self.asset_id["Wall"])

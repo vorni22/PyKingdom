@@ -37,7 +37,8 @@ class Game:
         self.players[self.current_player].reset_units_movements()
         self.is_player_turn = True
         # Do not touch yet, not fully implemented
-        self.map_interface.switch_context(self.current_player, None)
+        pos = (self.players[self.current_player].capital_line, self.players[self.current_player].capital_column)
+        self.map_interface.switch_context(self.current_player, pos)
 
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()

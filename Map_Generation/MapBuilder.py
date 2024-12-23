@@ -193,8 +193,8 @@ class MapMesh:
         self.heights[x_id * self.size_y + y_id] = self.__value(value, self.divs)
         self.types[x_id * self.size_y + y_id] = tile_type
 
-    def draw(self):
-        self.assets.draw()
+    def draw(self, player_id):
+        self.assets.draw(player_id)
 
         self.__bind_texture_to_shader()
         self.shader.set_float("resourceId", -1)
@@ -251,14 +251,21 @@ class MapMesh:
                 self.assets.add_instance_of_at(str, id, h)
                 self.resource_type[id] = str
 
-    def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
+    def real_coords(self, x_id, y_id):
         x_offset = 0
-        if not even_tile:
+        if y_id % 2 != 0:
             x_offset = self.len_x + 0.5 * dR
 
+        x_coord = x_offset + (2 * self.len_x + dR) * x_id
+        y_coord = (self.len_y + R + dR * np.sqrt(3) / 2) * y_id
+
+        return x_coord, y_coord
+
+    def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         central_id = x_id * self.size_y + y_id
-        x = x_offset + (2 * self.len_x + dR) * x_id
-        y = (self.len_y + R + dR * np.sqrt(3) / 2) * y_id
+
+        x, y = self.real_coords(x_id, y_id)
+
         h = self.heights[central_id]
         if water_tile:
             h = self.water_lvl

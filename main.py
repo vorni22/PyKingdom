@@ -228,7 +228,7 @@ while running:
         main_menu.draw_menu_buttons(screen_surf, mouse_pos)
     else:
         size, num_players = main_menu.get_game_constants()
-        ret = map_interface.activate(size[0], size[1], num_players, 0)
+        ret = map_interface.activate(size[0], size[1], num_players, 0, cameraManager)
         if ret is not None:
             game = ret
         if not game.is_player_turn:
