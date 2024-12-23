@@ -133,6 +133,7 @@ class CityPanel(BasicPanel):
             self.buy_buildings_city_center_button_production.update(screen, position)
             self.buy_buildings_city_center_button_gold.update(screen, position)
             self.clicked = True
+            return
 
         if self.buy_units[0]:
             self.draw_purchase_units(0, 1, screen, position, purchasable)
@@ -236,18 +237,34 @@ class CityPanel(BasicPanel):
         return unit + " " * num_spaces + cost
 
     def switch_to_buy_units_districts(self, position):
+        if self.check_if_rendered():
+            return
         if self.buy_units_button_production.check_for_input(position) and not self.buy_districts[0]:
             self.buy_units[0] = True
+            return
         if self.buy_districts_button_production.check_for_input(position) and not self.buy_units[0]:
             self.buy_districts[0] = True
+            return
         if self.buy_units_button_gold.check_for_input(position) and not self.buy_districts[1]:
             self.buy_units[1] = True
+            return
         if self.buy_districts_button_gold.check_for_input(position) and not self.buy_units[1]:
             self.buy_districts[1] = True
+            return
         if self.buy_buildings_city_center_button_production.check_for_input(position) and not self.buy_buildings_city_center[0]:
             self.buy_buildings_city_center[0] = True
+            return
         if self.buy_buildings_city_center_button_gold.check_for_input(position) and not self.buy_buildings_city_center[1]:
             self.buy_buildings_city_center[1] = True
+            return
+
+    def check_if_rendered(self):
+        ret = False
+        for i in range(2):
+            print(self.buy_units[i], self.buy_districts[i], self.buy_buildings_city_center[i])
+            ret = ret or self.buy_units[i] or self.buy_districts[i] or self.buy_buildings_city_center[i]
+
+        return ret
 
     # def draw_error_box(self, screen, start_time, duration=1000):
     #

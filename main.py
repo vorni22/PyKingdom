@@ -238,8 +238,6 @@ while running:
             if game.is_player_turn:
                 panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)
             for event in pg.event.get():
-                # if event.type == pg.QUIT:
-                #     running = False
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         main_menu.set_game_state(2)

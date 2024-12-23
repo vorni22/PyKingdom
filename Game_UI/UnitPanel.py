@@ -8,7 +8,6 @@ class UnitPanel(BasicPanel):
         super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
         self.move_unit_rect = pg.Rect(7 + self.center_x, 7 + self.center_y, 41, 41)
         self.is_unit_moved = False
-        self.unit_coords = (30, 30)
         self.settler_surf = pg.image.load("Assets/MainMenu/settler_panel.png")
         self.settler_rect = pg.Rect(7 + self.center_x, 48 + self.center_y, 41, 41)
         self.is_settler = False
@@ -29,7 +28,9 @@ class UnitPanel(BasicPanel):
             screen.blit(self.settler_surf, (self.center_x, self.center_y))
         else:
             screen.blit(self.surf, (self.center_x, self.center_y))
-        self.draw_title_text(f"Tile type: {unit[3][4]}", 45)
+        self.draw_title_text(f"Unit class: {unit[3][4]}", 45)
+        screen.blit(self.text_rendered, self.text_rect)
+
 
     def settle_city(self, position, screen, unit, settle_func):
         if self.settler_rect.collidepoint(position) and 3 in unit[0]:
