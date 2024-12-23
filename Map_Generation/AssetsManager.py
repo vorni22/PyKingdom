@@ -48,7 +48,7 @@ class AssetsManager:
     def __prepare_resource_texture(self):
         self.resource_texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, self.resource_texture)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, self.width, self.height, 0, GL_RG, GL_FLOAT, None)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, self.width, self.height, 0, GL_RGB, GL_FLOAT, None)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
@@ -87,19 +87,19 @@ class AssetsManager:
             y,  # Y position of the pixel
             count,  # Width of the region (1 pixel)
             1,  # Height of the region (1 pixel)
-            GL_RG,  # Format of the data
+            GL_RGB,  # Format of the data
             GL_FLOAT,  # Data type
             self.tile_ids_draw[asset_name]  # Pixel data
         )
 
-    def add_instance_of_at(self, asset_name, tile_id, h):
+    def add_instance_of_at(self, asset_name, tile_id, h, player_id):
         if asset_name not in self.meshes:
             return
         x = len(self.tile_ids_draw[asset_name])
         y = self.asset_id[asset_name]
-        self.tile_ids_draw[asset_name].append((tile_id, h))
+        self.tile_ids_draw[asset_name].append((tile_id, h, player_id))
         glBindTexture(GL_TEXTURE_2D, self.resource_texture)
-        data = np.array([tile_id, h], dtype=np.float32)
+        data = np.array([tile_id, h, player_id], dtype=np.float32)
         glTexSubImage2D(
             GL_TEXTURE_2D,  # Texture target
             0,  # Mipmap level (0 for base level)
@@ -107,7 +107,7 @@ class AssetsManager:
             y,  # Y position of the pixel
             1,  # Width of the region (1 pixel)
             1,  # Height of the region (1 pixel)
-            GL_RG,  # Format of the data
+            GL_RGB,  # Format of the data
             GL_FLOAT,  # Data type
             data  # Pixel data
         )
@@ -120,7 +120,7 @@ class AssetsManager:
                 self.shader.set_float("resourceId", self.asset_id[asset_name])
 
                 if asset_name in unit_classes:
-                    self.shader.set_float("isPlayer", player_id)
+                    self.shader.set_float("isPlayer", 1.0)
 
                 self.meshes[asset_name].apply_transform_only(self.shader)
                 count = len(self.tile_ids_draw[asset_name])

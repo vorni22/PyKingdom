@@ -55,6 +55,7 @@ void main() {
         ivec2 pos = ivec2(gl_InstanceID, resourceId);
         float extract = texelFetch(uResourcesTexture, pos, 0).r;
         float h = texelFetch(uResourcesTexture, pos, 0).g;
+        float player_id = texelFetch(uResourcesTexture, pos, 0).b;
         float tmp_id = round(extract);
 
         if (isWall > 0) {
@@ -71,6 +72,11 @@ void main() {
             Color = player_color[Player];
         } else {
             vec4 real_pos = model * vec4(aPos, 1.0);
+
+            if (isPlayer > 0) {
+                int key = int(round(player_id));
+                Color = player_color[key];
+            }
 
             id = tmp_id;
 
@@ -94,13 +100,8 @@ void main() {
 	Normal = normMatrix * aNormalVector;
 
 	//Color = color_palet[int(aData.x)];
-    if (isWall <= 0) {
-        if (isPlayer < 0) {
-            int key = int(aData.x);
-	        Color = texelFetch(color_palette_t, key, 0).rgb;
-	    } else {
-	        int key = int(isPlayer);
-	        Color = player_color[key];
-	    }
+    if (isWall <= 0 && isPlayer <= 0) {
+        int key = int(aData.x);
+	    Color = texelFetch(color_palette_t, key, 0).rgb;
 	}
 }

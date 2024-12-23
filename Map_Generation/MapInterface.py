@@ -239,7 +239,7 @@ class MapInterface:
         if self.units[tile_id] != 0:
             self.clr_unit(self.units[tile_id])
 
-        self.assets.add_instance_of_at(unit_name, tile_id, self.builder.heights[tile_id])
+        self.assets.add_instance_of_at(unit_name, tile_id, self.builder.heights[tile_id], player_id)
 
         self.units[tile_id] = unit_id
         self.unit_pos[unit_id] = tile_id
@@ -296,7 +296,7 @@ class MapInterface:
         self.tile_border[tile_id][side] = player_id
 
         wall_id = tile_id | (side << 12) | (player_id << 15)
-        self.assets.add_instance_of_at("Wall", wall_id, self.builder.heights[tile_id])
+        self.assets.add_instance_of_at("Wall", wall_id, self.builder.heights[tile_id], -1.0)
 
     def __remove_border_on_side(self, tile_id, side):
         if tile_id < 0 or tile_id >= self.size_x * self.size_y or not self.activated:

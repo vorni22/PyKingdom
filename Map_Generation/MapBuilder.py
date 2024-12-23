@@ -116,7 +116,7 @@ class MapMesh:
     def add_object_on_tile(self, tile_id, asset_name):
         if self.resource_type[tile_id] != None:
             self.clear_object_on_tile(tile_id)
-        self.assets.add_instance_of_at(asset_name, tile_id, self.heights[tile_id])
+        self.assets.add_instance_of_at(asset_name, tile_id, self.heights[tile_id], -1.0)
         self.resource_type[tile_id] = asset_name
 
     def get_tile_on_mouse(self, mouse_x, mouse_y, fbo):
@@ -228,13 +228,13 @@ class MapMesh:
                 str = random.choices(p, weights=w, k=1)[0]
                 if str == 'Fish':
                     h -= 0.1
-                self.assets.add_instance_of_at(str, id, h)
+                self.assets.add_instance_of_at(str, id, h, -1.0)
                 self.resource_type[id] = str
             if type == tile_colors['Peaks'] or type == tile_colors['Mountain']:
                 p = ['Stone', 'Diamonds', 'Coal', 'Iron', 'Niter', 'Mercury']
                 w = [2, 1, 1, 1, 1, 1]
                 str = random.choices(p, weights=w, k=1)[0]
-                self.assets.add_instance_of_at(str, id, h)
+                self.assets.add_instance_of_at(str, id, h, -1.0)
                 self.resource_type[id] = str
             if type == tile_colors['Grassland']:
                 p = ['Banana', 'Maize', 'Rice', 'Wheat', 'Coffee', 'Horses', 'Marsh', 'Rainforest']
@@ -242,13 +242,13 @@ class MapMesh:
                 str = random.choices(p, weights=w, k=1)[0]
                 if str == 'Marsh':
                     h += 0.01
-                self.assets.add_instance_of_at(str, id, h)
+                self.assets.add_instance_of_at(str, id, h, -1.0)
                 self.resource_type[id] = str
             if type == tile_colors['Plains']:
                 p = ['Woods', 'Stone', 'Horses', 'Wheat', 'Silk']
                 w = [5, 1, 1, 1, 2]
                 str = random.choices(p, weights=w, k=1)[0]
-                self.assets.add_instance_of_at(str, id, h)
+                self.assets.add_instance_of_at(str, id, h, -1.0)
                 self.resource_type[id] = str
 
     def real_coords(self, x_id, y_id):
