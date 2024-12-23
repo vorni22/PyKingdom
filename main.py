@@ -4,7 +4,6 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 import numpy as np
 
-import Logic.Tile
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
 from Graphics.Camera import Camera, StrategicCamera
@@ -117,11 +116,6 @@ glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo)
 glBufferData(GL_PIXEL_PACK_BUFFER, WIDTH * HEIGHT * 3, None, GL_STREAM_READ)
 glBindBuffer(GL_PIXEL_PACK_BUFFER, 0)
 
-game_state = 0
-
-clicked = False
-sw = False
-
 panels = PanelInterface(WIDTH, HEIGHT)
 
 objects = [0, 1, 2]
@@ -170,13 +164,13 @@ while running:
                 if action == 1:
                     continue
                 elif action == 2:
+                    mouse_y = HEIGHT - mouse_pos[1]
+                    mouse_x = mouse_pos[0]
+                    tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
+                    tile_line = tid % size[1]
+                    tile_column = tid // size[1]
                     if map_interface.activated and not panels.clicked:
                         if not panels.cursor_is_on_ui(mouse_pos) and not panels.unit_is_moving:
-                            mouse_y = HEIGHT - mouse_pos[1]
-                            mouse_x = mouse_pos[0]
-                            tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
-                            tile_line = tid % size[1]
-                            tile_column = tid // size[1]
                             objects = game.identify_object(tile_line, tile_column)
                             tile = game.get_tile(tile_line, tile_column)
                             unit_t = game.get_unit_actions(tile_line, tile_column)
@@ -185,7 +179,7 @@ while running:
                             unit = (unit_t, tile_line, tile_column, unit_info)
                     if game.is_player_turn:
                         panels.end_turn(mouse_pos, game.end_turn)
-                    panels.update_interface()
+                    panels.update_interface(game.move_unit, unit, (tile_line, tile_column))
                 elif action == 0:
                     running = False
 
@@ -238,6 +232,8 @@ while running:
             if game.is_player_turn:
                 panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)
             for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         main_menu.set_game_state(2)
@@ -250,6 +246,8 @@ while running:
                             tile_line = tid % size[1]
                             tile_column = tid // size[1]
                             panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
+                            if panels.unit_is_moving:
+                                panels.clicks_unit_is_moving += 1
                             panels.move_units(unit, mouse_pos, screen_surf, tile_line, tile_column, game.move_unit)
                         # panels.city_panel.try_to_buy_something(mouse_pos, 100)
 

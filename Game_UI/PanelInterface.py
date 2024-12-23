@@ -34,7 +34,7 @@ class PanelInterface:
         self.temp = False
 
     def draw_interface(self, screen, position, objects, tile, unit, purchasable):
-        if not self.unit_panel.is_unit_moved or self.clicks_unit_is_moving != 2:
+        if not self.unit_is_moving:
             if self.sw:
                 for obj in objects:
                     self.clicked_options[obj] = True
@@ -101,15 +101,15 @@ class PanelInterface:
             self.clicked = False
             self.sw = True
 
-    def update_interface(self):
+    def update_interface(self, move_func, unit, position):
         if not self.clicked:
             self.clicked = True
             self.update_every_frame = True
             if self.unit_is_moving:
-                self.clicks_unit_is_moving += 1
-            return 1
-
-        return 0
+                self.unit_is_moving = False
+                move_func(unit[1], unit[2], position[0], position[1])
+                self.clicks_unit_is_moving = 0
+                self.clicked = False
 
     def set_clicked(self, clicked):
         self.clicked = clicked
@@ -169,15 +169,10 @@ class PanelInterface:
                 player_end_turn()
 
     def move_units(self, unit, position, screen, tile_line, tile_column, move_func):
-        if self.unit_panel.move_unit(position, screen) or self.unit_is_moving:
-            self.city_panel.clicked = False
-            self.tile_panel.clicked = False
-            if not self.unit_is_moving:
-                self.unit_is_moving = True
-            if self.clicks_unit_is_moving == 1:
-                move_func(unit[1], unit[2], tile_line, tile_column)
-                self.unit_is_moving = False
-                self.clicks_unit_is_moving = 0
+        if not self.unit_is_moving:
+            self.unit_is_moving = self.unit_panel.move_unit(position, screen)
 
-
-
+        if self.unit_is_moving and self.clicks_unit_is_moving == 2:
+            move_func(unit[1], unit[2], tile_line, tile_column)
+            self.unit_is_moving = False
+            self.clicks_unit_is_moving = 0
