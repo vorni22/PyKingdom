@@ -261,7 +261,6 @@ class CityPanel(BasicPanel):
     def check_if_rendered(self):
         ret = False
         for i in range(2):
-            print(self.buy_units[i], self.buy_districts[i], self.buy_buildings_city_center[i])
             ret = ret or self.buy_units[i] or self.buy_districts[i] or self.buy_buildings_city_center[i]
 
         return ret

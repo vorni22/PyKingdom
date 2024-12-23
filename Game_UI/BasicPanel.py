@@ -48,12 +48,12 @@ class BasicPanel:
 
         for information in tile_information:
             if information[1] is not None:
-                self.draw_data_text(f"{information[0]}: {information[1]}", 30, i)
+                self.draw_data_text(f"{information[0]}: {information[1]}", 30, i, 0)
                 screen.blit(self.text_rendered, self.text_rect)
                 i += 1
 
         if i == 1:
-            self.draw_data_text("There is nothing on this tile", 30, i)
+            self.draw_data_text("There is nothing on this tile", 30, i, 0)
             screen.blit(self.text_rendered, self.text_rect)
 
         resources = {
@@ -82,13 +82,13 @@ class BasicPanel:
         self.text_rect.topleft = (self.center_x, self.center_y + 10)
         self.text_rect.centerx = self.surf.get_rect().centerx
 
-    def draw_data_text(self, new_text, font_size, idx):
+    def draw_data_text(self, new_text, font_size, idx, delta):
         self.text = new_text
         f = pg.font.Font(self.font, font_size)
         self.text_rendered = f.render(self.text, True, self.text_color)
 
         self.text_rect = self.text_rendered.get_rect()
-        self.text_rect.topleft = (self.center_x + 10, self.center_y + 10 + 40 * idx)
+        self.text_rect.topleft = (self.center_x + 10, self.center_y + 10 + 40 * idx + delta)
 
     def close_surf(self, position, screen):
         if self.close_rect.collidepoint(position):
