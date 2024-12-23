@@ -119,12 +119,12 @@ class Game:
 
     def move_unit(self, tile_line, tile_column, new_tile_line, new_tile_column):
         # add stuff for triggering attack if there is an enemy city or unit on the new tile
-
+        print(tile_line, tile_column, new_tile_line, new_tile_column)
         move_result = self.players[self.current_player].move_unit(tile_line, tile_column,
                                                                   new_tile_line, new_tile_column)
         moved_unit = None
         for unit in self.players[self.current_player].units:
-            if unit.position_line == tile_line and unit.position_column == tile_column:
+            if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
                 moved_unit = unit
         coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
         if move_result == 0:
@@ -154,10 +154,10 @@ class Game:
     def get_city_actions(self, tile_line, tile_column):
         purchasable_units = [[], [], [], [], [], [], []]
         purchasable_districts = []
-        purchasable_buildings = [[], [], [], [], [], [], []]
+        purchasable_buildings = [[], [], [], [], [], [], [], []]
         purchasable_units_gold = [[], [], [], [], [], [], []]
         purchasable_districts_gold = []
-        purchasable_buildings_gold = [[], [], [], [], [], [], []]
+        purchasable_buildings_gold = [[], [], [], [], [], [], [], []]
 
         ownerships = self.current_player_is_owner(tile_line, tile_column)
         if 2 in ownerships.keys():

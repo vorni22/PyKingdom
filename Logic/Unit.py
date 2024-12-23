@@ -193,7 +193,7 @@ class Unit:
 
     def move(self, new_line, new_column):
         distance = Map.Map.get_unit_shortest_distance(self.position_line, self.position_column, new_line, new_column)
-        if distance < self.remaining_movement:
+        if distance > self.remaining_movement:
             if distance % self.remaining_movement == 0:
                 return distance // self.remaining_movement
             else:
