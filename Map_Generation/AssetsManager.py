@@ -165,6 +165,14 @@ class AssetsManager:
                     ply_files.append(os.path.join(dirpath, file))
         return ply_files
 
+    @staticmethod
+    def calculate_plane_normal(p1, p2, p3):
+        p1, p2, p3 = np.array(p1), np.array(p2), np.array(p3)
+        v1 = p2 - p1
+        v2 = p3 - p1
+        normal = np.cross(v1, v2)
+        return normal / np.linalg.norm(normal)
+
     def read_ply(self, ply_file, scale):
         ply_data = PlyData.read(ply_file)
 
@@ -185,9 +193,15 @@ class AssetsManager:
         vert = []
 
         for triangle in triangles:
-            v1 = final_vertices[triangle[0]]
-            v2 = final_vertices[triangle[1]]
-            v3 = final_vertices[triangle[2]]
+            v1 = final_vertices[triangle[0]].copy()
+            v2 = final_vertices[triangle[1]].copy()
+            v3 = final_vertices[triangle[2]].copy()
+
+            norm = AssetsManager.calculate_plane_normal(v1.position, v2.position, v3.position)
+            v1.normal = norm
+            v2.normal = norm
+            v3.normal = norm
+
             vert.append((v1, v2, v3))
 
         return vert

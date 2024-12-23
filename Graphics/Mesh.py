@@ -16,6 +16,9 @@ class Vertex:
                 self.normal[0], self.normal[1], self.normal[2],
                 self.color[0], self.color[1], self.color[2]]
 
+    def copy(self):
+        return Vertex(self.position, self.normal, self.color)
+
 class Mesh:
     def __init__(self, vbo_ref:DynamicVBO):
         self.vbo = vbo_ref
