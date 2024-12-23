@@ -96,6 +96,10 @@ void main() {
         visibility = 1.0;
     }
 
+    if (isPlayer > 0 && abs(visibility - 0.7) <= 0.1) {
+        visibility = 0.0;
+    }
+
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	Normal = normMatrix * aNormalVector;
 

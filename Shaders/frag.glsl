@@ -17,9 +17,10 @@ layout(location = 1) out ivec4 DataOutput;
 
 void main(){
     if (abs(visibility) <= 0.01) {
-        ColorOutput = vec4(0.0, 0.0, 0.0, 0.0);
-        DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
-	    return;
+        //ColorOutput = vec4(0.0, 0.0, 0.0, 0.0);
+        //DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
+	    //return;
+	    discard;
     }
 
     vec3 lightDir = normalize(vec3(0.1, -0.5, 0.3));

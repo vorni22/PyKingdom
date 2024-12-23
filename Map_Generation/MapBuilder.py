@@ -209,7 +209,6 @@ class MapMesh:
 
         glEnable(GL_CULL_FACE)
         self.shader.set_float("opacity", 1.0)
-        self.mesh.draw(self.shader)
 
     def __pick_resource(self, id, h):
         type = self.types[id]
