@@ -311,6 +311,12 @@ class MapInterface:
         wall_id = tile_id | (side << 12) | (player_id << 15)
         self.assets.remove_instance_of_at("Wall", wall_id)
 
+    def add_tile_selector(self, tile_id):
+        self.builder.set_visibility(tile_id, 0.8)
+
+    def rmv_tile_selector(self, tile_id):
+        self.builder.set_visibility(tile_id, self.visibility[tile_id])
+
     def add_tile_owner(self, tile_id, player_id):
         if not self.activated or self.owner[tile_id] != -1 or self.owner[player_id] == player_id:
             return

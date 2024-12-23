@@ -20,7 +20,7 @@ layout (location = 2) uniform sampler2D uResourcesTexture; // 2
 
 uniform float resourceId;
 
-uniform float isUnit;
+uniform float isPlayer;
 uniform float isWall;
 
 uniform float size_x;
@@ -95,11 +95,11 @@ void main() {
 
 	//Color = color_palet[int(aData.x)];
     if (isWall <= 0) {
-        if (isUnit < 0) {
+        if (isPlayer < 0) {
             int key = int(aData.x);
 	        Color = texelFetch(color_palette_t, key, 0).rgb;
 	    } else {
-	        int key = int(isUnit);
+	        int key = int(isPlayer);
 	        Color = player_color[key];
 	    }
 	}

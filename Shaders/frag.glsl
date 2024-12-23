@@ -44,7 +44,13 @@ void main(){
         vi = 0.69;
     }
 
-	vec3 ret = (ambient + diffuse) * Color * vi * hgh;
+    vec3 col = Color;
+    if (abs(visibility - 0.8) <= 0.01 && id >= 0.0) {
+        col = vec3(0.1, 0.965, 1.0);
+        vi = 1.0;
+    }
+
+	vec3 ret = (ambient + diffuse) * col * vi * hgh;
 
 	ColorOutput = vec4(ret, op);
 	DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);

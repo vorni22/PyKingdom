@@ -183,7 +183,7 @@ while running:
                             purchasable = game.get_city_actions(tile_line, tile_column)
                             unit_info = game.get_unit_information(tile_line, tile_column)
                             unit = (unit_t, tile_line, tile_column, unit_info)
-                            print(unit[3][4])
+                            # print(unit[3][4])
                     if game.is_player_turn:
                         panels.end_turn(mouse_pos, game.end_turn)
                     panels.update_interface()
