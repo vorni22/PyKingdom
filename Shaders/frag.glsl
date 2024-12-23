@@ -16,7 +16,7 @@ layout(location = 0) out vec4 ColorOutput;
 layout(location = 1) out ivec4 DataOutput;
 
 void main(){
-    if (visibility <= 0.01) {
+    if (abs(visibility) <= 0.01) {
         ColorOutput = vec4(0.0, 0.0, 0.0, 0.0);
         DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
 	    return;
@@ -45,9 +45,10 @@ void main(){
     }
 
     vec3 col = Color;
-    if (abs(visibility - 0.8) <= 0.01 && id >= 0.0) {
+    if (abs(visibility - 2.0) <= 0.01 && id >= 0.0) {
         col = vec3(0.1, 0.965, 1.0);
-        vi = 1.0;
+        vi = 0.9;
+        op = 0.5;
     }
 
 	vec3 ret = (ambient + diffuse) * col * vi * hgh;
