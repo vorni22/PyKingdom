@@ -22,12 +22,14 @@ class UnitPanel(BasicPanel):
         return False
 
     def draw_surf(self, screen, mouse_pos, tile, unit, purchasable):
+        if unit[3] is None:
+            return
         if 3 in unit[0]:
             self.is_settler = True
             screen.blit(self.settler_surf, (self.center_x, self.center_y))
         else:
             screen.blit(self.surf, (self.center_x, self.center_y))
-        super().draw_title_text(f"Tile type: {unit[3][4]}", 45)
+        self.draw_title_text(f"Tile type: {unit[3][4]}", 45)
 
     def settle_city(self, position, screen, unit, settle_func):
         if self.settler_rect.collidepoint(position) and 3 in unit[0]:

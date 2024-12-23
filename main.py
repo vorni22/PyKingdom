@@ -183,7 +183,6 @@ while running:
                             purchasable = game.get_city_actions(tile_line, tile_column)
                             unit_info = game.get_unit_information(tile_line, tile_column)
                             unit = (unit_t, tile_line, tile_column, unit_info)
-                            # print(unit[3][4])
                     if game.is_player_turn:
                         panels.end_turn(mouse_pos, game.end_turn)
                     panels.update_interface()
@@ -252,7 +251,6 @@ while running:
                             tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
                             tile_line = tid % size[1]
                             tile_column = tid // size[1]
-                            print("loh1")
                             panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
                             panels.move_units(unit, mouse_pos, screen_surf, tile_line, tile_column, game.move_unit)
                         # panels.city_panel.try_to_buy_something(mouse_pos, 100)
