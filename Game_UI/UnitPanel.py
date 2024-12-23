@@ -1,6 +1,7 @@
 import pygame as pg
 
 from .BasicPanel import BasicPanel
+from Logic.Unit import unit_classes
 
 class UnitPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
@@ -26,6 +27,7 @@ class UnitPanel(BasicPanel):
             screen.blit(self.settler_surf, (self.center_x, self.center_y))
         else:
             screen.blit(self.surf, (self.center_x, self.center_y))
+        super().draw_title_text(f"Tile type: {unit[3][4]}", 45)
 
     def settle_city(self, position, screen, unit, settle_func):
         if self.settler_rect.collidepoint(position) and 3 in unit[0]:
