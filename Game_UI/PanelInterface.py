@@ -12,7 +12,7 @@ class PanelInterface:
     def __init__(self, width, height):
         city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
         basic_panel_back = pg.image.load("Assets/MainMenu/tile_panel.png")
-        unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel2.png")
+        unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
         next_turn_back = pg.image.load("Assets/MainMenu/next_turn_button.png")
         self.width = width
         self.height = height

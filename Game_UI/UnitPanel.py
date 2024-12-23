@@ -8,7 +8,7 @@ class UnitPanel(BasicPanel):
         super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
         self.move_unit_rect = pg.Rect(7 + self.center_x, 7 + self.center_y, 41, 41)
         self.is_unit_moved = False
-        self.settler_surf = pg.image.load("Assets/MainMenu/settler_panel2.png")
+        self.settler_surf = pg.image.load("Assets/MainMenu/settler_panel.png")
         self.settler_rect = pg.Rect(7 + self.center_x, 48 + self.center_y, 41, 41)
         self.is_settler = False
 
