@@ -122,13 +122,17 @@ class Game:
         print(tile_line, tile_column, new_tile_line, new_tile_column)
         move_result = self.players[self.current_player].move_unit(tile_line, tile_column,
                                                                   new_tile_line, new_tile_column)
-        moved_unit = None
-        for unit in self.players[self.current_player].units:
-            if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
-                moved_unit = unit
-        coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
         if move_result == 0:
+            moved_unit = None
+            for unit in self.players[self.current_player].units:
+                if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
+                    moved_unit = unit
+            coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
             self.map_interface.move_unit(moved_unit.unit_id, coords)
+            for coordinate_pair in self.units_coordinates:
+                if coordinate_pair[0] == tile_line and coordinate_pair[1] == tile_column:
+                    self.units_coordinates.remove(coordinate_pair)
+                    self.units_coordinates.append((new_tile_line, new_tile_column))
             return True
         return False
 
