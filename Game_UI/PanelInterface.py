@@ -46,6 +46,9 @@ class PanelInterface:
                 if len(objects) == 3:
                     self.clicked_options[0] = False
 
+                if not purchasable[0]:
+                    self.clicked_options[2] = False
+                    self.clicked_options[1] = False
                 self.sw = False
 
             if self.clicked_options[0]:
@@ -103,12 +106,7 @@ class PanelInterface:
             self.clicked = True
             self.update_every_frame = True
             if self.unit_is_moving:
-                # self.clicked = False
                 self.clicks_unit_is_moving += 1
-                # if self.clicks_unit_is_moving == 1 and not self.temp:
-                #     print("loh")
-                #     self.unit_is_moving = False
-                #     self.clicks_unit_is_moving = 0
             return 1
 
         return 0
@@ -176,7 +174,6 @@ class PanelInterface:
             self.tile_panel.clicked = False
             if not self.unit_is_moving:
                 self.unit_is_moving = True
-            print(self.clicks_unit_is_moving)
             if self.clicks_unit_is_moving == 1:
                 move_func(unit[1], unit[2], tile_line, tile_column)
                 self.unit_is_moving = False
