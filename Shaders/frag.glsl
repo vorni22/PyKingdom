@@ -17,6 +17,7 @@ layout(location = 1) out ivec4 DataOutput;
 
 void main(){
     if (visibility <= 0.01) {
+        ColorOutput = vec4(0.0, 0.0, 0.0, 0.0);
         DataOutput = ivec4(floatBitsToInt(id), 0, 0, 0);
 	    return;
     }
@@ -32,13 +33,13 @@ void main(){
 	vec3 diffuse = diff * lightColor;
 
     float hgh = 1.0;
-    if (abs(highlight_id - id) <= 0.001 && id >= 0) {
+    if (abs(highlight_id - id) <= 0.001 && id >= 0.0) {
         hgh = 0.5;
     }
 
     float vi = visibility;
     float op = opacity;
-    if (visibility < 0.69 && visibility < op && id >= 0) {
+    if (visibility < 0.69 && visibility < op && id >= 0.0) {
         op = visibility;
         vi = 0.69;
     }

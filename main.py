@@ -7,12 +7,8 @@ import numpy as np
 import Logic.Tile
 from Graphics.Buffers import DynamicVBO
 from Graphics.Buffers import BasicVBO
-from Graphics.Camera import Camera, CameraManager, StrategicCamera
-from Graphics.ColorPalette import ColorPalette
-from Graphics.Mesh import Mesh
+from Graphics.Camera import Camera, StrategicCamera
 from Graphics.Shaders import Shader
-from Map_Generation.AssetsManager import AssetsManager
-from Map_Generation.MapBuilder import MapMesh
 from Graphics.FrameBuffer import FrameBuffer
 from Map_Generation.MapInterface import MapInterface
 from UI.MainMenu import MainMenu

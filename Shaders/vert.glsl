@@ -78,12 +78,13 @@ void main() {
             gl_Position = projection * view * real_pos;
         }
     } else {
-        id = int(round(aData.y));
+        id = round(aData.y);
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
 
-    if (id >= 0) {
-        visibility = texelFetch(uVisibilityTexture, int(round(id)), 0).r;
+    if (id >= 0.0) {
+        int key = int(id);
+        visibility = texelFetch(uVisibilityTexture, key, 0).r;
     } else {
         visibility = 1.0;
     }
@@ -93,6 +94,7 @@ void main() {
 
 	//Color = color_palet[int(aData.x)];
     if (isWall <= 0) {
-	    Color = texelFetch(color_palette_t, int(aData.x), 0).rgb;
+        int key = int(aData.x);
+	    Color = texelFetch(color_palette_t, key, 0).rgb;
 	}
 }
