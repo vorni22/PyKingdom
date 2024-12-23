@@ -79,7 +79,7 @@ class BasicPanel:
         self.text_rendered = f.render(self.text, True, self.text_color)
 
         self.text_rect = self.text_rendered.get_rect()
-        self.text_rect.topleft = (self.center_x, self.center_y + 10)
+        self.text_rect.topleft = (self.center_x + 100, self.center_y + 10)
         self.text_rect.centerx = self.surf.get_rect().centerx
 
     def draw_data_text(self, new_text, font_size, idx):

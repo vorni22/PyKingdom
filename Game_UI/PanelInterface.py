@@ -28,10 +28,10 @@ class PanelInterface:
                                     self.width - city_panel_back.get_rect().width, 50, "Red", city_panel_back)
         self.status_panel = PermanentPanel()
         self.end_turn_button = CircleButton(next_turn_back, 75, (self.width - next_turn_back.get_rect().width, self.height - next_turn_back.get_rect().height))
-        # self.end_turn_button = CircleButton(next_turn_back, 75, (next_turn_back.get_rect().width, next_turn_back.get_rect().height))
 
         self.unit_is_moving = False
         self.clicks_unit_is_moving = 0
+        self.temp = False
 
     def draw_interface(self, screen, position, objects, tile, unit, purchasable):
         if not self.unit_panel.is_unit_moved or self.clicks_unit_is_moving != 2:
@@ -103,11 +103,12 @@ class PanelInterface:
             self.clicked = True
             self.update_every_frame = True
             if self.unit_is_moving:
-                self.clicked = False
+                # self.clicked = False
                 self.clicks_unit_is_moving += 1
-                if self.clicks_unit_is_moving == 1:
-                    self.unit_is_moving = False
-                    self.clicks_unit_is_moving = 0
+                # if self.clicks_unit_is_moving == 1 and not self.temp:
+                #     print("loh")
+                #     self.unit_is_moving = False
+                #     self.clicks_unit_is_moving = 0
             return 1
 
         return 0
@@ -164,10 +165,22 @@ class PanelInterface:
         return False
 
     def end_turn(self, position, player_end_turn):
-        # if self.end_turn_button.rendered:
-        if self.end_turn_button.circle_collidepoint(position):
-            print("end turn")
-            player_end_turn()
+        if self.end_turn_button.rendered:
+            if self.end_turn_button.circle_collidepoint(position):
+                print("end turn")
+                player_end_turn()
+
+    def move_units(self, unit, position, screen, tile_line, tile_column, move_func):
+        if self.unit_panel.move_unit(position, screen) or self.unit_is_moving:
+            self.city_panel.clicked = False
+            self.tile_panel.clicked = False
+            if not self.unit_is_moving:
+                self.unit_is_moving = True
+            print(self.clicks_unit_is_moving)
+            if self.clicks_unit_is_moving == 1:
+                move_func(unit[1], unit[2], tile_line, tile_column)
+                self.unit_is_moving = False
+                self.clicks_unit_is_moving = 0
 
 
 
