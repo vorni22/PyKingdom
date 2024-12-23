@@ -312,7 +312,7 @@ class MapInterface:
         self.assets.remove_instance_of_at("Wall", wall_id)
 
     def add_tile_selector(self, tile_id):
-        self.builder.set_visibility(tile_id, 2.0)
+        self.builder.set_visibility(tile_id, 1.1)
 
     def rmv_tile_selector(self, tile_id):
         self.__apply_vis(self.visibility[self.active_player][tile_id], tile_id)

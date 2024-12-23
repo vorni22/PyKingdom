@@ -45,10 +45,10 @@ void main(){
     }
 
     vec3 col = Color;
-    if (abs(visibility - 2.0) <= 0.01 && id >= 0.0) {
-        col = vec3(0.1, 0.965, 1.0);
+    if (abs(visibility - 1.1) <= 0.01 && id >= 0.0) {
+        col = 0.75 * Color + 0.25 * vec3(0.1, 0.965, 1.0);
         vi = 0.9;
-        op = 0.5;
+        op = opacity;
     }
 
 	vec3 ret = (ambient + diffuse) * col * vi * hgh;
