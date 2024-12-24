@@ -29,6 +29,7 @@ class Map:
     G_unit_distance = nx.DiGraph()
     shortest_distances = []
     unit_shortest_distances = []
+    unit_shortest_paths = []
 
     @staticmethod
     def init_map(lines, columns, map_interface):
@@ -176,12 +177,18 @@ class Map:
                     else:
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
                                                      weight=Map.get_tile(i - 1, j - 1).movement_cost)
-        for i in range(0, Map.lines * Map.columns):
-            Map.unit_shortest_distances.append(nx.single_source_dijkstra_path_length(Map.G_unit_distance, i))
+        Map.unit_shortest_distances = dict(nx.all_pairs_shortest_path_length(Map.G_unit_distance))
+        Map.unit_shortest_paths = dict(nx.all_pairs_shortest_path(Map.G_unit_distance))
+        # for i in range(0, Map.lines * Map.columns):
+        #    Map.unit_shortest_distances.append(nx.single_source_dijkstra_path_length(Map.G_unit_distance, i))
 
     @staticmethod
     def get_unit_shortest_distance(start_line, start_col, end_line, end_col):
         return Map.unit_shortest_distances[start_line * Map.columns + start_col][end_line * Map.columns + end_col]
+
+    @staticmethod
+    def get_unit_shortest_path(start_line, start_col, end_line, end_col):
+        return Map.unit_shortest_paths[start_line * Map.columns + start_col][end_line * Map.columns + end_col]
 
     @staticmethod
     def get_tile(line, column) -> Tile.Tile:

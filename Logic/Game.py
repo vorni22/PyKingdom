@@ -2,10 +2,10 @@ import random
 
 import Logic.Player as Player
 import Logic.City as City
-import Logic.Resources as Resources
+# import Logic.Resources as Resources
 import Logic.Unit as Unit
-import Logic.Tech as Tech
-import Logic.Civic as Civic
+# import Logic.Tech as Tech
+# import Logic.Civic as Civic
 import Map_Generation.Map as Map
 
 # class that will be used for integrating the UI and the graphics with the backend of the game
@@ -14,6 +14,7 @@ class Game:
         self.map_interface = map_interface
         Map.Map.init_map(map_size_lines, map_size_columns, map_interface)
         self.player_count = player_count
+        self.defeated_players = 0
         self.current_player = -1
         self.is_player_turn = False
         self.players = []
@@ -32,24 +33,39 @@ class Game:
     def start_turn(self):
         if self.current_player == self.player_count - 1:
             self.current_player = 0
+            for i in range(self.player_count):
+                for unit in self.players[i].units:
+                    unit.rest()
+                for city in self.players[i].cities:
+                    city.recover_health()
         else:
             self.current_player = self.current_player + 1
+            while self.players[self.current_player] is None:
+                self.current_player = (self.current_player + 1) % self.player_count
+
+        # victory conditions
+        if self.defeated_players == self.player_count - 1:
+            return 1
+        if self.players[self.current_player].resources.science_count >= 1500:
+            return 2
+        if self.players[self.current_player].resources.culture_count >= 1500:
+            return 3
         self.players[self.current_player].reset_units_movements()
         self.is_player_turn = True
-        # Do not touch yet, not fully implemented
         pos = (self.players[self.current_player].capital_line, self.players[self.current_player].capital_column)
         self.map_interface.switch_context(self.current_player, pos)
+        return 0
 
     def end_turn(self):
         self.players[self.current_player].end_turn_resource_calculation()
-        self.start_turn()
+        return self.start_turn()
 
     def identify_object(self, tile_line, tile_column) -> list[int]:
         objects = [0, ]
         if (tile_line, tile_column) in self.units_coordinates:
             # code for unit
             objects.append(1)
-        elif (tile_line, tile_column) in self.cities_coordinates:
+        if (tile_line, tile_column) in self.cities_coordinates:
             # code for city
             objects.append(2)
         return objects
@@ -64,6 +80,18 @@ class Game:
         if 2 in objects:
             ownerships[2] = self.players[self.current_player].is_city_owner(tile_line, tile_column)
         return ownerships
+
+    def get_city_owner(self, tile_line, tile_column) -> int:
+        for player in self.players:
+            if player.is_city_owner(tile_line, tile_column):
+                return player.player_id
+        return -1
+
+    def get_unit_owner(self, tile_line, tile_column) -> int:
+        for player in self.players:
+            if player.is_unit_owner(tile_line, tile_column):
+                return player.player_id
+        return -1
 
     def get_unit_actions(self, tile_line, tile_column):
         possible_actions = []
@@ -118,23 +146,115 @@ class Game:
         return False
 
     def move_unit(self, tile_line, tile_column, new_tile_line, new_tile_column):
-        # add stuff for triggering attack if there is an enemy city or unit on the new tile
-        print(tile_line, tile_column, new_tile_line, new_tile_column)
-        move_result = self.players[self.current_player].move_unit(tile_line, tile_column,
-                                                                  new_tile_line, new_tile_column)
-        if move_result == 0:
-            moved_unit = None
-            for unit in self.players[self.current_player].units:
+        moved_unit = None
+        objects = self.identify_object(new_tile_line, new_tile_column)
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == tile_line and unit.position_column == tile_column:
+                moved_unit = unit
+        # if it's a settler, it can only move, so cancel any movements on tiles where other players / cities are
+        is_settler = moved_unit.type_id == 6
+        # check if movement is valid
+        can_move = (Map.Map.get_unit_shortest_distance(tile_line, tile_column, new_tile_line, new_tile_column)
+                    <= moved_unit.remaining_movement)
+        can_ranged_attack = (Map.Map.get_shortest_distance(tile_line, tile_column, new_tile_line, new_tile_column)
+                             <= moved_unit.range)
+        # if the unit can cause a ranged attack, do it and finish this unit's turn
+        if can_ranged_attack:
+            if 1 in objects:
+                unit_owner = self.get_unit_owner(tile_line, tile_column)
+                if unit_owner != self.current_player:
+                    for unit in self.players[unit_owner].units:
+                        if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
+                            unit.calculate_ranged_combat_with_unit(moved_unit)
+                            moved_unit.remaining_movement = 0
+                            moved_unit.range = 0
+                            return True
+            if 2 in objects:
+                city_owner = self.get_city_owner(new_tile_line, new_tile_column)
+                if city_owner != self.current_player:
+                    for city in self.players[city_owner].cities:
+                        if (city.center_line_location == new_tile_line and
+                            city.center_column_location == new_tile_column):
+                            city.ranged_combat(moved_unit)
+                            moved_unit.remaining_movement = 0
+                            moved_unit.range = 0
+                            return True
+        # check if unit can move to the position and if there is a unit or city there, attack it
+        # before attacking, check if the next-to-last tile on the path can be moved to, and if it can,
+        # move there before attacking
+        # melee attacks will finish a units turn
+        if not can_move:
+            return False
+        if is_settler and (1 in objects or 2 in objects):
+            return False
+        shortest_path = Map.Map.get_unit_shortest_path(tile_line, tile_column, new_tile_line, new_tile_column)
+        next_to_last_tile = (shortest_path[len(shortest_path) - 2] // Map.Map.columns,
+                             shortest_path[len(shortest_path) - 2] % Map.Map.columns)
+        if (1 in objects and ((next_to_last_tile not in self.units_coordinates
+            and next_to_last_tile not in self.cities_coordinates) or len(shortest_path) == 2)):
+            unit_owner = self.get_unit_owner(new_tile_line, new_tile_column)
+            if unit_owner == self.current_player:
+                return False
+            for unit in self.players[unit_owner].units:
                 if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
-                    moved_unit = unit
-            coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
-            self.map_interface.move_unit(moved_unit.unit_id, coords)
-            for coordinate_pair in self.units_coordinates:
-                if coordinate_pair[0] == tile_line and coordinate_pair[1] == tile_column:
-                    self.units_coordinates.remove(coordinate_pair)
-                    self.units_coordinates.append((new_tile_line, new_tile_column))
-            return True
-        return False
+                    unit.calculate_melee_combat_with_unit(moved_unit)
+                    moved_unit.calculate_melee_combat_with_unit(unit)
+                    if unit.health_percentage <= 0:
+                        self.players[unit_owner].delete_units(new_tile_line, new_tile_column)
+                        self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
+                    else:
+                        self.__render_movement(moved_unit, tile_line, tile_column, next_to_last_tile[0],
+                                               next_to_last_tile[1])
+                    if moved_unit.health_percentage <= 0:
+                        self.map_interface.clr_unit(moved_unit.unit_id)
+                        self.players[self.current_player].delete_units(moved_unit.position_line,
+                                                                       moved_unit.position_column)
+                    moved_unit.remaining_movement = 0
+                    return True
+        if (2 in objects and ((next_to_last_tile not in self.units_coordinates
+            and next_to_last_tile not in self.cities_coordinates) or len(shortest_path) == 2)):
+            city_owner = self.get_city_owner(new_tile_line, new_tile_column)
+            for city in self.players[city_owner].cities:
+                if city.center_line_location == new_tile_line and city.center_column_location == new_tile_column:
+                    city.melee_combat(moved_unit)
+                    moved_unit.calculate_melee_combat_with_city(city)
+                    if city.health_percentage <= 0:
+                        ret = self.players[city_owner].delete_city(new_tile_line, new_tile_column)
+                        if ret == 1:
+                            for captured_city in self.players[city_owner].cities:
+                                for tile in captured_city.tiles:
+                                    coord = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+                                    self.map_interface.remove_owner(coord)
+                                    self.map_interface.add_tile_owner(coord, self.current_player)
+                                self.players[self.current_player].cities.append(captured_city)
+                            for unit in self.players[city_owner].units:
+                                self.map_interface.clr_unit(unit.unit_id)
+                            self.players[city_owner] = None
+                            self.defeated_players += 1
+                        else:
+                            self.players[self.current_player].cities.append(city)
+                        if moved_unit.health_percentage <= 0:
+                            moved_unit.health_percentage = 1
+                        self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
+                    if moved_unit.health_percentage <= 0:
+                        self.map_interface.clr_unit(moved_unit.unit_id)
+                        self.players[self.current_player].delete_units(moved_unit.position_line,
+                                                                       moved_unit.position_column)
+                    moved_unit.remaining_movement = 0
+                    return True
+        elif 1 in objects or 2 in objects:
+            return False
+        self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
+        return True
+
+    def __render_movement(self, moved_unit, tile_line, tile_column, new_tile_line, new_tile_column):
+        self.players[self.current_player].move_unit(tile_line, tile_column, new_tile_line, new_tile_column)
+        coords = self.map_interface.convert_coordinates_to_mine(new_tile_line, new_tile_column)
+        self.map_interface.move_unit(moved_unit.unit_id, coords)
+        for coordinate_pair in self.units_coordinates:
+            if coordinate_pair[0] == tile_line and coordinate_pair[1] == tile_column:
+                self.units_coordinates.remove(coordinate_pair)
+                self.units_coordinates.append((new_tile_line, new_tile_column))
 
     def settle_city(self, tile_line, tile_column):
         settler = None
@@ -329,6 +449,10 @@ class Game:
                 if self.players[self.current_player].resources.gold_count >= Unit.naval_ranged_units_costs[0] * 2:
                     purchasable_units_gold[5].extend([0])
 
+                if (tile_line, tile_column) in self.units_coordinates:
+                    purchasable_units = [[], [], [], [], [], [], []]
+                    purchasable_units_gold = [[], [], [], [], [], [], []]
+
         return (True, purchasable_units, purchasable_districts, purchasable_buildings,
                purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 
@@ -384,14 +508,26 @@ class Game:
                         total_food, total_production, housing, population, health, combat_strength, city_name)
 
     def get_unit_information(self, unit_line, unit_column):
-        for unit in self.players[self.current_player].units:
-            if unit.position_line == unit_line and unit.position_column == unit_column:
-                unit_health = unit.health_percentage
-                melee_strength = unit.melee_strength
-                ranged_strength = unit.ranged_strength
-                movement = unit.remaining_movement
-                unit_name = unit.name
-                return unit_health, melee_strength, ranged_strength, movement, unit_name
+        for i in range(self.player_count):
+            for unit in self.players[self.current_player].units:
+                if unit.position_line == unit_line and unit.position_column == unit_column:
+                    unit_health = unit.health_percentage
+                    melee_strength = unit.melee_strength
+                    ranged_strength = unit.ranged_strength
+                    movement = unit.remaining_movement
+                    unit_name = unit.name
+                    return unit_health, melee_strength, ranged_strength, movement, unit_name
+
+    def get_player_information(self):
+        total_science = self.players[self.current_player].resources.science_count
+        science_per_turn = self.players[self.current_player].resources_per_turn.science_per_turn_count
+        total_culture = self.players[self.current_player].resources.culture_count
+        culture_per_turn = self.players[self.current_player].resources_per_turn.culture_per_turn_count
+        total_gold = self.players[self.current_player].resources.gold_count
+        gold_per_turn = self.players[self.current_player].resources_per_turn.gold_per_turn_count
+        player_number = self.current_player + 1
+        return (player_number, total_science, total_culture, total_gold,
+                science_per_turn, culture_per_turn, gold_per_turn)
 
     @staticmethod
     def get_tile(tile_line, tile_column):

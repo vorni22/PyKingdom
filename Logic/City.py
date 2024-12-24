@@ -1,6 +1,8 @@
 import Logic.Resources as Resources
 from Map_Generation import Map as Map
 import Logic.Unit as Unit
+import math
+import random
 
 district_types = ['Campus', 'Theatre Square', 'Commercial Hub', 'Harbour', 'Industrial Zone',
                   'Neighborhood', 'Aqueduct', 'City Center']
@@ -253,14 +255,15 @@ class City:
 
         self.city_resources.food_count += self.city_resources_per_turn.food_per_turn_count
         self.city_resources_per_turn.production_per_turn_count += self.city_resources_per_turn.production_per_turn_count
-
-        self.health_percentage = min(100, self.health_percentage + 20)
         # update population
         if self.city_resources.food_count >= self.population * 11 + 4:
             self.city_resources.food_count -= self.population * 11 + 4
             self.population += 1
 
         return self.resources_per_turn
+
+    def recover_health(self):
+        self.health_percentage = min(100, self.health_percentage + 20)
 
     def get_resources(self):
         temp_resources_per_turn, temp_city_resources_per_turn = self.calculate_yields_tiles()
@@ -284,23 +287,17 @@ class City:
 
     def melee_combat(self, unit):
         diff = (self.melee_combat_strength - self.health_strength_loss() -
-                unit.melee_combat_strength - unit.health_strength_loss())
-
-        if diff > 0:
-            self.health_percentage -= 0.4 * diff - 3
-        else:
-            self.health_percentage -= 2.5 * (-diff) - 5
+                unit.melee_strength + unit.health_strength_loss())
+        self.health_percentage = self.health_percentage - 30 * math.exp(-diff / 25 * random.randint(75, 125)
+                                                                        / 100)
 
     def ranged_combat(self, unit):
         diff = (self.melee_combat_strength + 10 - self.health_strength_loss() -
-                unit.ranged_combat_strength + unit.health_strength_loss())
-        if unit.type == Unit.unit_classes[3]:
+                unit.ranged_strength + unit.health_strength_loss())
+        if unit.type_id in [3, 5]:
             diff -= 10
-
-        if diff > 0:
-            self.health_percentage -= 0.4 * diff - 3
-        else:
-            self.health_percentage -= 2.5 * (-diff) - 5
+        self.health_percentage = self.health_percentage - 30 * math.exp(-diff / 25 * random.randint(75, 125)
+                                                                        / 100)
 
     def build_district_with_production(self, district_type_id, district_location_line, district_location_column):
         self.add_district(district_type_id, district_location_line, district_location_column)

@@ -34,11 +34,14 @@ class Player:
         while True:
             self.capital_line = random.randint(3, Map.Map.lines - 3)
             self.capital_column = random.randint(3, Map.Map.columns - 3)
-            # ensure at least 8 tiles between players
+            # ensure at least 3 tiles between players
+            good_start = True
             for player in other_players:
                 if Map.Map.get_shortest_distance(player.capital_line, player.capital_column,
-                                                 self.capital_line, self.capital_column) < 8:
-                    continue
+                                                 self.capital_line, self.capital_column) < 3:
+                    good_start = False
+            if not good_start:
+                continue
             if Map.Map.get_tile(self.capital_line, self.capital_column).type_id in [0, 1]:
                 # add starting settler
                 self.add_units(6, 0, self.capital_line, self.capital_column)
@@ -69,6 +72,15 @@ class Player:
             self.capital_line = city_line
             self.capital_column = city_column
         self.tiles.extend(self.cities[len(self.cities) - 1].tiles)
+
+    def delete_city(self, city_line, city_column):
+        for city in self.cities:
+            if city.center_line_location == city_line and city.center_column_location == city_column:
+                if city.is_capital:
+                    # Player was defeated and is going to be removed
+                    return 1
+                self.cities.remove(city)
+                return 0
 
     def add_units(self, unit_name_id, unit_type_id, unit_line, unit_column):
         self.units.append(Unit.Unit(unit_name_id, unit_type_id, unit_line, unit_column))
@@ -201,10 +213,11 @@ class Player:
 
     def build_unit_with_production(self, city_line, city_column, unit_type_id, unit_name_id):
         for city in self.cities:
-            if city.city_line == city_line and city.city_column == city_column:
+            if city.center_line_location == city_line and city.center_column_location == city_column:
                 ret_code = city.build_unit_with_production(unit_type_id, unit_name_id, self)
-                if not ret_code:
+                if ret_code == 0:
                     self.add_units(unit_type_id, unit_name_id, city_line, city_column)
+                return ret_code
 
     def build_unit_with_gold(self, city_line, city_column, unit_type_id, unit_name_id):
         if unit_type_id == 0:
