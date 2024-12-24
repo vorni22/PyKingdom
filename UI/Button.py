@@ -48,3 +48,13 @@ class Button:
         self.curr_color = color
         self.hover_color = hover
         self.text = self.fnt.render(self.text_input, True, self.curr_color)
+
+    def update_position(self):
+        if self.image:
+            self.rect = self.image.get_rect(center=(self.x_coord, self.y_coord))
+        else:
+            self.rect = self.text.get_rect(center=(self.x_coord, self.y_coord))
+        self.text_rect = self.text.get_rect(center=(self.x_coord, self.y_coord))
+
+    def set_coords(self, x_coord, y_coord):
+        self.x_coord, self.y_coord = x_coord, y_coord

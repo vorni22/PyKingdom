@@ -28,35 +28,39 @@ class CityPanel(BasicPanel):
         self.buy_units = [False, False]
         self.buy_districts = [False, False]
         self.buy_buildings_city_center = [False, False]
+        self.buy_buildings = [False, False]
         self.buy_units_buttons = [[], []]
         self.buy_districts_buttons = [[], []]
         self.buy_buildings_city_center_buttons = [[], []]
+        self.buy_buildings = [[], []]
 
         bg = pg.image.load("Assets/MainMenu/cnt2.png")
         bg_buy_buttons = pg.image.load("Assets/MainMenu/buy_smth_bg.png")
         bg_buy = pg.transform.scale(bg_buy_buttons, (2 * bg.get_rect().width // 3 - 10, bg.get_rect().height + 20))
         self.error_message_time = 0
         self.error_message = "Not enough production to buy this"
-
+        self.change_coords = [True, True]
         bg = pg.transform.scale(bg, (bg.get_rect().width + 50, bg.get_rect().height))
 
         self.units_cost_production = [melee_units_costs[0], ranged_units_costs[0], cavalry_units_costs[0], siege_units_costs[0], naval_melee_units_costs[0], naval_ranged_units_costs[0], civilian_units_costs]
         self.units_cost_gold = [cost * 2 for cost in self.units_cost_production]
         district_cost_gold = 2 * district_cost
-        # self.update_units_buttons = [[], []]
-        self.update_districts_buttons = [[], []]
 
-        for i, unit_name in enumerate(unit_classes[::-1]):
+        self.update_districts_buttons = [[], []]
+        self.heights = [[], []]
+        for i, unit_name in enumerate(unit_classes):
             self.buy_units_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(unit_name, str(self.units_cost_production[i]), 350, 30), None, "White", "Gray", 30))
 
         for i, district_name in enumerate(district_types[-2::-1]):
-            self.buy_districts_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(district_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
+            self.buy_districts_buttons[0].append(Button(bg, w, h - i * 50 - 50, self.format_text(district_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
+            self.heights[0].append(h - i * 50)
 
-        for i, unit_name in enumerate(unit_classes[::-1]):
+        for i, unit_name in enumerate(unit_classes):
             self.buy_units_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(unit_name, str(self.units_cost_gold[i]), 350, 30), None, "White", "Gray", 30))
 
         for i, district_name in enumerate(district_types[-2::-1]):
-            self.buy_districts_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
+            self.buy_districts_buttons[1].append(Button(bg, w, h - i * 50 - 50, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
+            self.heights[1].append(h - i * 50)
 
         for i, building_name in enumerate(city_center_buildings):
             self.buy_buildings_city_center_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
@@ -64,12 +68,20 @@ class CityPanel(BasicPanel):
         for i, building_name in enumerate(city_center_buildings):
             self.buy_buildings_city_center_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost_gold), 350, 30),None, "White", "Gray", 30))
 
+        self.update_buttons = [[], []]
+        for i in range(len(self.buy_districts_buttons[0])):
+            self.update_buttons[0].append(Button(bg, w, h - (i + 1) * 50, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
+
+        for i in range(len(self.buy_districts_buttons[1])):
+            self.update_buttons[1].append(Button(bg, w, h - (i + 1) * 50, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
+
         self.buy_units_button_production = Button(bg_buy, w - 100, 210, "Production", None, "White", "Gray", 40)
         self.buy_districts_button_production = Button(bg_buy, w - 100, 330, "Production", None, "White", "Gray", 40)
         self.buy_units_button_gold = Button(bg_buy, w + 100, 210, "Gold", None, "White", "Gray", 40)
         self.buy_districts_button_gold = Button(bg_buy, w + 100, 330, "Gold", None, "White", "Gray", 40)
         self.buy_buildings_city_center_button_production = Button(bg_buy, w - 100, 450, "Production", None, "White", "Gray", 40)
         self.buy_buildings_city_center_button_gold = Button(bg_buy, w + 100, 450, "Gold", None, "White", "Gray", 40)
+
 
     def render_text(self, text_type, center, screen):
         text = "Buy " + text_type + " with:"
@@ -92,13 +104,33 @@ class CityPanel(BasicPanel):
                 unit.draw_button(screen)
 
     def draw_purchase_districts(self, idx, pidx, screen, position, purchasable):
-        for i, district in enumerate(self.buy_districts_buttons[idx]):
+        for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
             if not i in purchasable[pidx][:-1]:
                 district.set_colors("#9c9c9c", "#9c9c9c")
             else:
                 district.set_colors("White", "Gray")
 
-        for i, district in enumerate(self.buy_districts_buttons[idx]):
+        if self.change_coords[idx]:
+            for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
+                if len(purchasable[pidx + 1][len(self.buy_districts_buttons[idx]) - i - 1]) != 0:
+                    for j, d in enumerate(self.buy_districts_buttons[idx][::-1][len(self.buy_districts_buttons[idx]) - i:]):
+                        d.set_coords(d.x_coord, d.y_coord + 50)
+                        d.update_position()
+
+                    # for j, u in enumerate(self.update_buttons[idx][len(self.buy_districts_buttons[idx]) - i:]):
+                    #     u.set_coords(u.x_coord, u.y_coord + 50)
+                    #     u.update_position()
+            for i, update in enumerate(self.update_buttons[idx][::-1]):
+                update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + 50)
+                update.update_position()
+
+            self.change_coords[idx] = False
+
+        for i, building in enumerate(self.update_buttons[idx][::-1]):
+            if len(purchasable[pidx + 1][i]) != 0:
+                building.update(screen, position)
+
+        for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
             if i in purchasable[pidx][:-1]:
                 district.update(screen, position)
             else:
@@ -240,6 +272,13 @@ class CityPanel(BasicPanel):
                 self.buy_units[i] = False
                 self.buy_districts[i] = False
                 self.buy_buildings_city_center[i] = False
+                self.change_coords[i] = True
+
+            for i, district in enumerate(self.buy_districts_buttons[0]):
+                district.set_coords(district.x_coord, self.heights[0][i])
+
+            for i, district in enumerate(self.buy_districts_buttons[0]):
+                district.set_coords(district.x_coord, self.heights[1][i])
 
     def return_to_init_surf(self, position, screen):
         close = self.check_if_in_special_rects(position)
@@ -318,6 +357,7 @@ class CityPanel(BasicPanel):
         screen.blit(text_rendered, text_rect)
 
 
+
     # def draw_error_box(self, screen, start_time, duration=1000):
     #
     #     current_time = time.time()
@@ -331,24 +371,98 @@ class CityPanel(BasicPanel):
     #         return True
     #     return False
 
-    # def try_to_buy_something(self, position, production):
-    #     if self.buy_units:
-    #         for i, unit in enumerate(self.buy_units_buttons):
-    #             if unit.check_for_input(position):
-    #                 if self.units_cost[i] > production:
-    #                     self.error_message_time = time.time()
-    #                 else:
-    #                     print("Unit purchased!")
-    #                     self.error_message_time = None
-    #         return
-    #
-    #     if self.buy_districts:
-    #         for i, district in enumerate(self.buy_districts_buttons):
-    #             if district.check_for_input(position):
-    #                 if self.units_cost[i] > production:
-    #                     self.error_message_time = time.time()
-    #                 else:
-    #                     print("district purchased!")
-    #                     self.error_message_time = None
-    #         return
+    def handle_buy_units(self, buy_func, tile, city, position, idx):
+        if self.buy_units[idx]:
+            for i, key in enumerate(self.buy_units_buttons[idx]):
+                if key.check_for_input(position):
+                    if self.units_cost_production[i] > 100:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Unit purchased!")
+                        buy_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+                        return
+
+    def handle_buy_districts(self, buy_func, tile, city, position, idx):
+        if self.buy_districts[idx]:
+            for i, unit in enumerate(self.buy_units_buttons[0]):
+                if unit.check_for_input(position):
+                    if district_cost > 100:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Unit purchased!")
+                        buy_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+                        return
+            return
+
+    def try_to_buy_something(self, position, city, buy_units_with_production_func, tile):
+        if self.buy_units[0]:
+            for i, unit in enumerate(self.buy_units_buttons[0]):
+                if unit.check_for_input(position):
+                    if self.units_cost_production[i] > 100:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Unit purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+                        return
+            return
+
+        if self.buy_districts[0]:
+            for i, district in enumerate(self.buy_districts_buttons[0]):
+                if district.check_for_input(position):
+                    if district_cost > 200:
+                        self.error_message_time = time.time()
+                    else:
+                        print("district purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+            return
+
+        if self.buy_buildings_city_center[0]:
+            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[0]):
+                if buildings.check_for_input(position):
+                    if district_cost > 200:
+                        self.error_message_time = time.time()
+                    else:
+                        print("district purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+            return
+
+        if self.buy_units[1]:
+            for i, unit in enumerate(self.buy_units_buttons[1]):
+                if unit.check_for_input(position):
+                    if self.units_cost_production[i] > 100:
+                        self.error_message_time = time.time()
+                    else:
+                        print("Unit purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+                        return
+            return
+
+        if self.buy_districts[1]:
+            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[1]):
+                if buildings.check_for_input(position):
+                    if district_cost > 200:
+                        self.error_message_time = time.time()
+                    else:
+                        print("district purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+            return
+
+        if self.buy_buildings_city_center[1]:
+            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[0]):
+                if buildings.check_for_input(position):
+                    if district_cost > 200:
+                        self.error_message_time = time.time()
+                    else:
+                        print("district purchased!")
+                        buy_units_with_production_func(tile[0], tile[1], i)
+                        self.error_message_time = None
+            return
+
 

@@ -1,5 +1,6 @@
 import pygame as pg
 
+import Logic.Unit
 from .BasicPanel import BasicPanel
 from .CityPanel import CityPanel
 from .UnitPanel import UnitPanel
@@ -175,3 +176,21 @@ class PanelInterface:
             move_func(unit[1], unit[2], tile_line, tile_column)
             self.unit_is_moving = False
             self.clicks_unit_is_moving = 0
+
+
+    def buy_units(self, tile_line, tile_column, position, buy_func):
+        if self.city_panel.buy_units[0]:
+            for i, key in enumerate(self.city_panel.buy_units_buttons[0]):
+                if key.check_for_input(position):
+                    if self.city_panel.units_cost_production[i] <= 100:
+                        ret = buy_func(tile_line, tile_column, i)
+                        return
+
+        if self.city_panel.buy_units[1]:
+            for i, key in enumerate(self.city_panel.buy_units_buttons[1]):
+                if key.check_for_input(position):
+                    if self.city_panel.units_cost_production[i] <= 100:
+                        ret = buy_func(tile_line, tile_column, i)
+                        return
+
+    # def buy_buildings(self, tile_line, tile_column, position, buy_func, purchasable):
