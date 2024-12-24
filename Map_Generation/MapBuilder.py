@@ -236,7 +236,7 @@ class MapMesh:
                 self.assets.add_instance_of_at(str, id, h, -1.0)
                 self.resource_type[id] = str
             if type == tile_colors['Grassland']:
-                p = ['Banana', 'Maize', 'Rice', 'Wheat', 'Coffee', 'Horses', 'Marsh', 'Rainforest']
+                p = ['Banana', 'Maize', 'Rice', 'Wheat', 'Coffee', 'Horses', 'Marsh', 'Rainforests']
                 w = [1, 1, 1, 1, 1, 1, 1, 4]
                 str = random.choices(p, weights=w, k=1)[0]
                 if str == 'Marsh':
