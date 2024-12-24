@@ -35,9 +35,9 @@ class BasicPanel:
 
         self.close_rect = pg.Rect(437 + self.center_x, 7 + self.center_y, 40, 42)
 
-    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable):
+    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable, city):
         screen.blit(self.surf, (self.center_x, self.center_y))
-        self.draw_title_text(f"Tile type: {tile_types[tile[0]]}", 45)
+        self.draw_title_text(f"Tile type: {tile_types[tile[0]]}", 45, (self.center_x, self.center_y + 10))
         screen.blit(self.text_rendered, self.text_rect)
 
         i = 1
@@ -73,13 +73,14 @@ class BasicPanel:
 
         self.clicked = True
 
-    def draw_title_text(self, new_text, font_size):
+    def draw_title_text(self, new_text, font_size, center):
         self.text = new_text
         f = pg.font.Font(self.font, font_size)
         self.text_rendered = f.render(self.text, True, "Black")
 
+
         self.text_rect = self.text_rendered.get_rect()
-        self.text_rect.topleft = (self.center_x, self.center_y + 10)
+        self.text_rect.topleft = center
         self.text_rect.centerx = self.surf.get_rect().centerx
 
     def draw_data_text(self, new_text, font_size, idx, delta):

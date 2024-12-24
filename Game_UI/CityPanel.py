@@ -73,7 +73,8 @@ class CityPanel(BasicPanel):
 
     def render_text(self, text_type, center, screen):
         text = "Buy " + text_type + " with:"
-        rendered_text = self.fnt.render(text, True, "Black")
+        fnt = pg.font.Font(self.font, 45)
+        rendered_text = fnt.render(text, True, "Black")
         rect = rendered_text.get_rect(center=(center[0], center[1]))
         screen.blit(rendered_text, rect)
 
@@ -116,7 +117,7 @@ class CityPanel(BasicPanel):
             else:
                 building.draw_button(screen)
 
-    def draw_surf(self, screen, position, tile, unit, purchasable):
+    def draw_surf(self, screen, position, tile, unit, purchasable, city):
         screen.blit(self.surf, (self.center_x, self.center_y))
 
         if not self.buy_districts[0] and not self.buy_units[0] and not self.buy_districts[1] and not self.buy_units[1] and not self.buy_buildings_city_center[0] and not self.buy_buildings_city_center[1]:
@@ -133,7 +134,29 @@ class CityPanel(BasicPanel):
             self.buy_buildings_city_center_button_production.update(screen, position)
             self.buy_buildings_city_center_button_gold.update(screen, position)
             self.clicked = True
+
+        if city is None:
             return
+
+        self.draw_title_text(f"{city[11]}", 45, (self.width + self.center_x, self.center_y + 10))
+        screen.blit(self.text_rendered, self.text_rect)
+        resources_per_turn = ["+" + str(city[0]), "+" + str(city[1]), "+" + str(city[2]), "+" + str(city[3]), "+" + str(city[4])]
+
+        i = 0
+        rects = []
+        for j in range(5):
+            rects.append(pg.Rect(1070 + j * 88, 610, 50, 25))
+
+        for resource in resources_per_turn:
+            self.resources_per_turn(f"{resource}", 25, rects[i], screen)
+            i += 1
+
+        city_information = [("Total Food", city[5]), ("Total Production", city[6]), ("Housing", city[7]), ("Population", city[8]), ("Health", city[9]), ("Combat Strength", city[10])]
+
+        i = 0
+        for information in city_information:
+            self.draw_data_text(f"{information[0]}: {information[1]}", 30, i, screen)
+            i += 1
 
         if self.buy_units[0]:
             self.draw_purchase_units(0, 1, screen, position, purchasable)
@@ -164,6 +187,7 @@ class CityPanel(BasicPanel):
             self.draw_purchase_city_center_buildings(1, 6, screen, position, purchasable)
             self.clicked = True
             return
+
 
     def check_if_in_special_rects(self, position):
         close = True
@@ -264,6 +288,35 @@ class CityPanel(BasicPanel):
             ret = ret or self.buy_units[i] or self.buy_districts[i] or self.buy_buildings_city_center[i]
 
         return ret
+
+    def draw_title_text(self, new_text, font_size, center):
+        self.text = new_text
+        f = pg.font.Font(self.font, font_size)
+        self.text_rendered = f.render(self.text, True, "Black")
+
+        temp = self.surf.get_rect()
+        temp.center = self.text_rect.center
+        self.text_rect = self.text_rendered.get_rect()
+        self.text_rect.topleft = center
+        self.text_rect.centerx = temp.centerx
+
+    def resources_per_turn(self, new_text, font_size, rect, screen):
+        f = pg.font.Font(self.font, font_size)
+        text_rendered = f.render(new_text, True, self.text_color)
+
+        # text_rect = text_rendered.get_rect()
+        text_rect = rect
+        screen.blit(text_rendered, text_rect)
+
+    def draw_data_text(self, new_text, font_size, idx, screen):
+        text = new_text
+        f = pg.font.Font(self.font, font_size)
+        text_rendered = f.render(text, True, self.text_color)
+
+        text_rect = text_rendered.get_rect()
+        text_rect.topleft = (self.center_x + 10, self.height - (self.center_y - 10 + 35 * idx))
+        screen.blit(text_rendered, text_rect)
+
 
     # def draw_error_box(self, screen, start_time, duration=1000):
     #

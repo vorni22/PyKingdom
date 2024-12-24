@@ -1,4 +1,3 @@
-import time
 import pygame as pg
 
 from .BasicPanel import BasicPanel
@@ -10,7 +9,7 @@ from UI.CircleButton import CircleButton
 
 class PanelInterface:
     def __init__(self, width, height):
-        city_panel_back = pg.image.load("Assets/MainMenu/ct3.png")
+        city_panel_back = pg.image.load("Assets/MainMenu/city_panel.png")
         basic_panel_back = pg.image.load("Assets/MainMenu/tile_panel.png")
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
         next_turn_back = pg.image.load("Assets/MainMenu/next_turn_button.png")
@@ -33,7 +32,7 @@ class PanelInterface:
         self.clicks_unit_is_moving = 0
         self.temp = False
 
-    def draw_interface(self, screen, position, objects, tile, unit, purchasable):
+    def draw_interface(self, screen, position, objects, tile, unit, purchasable, city):
         if not self.unit_is_moving:
             if self.sw:
                 for obj in objects:
@@ -52,13 +51,13 @@ class PanelInterface:
                 self.sw = False
 
             if self.clicked_options[0]:
-                self.tile_panel.draw_surf(screen, position, tile, unit, purchasable)
+                self.tile_panel.draw_surf(screen, position, tile, unit, purchasable, city)
 
             if self.clicked_options[1]:
-                self.unit_panel.draw_surf(screen, position, tile, unit, purchasable)
+                self.unit_panel.draw_surf(screen, position, tile, unit, purchasable, city)
 
             if self.clicked_options[2]:
-                self.city_panel.draw_surf(screen, position, tile, unit, purchasable)
+                self.city_panel.draw_surf(screen, position, tile, unit, purchasable, city)
 
             self.clicked = True
 

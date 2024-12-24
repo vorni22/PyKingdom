@@ -20,7 +20,7 @@ class UnitPanel(BasicPanel):
 
         return False
 
-    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable):
+    def draw_surf(self, screen, mouse_pos, tile, unit, purchasable, city):
         if unit[3] is None:
             return
         if 3 in unit[0]:
@@ -28,7 +28,7 @@ class UnitPanel(BasicPanel):
             screen.blit(self.settler_surf, (self.center_x, self.center_y))
         else:
             screen.blit(self.surf, (self.center_x, self.center_y))
-        self.draw_title_text(f"Unit class: {unit[3][4]}", 45)
+        self.draw_title_text(f"Unit class: {unit[3][4]}", 45, (self.center_x, self.center_y + 10))
         screen.blit(self.text_rendered, self.text_rect)
 
         self.render_text(unit[3][0], (200, 119), screen)

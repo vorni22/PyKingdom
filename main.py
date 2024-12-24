@@ -121,6 +121,7 @@ panels = PanelInterface(WIDTH, HEIGHT)
 objects = [0, 1, 2]
 tile = None
 unit = None
+city = None
 
 tile_id = -1
 
@@ -177,6 +178,7 @@ while running:
                             purchasable = game.get_city_actions(tile_line, tile_column)
                             unit_info = game.get_unit_information(tile_line, tile_column)
                             unit = (unit_t, tile_line, tile_column, unit_info)
+                            city = game.get_city_information(tile_line, tile_column)
                     if game.is_player_turn:
                         panels.end_turn(mouse_pos, game.end_turn)
                     panels.update_interface(game.move_unit, unit, (tile_line, tile_column))
@@ -230,7 +232,7 @@ while running:
         panels.end_turn_button.draw(screen_surf)
         if panels.clicked:
             if game.is_player_turn:
-                panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable)
+                panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable, city)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
