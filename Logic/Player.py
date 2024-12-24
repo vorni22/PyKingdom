@@ -214,7 +214,7 @@ class Player:
     def build_unit_with_production(self, city_line, city_column, unit_type_id, unit_name_id):
         for city in self.cities:
             if city.center_line_location == city_line and city.center_column_location == city_column:
-                ret_code = city.build_unit_with_production(unit_type_id, unit_name_id, self)
+                ret_code = city.build_unit_with_production(unit_type_id, unit_name_id)
                 if ret_code == 0:
                     self.add_units(unit_type_id, unit_name_id, city_line, city_column)
                 return ret_code
