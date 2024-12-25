@@ -1,5 +1,4 @@
 import pygame as pg
-import time
 
 from UI.Button import Button
 from .BasicPanel import BasicPanel
@@ -62,10 +61,10 @@ class CityPanel(BasicPanel):
             self.buy_districts_buttons[1].append(Button(bg, w, h - i * 50 - 50, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
             self.heights[1].append(h - i * 50)
 
-        for i, building_name in enumerate(city_center_buildings):
+        for i, building_name in enumerate(city_center_buildings[1:]):
             self.buy_buildings_city_center_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
 
-        for i, building_name in enumerate(city_center_buildings):
+        for i, building_name in enumerate(city_center_buildings[1:]):
             self.buy_buildings_city_center_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost_gold), 350, 30),None, "White", "Gray", 30))
 
         self.update_buttons = [[], []]
@@ -117,9 +116,6 @@ class CityPanel(BasicPanel):
                         d.set_coords(d.x_coord, d.y_coord + 50)
                         d.update_position()
 
-                    # for j, u in enumerate(self.update_buttons[idx][len(self.buy_districts_buttons[idx]) - i:]):
-                    #     u.set_coords(u.x_coord, u.y_coord + 50)
-                    #     u.update_position()
             for i, update in enumerate(self.update_buttons[idx][::-1]):
                 update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + 50)
                 update.update_position()
@@ -172,7 +168,7 @@ class CityPanel(BasicPanel):
 
         self.draw_title_text(f"{city[11]}", 45, (self.width + self.center_x, self.center_y + 10))
         screen.blit(self.text_rendered, self.text_rect)
-        resources_per_turn = ["+" + str(city[0]), "+" + str(city[1]), "+" + str(city[2]), "+" + str(city[3]), "+" + str(city[4])]
+        resources_per_turn = ["+" + str(round(city[0])), "+" + str(round(city[1])), "+" + str(round(city[2])), "+" + str(round(city[3])), "+" + str(round(city[4]))]
 
         i = 0
         rects = []
@@ -302,22 +298,22 @@ class CityPanel(BasicPanel):
     def switch_to_buy_units_districts(self, position):
         if self.check_if_rendered():
             return
-        if self.buy_units_button_production.check_for_input(position) and not self.buy_districts[0]:
+        if self.buy_units_button_production.check_for_input(position):
             self.buy_units[0] = True
             return
-        if self.buy_districts_button_production.check_for_input(position) and not self.buy_units[0]:
+        if self.buy_districts_button_production.check_for_input(position):
             self.buy_districts[0] = True
             return
-        if self.buy_units_button_gold.check_for_input(position) and not self.buy_districts[1]:
+        if self.buy_units_button_gold.check_for_input(position):
             self.buy_units[1] = True
             return
-        if self.buy_districts_button_gold.check_for_input(position) and not self.buy_units[1]:
+        if self.buy_districts_button_gold.check_for_input(position):
             self.buy_districts[1] = True
             return
-        if self.buy_buildings_city_center_button_production.check_for_input(position) and not self.buy_buildings_city_center[0]:
+        if self.buy_buildings_city_center_button_production.check_for_input(position):
             self.buy_buildings_city_center[0] = True
             return
-        if self.buy_buildings_city_center_button_gold.check_for_input(position) and not self.buy_buildings_city_center[1]:
+        if self.buy_buildings_city_center_button_gold.check_for_input(position):
             self.buy_buildings_city_center[1] = True
             return
 
@@ -343,7 +339,6 @@ class CityPanel(BasicPanel):
         f = pg.font.Font(self.font, font_size)
         text_rendered = f.render(new_text, True, self.text_color)
 
-        # text_rect = text_rendered.get_rect()
         text_rect = rect
         screen.blit(text_rendered, text_rect)
 
@@ -370,99 +365,5 @@ class CityPanel(BasicPanel):
     #         screen.blit(text, text_rect)
     #         return True
     #     return False
-
-    def handle_buy_units(self, buy_func, tile, city, position, idx):
-        if self.buy_units[idx]:
-            for i, key in enumerate(self.buy_units_buttons[idx]):
-                if key.check_for_input(position):
-                    if self.units_cost_production[i] > 100:
-                        self.error_message_time = time.time()
-                    else:
-                        print("Unit purchased!")
-                        buy_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-                        return
-
-    def handle_buy_districts(self, buy_func, tile, city, position, idx):
-        if self.buy_districts[idx]:
-            for i, unit in enumerate(self.buy_units_buttons[0]):
-                if unit.check_for_input(position):
-                    if district_cost > 100:
-                        self.error_message_time = time.time()
-                    else:
-                        print("Unit purchased!")
-                        buy_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-                        return
-            return
-
-    def try_to_buy_something(self, position, city, buy_units_with_production_func, tile):
-        if self.buy_units[0]:
-            for i, unit in enumerate(self.buy_units_buttons[0]):
-                if unit.check_for_input(position):
-                    if self.units_cost_production[i] > 100:
-                        self.error_message_time = time.time()
-                    else:
-                        print("Unit purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-                        return
-            return
-
-        if self.buy_districts[0]:
-            for i, district in enumerate(self.buy_districts_buttons[0]):
-                if district.check_for_input(position):
-                    if district_cost > 200:
-                        self.error_message_time = time.time()
-                    else:
-                        print("district purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-            return
-
-        if self.buy_buildings_city_center[0]:
-            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[0]):
-                if buildings.check_for_input(position):
-                    if district_cost > 200:
-                        self.error_message_time = time.time()
-                    else:
-                        print("district purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-            return
-
-        if self.buy_units[1]:
-            for i, unit in enumerate(self.buy_units_buttons[1]):
-                if unit.check_for_input(position):
-                    if self.units_cost_production[i] > 100:
-                        self.error_message_time = time.time()
-                    else:
-                        print("Unit purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-                        return
-            return
-
-        if self.buy_districts[1]:
-            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[1]):
-                if buildings.check_for_input(position):
-                    if district_cost > 200:
-                        self.error_message_time = time.time()
-                    else:
-                        print("district purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-            return
-
-        if self.buy_buildings_city_center[1]:
-            for i, buildings in enumerate(self.buy_buildings_city_center_buttons[0]):
-                if buildings.check_for_input(position):
-                    if district_cost > 200:
-                        self.error_message_time = time.time()
-                    else:
-                        print("district purchased!")
-                        buy_units_with_production_func(tile[0], tile[1], i)
-                        self.error_message_time = None
-            return
 
 

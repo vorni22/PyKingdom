@@ -36,9 +36,10 @@ class UnitPanel(BasicPanel):
         i = 1
         unit_information = [("Melee Strength", unit[3][1]), ("Ranged Strength", unit[3][2]), ("Movement", unit[3][3])]
         for information in unit_information:
-            self.draw_data_text(f"{information[0]}: {information[1]}", 30, i, 50)
-            screen.blit(self.text_rendered, self.text_rect)
-            i += 1
+            if information[1] >= 0:
+                self.draw_data_text(f"{information[0]}: {information[1]}", 30, i, 50)
+                screen.blit(self.text_rendered, self.text_rect)
+                i += 1
 
     def settle_city(self, position, screen, unit, settle_func):
         if self.settler_rect.collidepoint(position) and 3 in unit[0]:

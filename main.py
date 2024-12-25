@@ -122,6 +122,7 @@ objects = [0, 1, 2]
 tile = None
 unit = None
 city = None
+sw = True
 
 tile_id = -1
 
@@ -134,6 +135,9 @@ purchasable_buildings_gold = [[0], [], [0], [], [], [], []]
 purchasable = (True, purchasable_units, purchasable_districts, purchasable_buildings, purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 tile_line = -1
 tile_column = -1
+tile_l = -1
+tile_c = -1
+city_pos = None
 
 while running:
     current_time = time.time()
@@ -181,9 +185,10 @@ while running:
                             unit_info = game.get_unit_information(tile_line, tile_column)
                             unit = (unit_t, tile_line, tile_column, unit_info)
                             city = game.get_city_information(tile_line, tile_column)
+                            city_pos = (tile_line, tile_column)
                     if game.is_player_turn:
                         panels.end_turn(mouse_pos, game.end_turn)
-                    panels.update_interface(game.move_unit, unit, (tile_line, tile_column))
+                    panels.update_interface(game.move_unit, unit, (tile_line, tile_column), game.purchase_district_with_production, game.purchase_district_with_gold)
                 elif action == 0:
                     running = False
 
@@ -230,8 +235,12 @@ while running:
             game = ret
         if not game.is_player_turn:
             game.start_turn()
-        panels.status_panel.draw(screen_surf)
-        panels.end_turn_button.draw(screen_surf)
+
+        panels.status_panel.draw(screen_surf, game.get_player_information)
+        if panels.end_turn_button.rendered or sw:
+            panels.end_turn_button.draw(screen_surf)
+            sw = False
+
         if panels.clicked:
             if game.is_player_turn:
                 panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable, city)
@@ -247,15 +256,19 @@ while running:
                             if not panels.cursor_is_on_ui(mouse_pos):
                                 mouse_y = HEIGHT - mouse_pos[1]
                                 mouse_x = mouse_pos[0]
-                                if tile_line == -1 or tile_column == -1:
+                                if tile_l == -1 or tile_c == -1:
                                     tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
-                                    tile_line = tid % size[1]
-                                    tile_column = tid // size[1]
+                                    tile_l = tid % size[1]
+                                    tile_c = tid // size[1]
                             panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
                             if panels.unit_is_moving:
                                 panels.clicks_unit_is_moving += 1
-                            panels.move_units(unit, mouse_pos, screen_surf, tile_line, tile_column, game.move_unit)
-                            panels.buy_units(tile_line, tile_column, mouse_pos, game.purchase_unit_with_production)
+                            print(tile_l, tile_c)
+                            panels.move_units(unit, mouse_pos, screen_surf, tile_l, tile_c, game.move_unit)
+                            panels.count_clicks()
+                            panels.buy_units(tile_l, tile_c, mouse_pos, game, city)
+                            panels.buy_buildings(tile_l, tile_c, mouse_pos, game, city)
+                            panels.buy_districts(city_pos[0], city_pos[1], mouse_pos, game, city, tile_l, tile_c)
 
     # UI end here
 
@@ -273,6 +286,5 @@ while running:
 
 shader.del_shader()
 pg.quit()
-
 
 
