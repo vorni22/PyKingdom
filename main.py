@@ -177,7 +177,7 @@ while running:
                             objects = game.identify_object(tile_line, tile_column)
                             tile = game.get_tile(tile_line, tile_column)
                             unit_t = game.get_unit_actions(tile_line, tile_column)
-                            # purchasable = game.get_city_actions(tile_line, tile_column)
+                            purchasable = game.get_city_actions(tile_line, tile_column)
                             unit_info = game.get_unit_information(tile_line, tile_column)
                             unit = (unit_t, tile_line, tile_column, unit_info)
                             city = game.get_city_information(tile_line, tile_column)

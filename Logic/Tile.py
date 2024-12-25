@@ -2,7 +2,7 @@ import Logic.Resources as Resources
 
 tile_types = ['Plains', 'Grassland', 'Shallow Water', 'Ocean', 'Mountain', 'Peaks', None]
 tile_basic_resources = ['Banana', 'Wheat', 'Rice', 'Maize', 'Stone', 'Fish', 'Crabs', None]
-tile_features = ['Woods', 'Rainforest', 'Marsh', 'Coral Reef', None]
+tile_features = ['Woods', 'Rainforests', 'Marsh', 'Coral Reef', None]
 tile_strategic_resources = ['Horses', 'Iron', 'Niter', 'Coal', None]
 tile_luxury_resources = ['Mercury', 'Silk', 'Turtles', 'Coffee', 'Diamonds', None]
 

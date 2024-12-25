@@ -120,28 +120,40 @@ class Map:
     def init_unit_graph():
         for i, j in np.ndindex(Map.lines, Map.columns):
             if j > 0:
-                if Map.get_tile(i, j - 1).movement_cost == 'Unpassable':
+                if (Map.get_tile(i, j - 1).movement_cost == 'Unpassable'
+                    or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i, j - 1).type_id in [2, 3])
+                    or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i, j - 1).type_id in [0, 1, 4, 5])
+                    ):
                     Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j - 1,
                                                  weight=float('inf'))
                 else:
                     Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j - 1,
                                                  weight=Map.get_tile(i, j - 1).movement_cost)
             if j < Map.columns - 1:
-                if Map.get_tile(i, j + 1).movement_cost == 'Unpassable':
+                if (Map.get_tile(i, j + 1).movement_cost == 'Unpassable'
+                    or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i, j + 1).type_id in [2, 3])
+                    or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i, j + 1).type_id in [0, 1, 4, 5])
+                    ):
                     Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j + 1,
                                                  weight=float('inf'))
                 else:
                     Map.G_unit_distance.add_edge(i * Map.columns + j, i * Map.columns + j + 1,
                                                  weight=Map.get_tile(i, j + 1).movement_cost)
             if i < Map.lines - 1:
-                if Map.get_tile(i + 1, j).movement_cost == 'Unpassable':
+                if (Map.get_tile(i + 1, j).movement_cost == 'Unpassable'
+                    or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i + 1, j).type_id in [2, 3])
+                    or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i + 1, j).type_id in [0, 1, 4, 5])
+                    ):
                     Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j,
                                                  weight=float('inf'))
                 else:
                     Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j,
                                                  weight=Map.get_tile(i + 1, j).movement_cost)
             if i > 0:
-                if Map.get_tile(i - 1, j).movement_cost == 'Unpassable':
+                if (Map.get_tile(i - 1, j).movement_cost == 'Unpassable'
+                    or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i - 1, j).type_id in [2, 3])
+                    or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i - 1, j).type_id in [0, 1, 4, 5])
+                    ):
                     Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j,
                                                  weight=float('inf'))
                 else:
@@ -149,14 +161,20 @@ class Map:
                                                  weight=Map.get_tile(i - 1, j).movement_cost)
             if i % 2:
                 if i < Map.lines - 1 and j < Map.columns - 1:
-                    if Map.get_tile(i + 1, j + 1).movement_cost == 'Unpassable':
+                    if (Map.get_tile(i + 1, j + 1).movement_cost == 'Unpassable'
+                        or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i + 1, j + 1).type_id in [2, 3])
+                        or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i + 1, j + 1).type_id in [0, 1, 4, 5])
+                        ):
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j + 1,
                                                      weight=float('inf'))
                     else:
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j + 1,
                                                      weight=Map.get_tile(i + 1, j + 1).movement_cost)
                 if i > 0 and j < Map.columns - 1:
-                    if Map.get_tile(i - 1, j + 1).movement_cost == 'Unpassable':
+                    if (Map.get_tile(i - 1, j + 1).movement_cost == 'Unpassable'
+                        or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i - 1, j + 1).type_id in [2, 3])
+                        or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i - 1, j + 1).type_id in [0, 1, 4, 5])
+                        ):
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j + 1,
                                                      weight=float('inf'))
                     else:
@@ -164,21 +182,27 @@ class Map:
                                                      weight=Map.get_tile(i - 1, j + 1).movement_cost)
             else:
                 if i < Map.lines - 1 and j > 0:
-                    if Map.get_tile(i + 1, j - 1).movement_cost == 'Unpassable':
+                    if (Map.get_tile(i + 1, j - 1).movement_cost == 'Unpassable'
+                        or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i + 1, j - 1).type_id in [2, 3])
+                        or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i + 1, j - 1).type_id in [0, 1, 4, 5])
+                        ):
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j - 1,
                                                      weight=float('inf'))
                     else:
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i + 1) * Map.columns + j - 1,
                                                      weight=Map.get_tile(i + 1, j - 1).movement_cost)
                 if i > 0 and j > 0:
-                    if Map.get_tile(i - 1, j - 1).movement_cost == 'Unpassable':
+                    if (Map.get_tile(i - 1, j - 1).movement_cost == 'Unpassable'
+                        or (Map.get_tile(i, j).type_id in [0, 1, 4, 5] and Map.get_tile(i - 1, j - 1).type_id in [2, 3])
+                        or (Map.get_tile(i, j).type_id in [2, 3] and Map.get_tile(i - 1, j - 1).type_id in [0, 1, 4, 5])
+                        ):
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
                                                      weight=float('inf'))
                     else:
                         Map.G_unit_distance.add_edge(i * Map.columns + j, (i - 1) * Map.columns + j - 1,
                                                      weight=Map.get_tile(i - 1, j - 1).movement_cost)
-        Map.unit_shortest_distances = dict(nx.all_pairs_shortest_path_length(Map.G_unit_distance))
-        Map.unit_shortest_paths = dict(nx.all_pairs_shortest_path(Map.G_unit_distance))
+        Map.unit_shortest_distances = dict(nx.all_pairs_dijkstra_path_length(Map.G_unit_distance, weight='weight'))
+        Map.unit_shortest_paths = dict(nx.all_pairs_dijkstra_path(Map.G_unit_distance, weight='weight'))
         # for i in range(0, Map.lines * Map.columns):
         #    Map.unit_shortest_distances.append(nx.single_source_dijkstra_path_length(Map.G_unit_distance, i))
 

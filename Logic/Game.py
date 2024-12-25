@@ -124,23 +124,46 @@ class Game:
         return possible_actions
 
     def purchase_unit_with_production(self, tile_line, tile_column, unit_type_id):
-        purchase_result = self.players[self.current_player].build_unit_with_production(tile_line, tile_column,
+        print(tile_line, tile_column, unit_type_id)
+        place_line = tile_line
+        place_column = tile_column
+        if unit_type_id in [4, 5]:
+            for city in self.players[self.current_player].cities:
+                if city.center_line_location == tile_line and city.center_column_location == tile_column:
+                    for tile in city.tiles:
+                        if tile.type_id in [2, 3] and (tile.line, tile.column) not in self.units_coordinates:
+                            place_line = tile.line
+                            place_column = tile.column
+
+        purchase_result = self.players[self.current_player].build_unit_with_production(place_line, place_column,
+                                                                                       tile_line, tile_column,
                                                                                        unit_type_id, 0)
-        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
+        coords = self.map_interface.convert_coordinates_to_mine(place_line, place_column)
         if purchase_result == 0:
             unit_id = self.map_interface.add_unit_on_tile(coords, Unit.unit_classes[unit_type_id], self.current_player)
             self.players[self.current_player].units[len(self.players[self.current_player].units) - 1].unit_id = unit_id
+            self.units_coordinates.append((place_line, place_column))
             return True
         # some error happened, not supposed to be able to call this function if the resources aren't in possession
         return False
 
     def purchase_unit_with_gold(self, tile_line, tile_column, unit_type_id):
-        purchase_result = self.players[self.current_player].build_unit_with_gold(tile_line, tile_column,
+        place_line = tile_line
+        place_column = tile_column
+        if unit_type_id in [4, 5]:
+            for city in self.players[self.current_player].cities:
+                if city.center_line_location == tile_line and city.center_column_location == tile_column:
+                    for tile in city.tiles:
+                        if tile.type_id in [2, 3] and (tile.line, tile.column) not in self.units_coordinates:
+                            place_line = tile.line
+                            place_column = tile.column
+        purchase_result = self.players[self.current_player].build_unit_with_gold(place_line, place_column,
                                                                                  unit_type_id, 0)
-        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
+        coords = self.map_interface.convert_coordinates_to_mine(place_line, place_column)
         if purchase_result == 0:
             unit_id = self.map_interface.add_unit_on_tile(coords, Unit.unit_classes[unit_type_id], self.current_player)
             self.players[self.current_player].units[len(self.players[self.current_player].units) - 1].unit_id = unit_id
+            self.units_coordinates.append((place_line, place_column))
             return True
         # some error happened, not supposed to be able to call this function if the resources aren't in possession
         return False
@@ -152,7 +175,7 @@ class Game:
             if unit.position_line == tile_line and unit.position_column == tile_column:
                 moved_unit = unit
         # if it's a settler, it can only move, so cancel any movements on tiles where other players / cities are
-        is_settler = moved_unit.type_id == 6
+        is_settler = (moved_unit.type_id == 6)
         # check if movement is valid
         can_move = (Map.Map.get_unit_shortest_distance(tile_line, tile_column, new_tile_line, new_tile_column)
                     <= moved_unit.remaining_movement)
@@ -161,13 +184,17 @@ class Game:
         # if the unit can cause a ranged attack, do it and finish this unit's turn
         if can_ranged_attack:
             if 1 in objects:
-                unit_owner = self.get_unit_owner(tile_line, tile_column)
+                unit_owner = self.get_unit_owner(new_tile_line, new_tile_column)
                 if unit_owner != self.current_player:
                     for unit in self.players[unit_owner].units:
                         if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
                             unit.calculate_ranged_combat_with_unit(moved_unit)
+                            if unit.health_percentage <= 0:
+                                self.map_interface.clr_unit(unit.unit_id)
+                                self.players[unit_owner].delete_units(new_tile_line, new_tile_column)
                             moved_unit.remaining_movement = 0
                             moved_unit.range = 0
+                            unit.health_percentage = round(unit.health_percentage)
                             return True
             if 2 in objects:
                 city_owner = self.get_city_owner(new_tile_line, new_tile_column)
@@ -178,6 +205,7 @@ class Game:
                             city.ranged_combat(moved_unit)
                             moved_unit.remaining_movement = 0
                             moved_unit.range = 0
+                            city.health_percentage = max(round(city.health_percentage), 0)
                             return True
         # check if unit can move to the position and if there is a unit or city there, attack it
         # before attacking, check if the next-to-last tile on the path can be moved to, and if it can,
@@ -199,6 +227,8 @@ class Game:
                 if unit.position_line == new_tile_line and unit.position_column == new_tile_column:
                     unit.calculate_melee_combat_with_unit(moved_unit)
                     moved_unit.calculate_melee_combat_with_unit(unit)
+                    unit.health_percentage = round(unit.health_percentage)
+                    moved_unit.health_percentage = round(moved_unit.health_percentage)
                     if unit.health_percentage <= 0:
                         self.players[unit_owner].delete_units(new_tile_line, new_tile_column)
                         self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
@@ -218,6 +248,8 @@ class Game:
                 if city.center_line_location == new_tile_line and city.center_column_location == new_tile_column:
                     city.melee_combat(moved_unit)
                     moved_unit.calculate_melee_combat_with_city(city)
+                    city.health_percentage = round(city.health_percentage)
+                    moved_unit.health_percentage = round(moved_unit.health_percentage)
                     if city.health_percentage <= 0:
                         ret = self.players[city_owner].delete_city(new_tile_line, new_tile_column)
                         if ret == 1:
@@ -450,8 +482,14 @@ class Game:
                     purchasable_units_gold[5].extend([0])
 
                 if (tile_line, tile_column) in self.units_coordinates:
-                    purchasable_units = [[], [], [], [], [], [], []]
-                    purchasable_units_gold = [[], [], [], [], [], [], []]
+                    purchasable_units = [[], [], [], [], purchasable_units[4], purchasable_units[5], []]
+                    purchasable_units_gold = [[], [], [], [], purchasable_units_gold[4],
+                                              purchasable_units_gold[5], []]
+                if not city.is_coastal:
+                    purchasable_units[4] = []
+                    purchasable_units[5] = []
+                    purchasable_units_gold[4] = []
+                    purchasable_units_gold[5] = []
 
         return (True, purchasable_units, purchasable_districts, purchasable_buildings,
                purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)

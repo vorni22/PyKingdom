@@ -114,9 +114,9 @@ class Unit:
                 self.ranged_strength = 35
         elif type_id == 3:
             if name_id == 0:
-                self.ranged_strength = 10
+                self.ranged_strength = 15
             elif name_id == 1:
-                self.ranged_strength = 20
+                self.ranged_strength = 25
             elif name_id == 2:
                 self.ranged_strength = 35
         elif type_id == 5:

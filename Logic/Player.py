@@ -83,7 +83,7 @@ class Player:
                 return 0
 
     def add_units(self, unit_name_id, unit_type_id, unit_line, unit_column):
-        self.units.append(Unit.Unit(unit_name_id, unit_type_id, unit_line, unit_column))
+        self.units.append(Unit.Unit(unit_type_id, unit_name_id, unit_line, unit_column))
 
     def delete_units(self, location_line, location_column):
         for unit in self.units:
@@ -134,6 +134,8 @@ class Player:
                 return city.build_building_with_production(building_name_id, district_type_id)
 
     def build_building_with_gold(self, city_line, city_column, district_type_id, building_name_id):
+        if self.resources.gold_count == 0:
+            return 1
         for city in self.cities:
             if city.city_line == city_line and city.city_column == city_column:
                 district = city.get_district_by_type(district_type_id)
@@ -211,15 +213,17 @@ class Player:
                 district.add_building(building_name_id)
                 return 0
 
-    def build_unit_with_production(self, city_line, city_column, unit_type_id, unit_name_id):
+    def build_unit_with_production(self, unit_line, unit_column, city_line, city_column, unit_type_id, unit_name_id):
         for city in self.cities:
             if city.center_line_location == city_line and city.center_column_location == city_column:
                 ret_code = city.build_unit_with_production(unit_type_id, unit_name_id)
                 if ret_code == 0:
-                    self.add_units(unit_type_id, unit_name_id, city_line, city_column)
+                    self.add_units(unit_type_id, unit_name_id, unit_line, unit_column)
                 return ret_code
 
-    def build_unit_with_gold(self, city_line, city_column, unit_type_id, unit_name_id):
+    def build_unit_with_gold(self, unit_line, unit_column, unit_type_id, unit_name_id):
+        if self.resources.gold_count == 0:
+            return 1
         if unit_type_id == 0:
             if self.resources.gold_count < Unit.melee_units_costs[unit_name_id] * 2:
                 remaining_gold = (Unit.melee_units_costs[unit_name_id] * 2 -
@@ -290,7 +294,7 @@ class Player:
                     return remaining_gold // self.resources_per_turn.gold_per_turn_count + 1
             else:
                 self.resources.gold_count -= Unit.civilian_units_costs * 2
-        self.add_units(unit_name_id, unit_type_id, city_line, city_column)
+        self.add_units(unit_name_id, unit_type_id, unit_line, unit_column)
         return 0
 
     def move_unit(self, unit_position_line, unit_position_column, unit_new_line, unit_new_column):

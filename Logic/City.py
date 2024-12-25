@@ -163,6 +163,8 @@ class City:
         self.health_percentage = 100
         self.melee_combat_strength = 15
         self.is_capital = False
+        self.is_coastal = False
+        self.check_if_coastal()
 
     def add_tiles(self, line, column):
         ref = Map.Map.get_tile(line, column - 1)
@@ -254,7 +256,7 @@ class City:
             self.city_resources_per_turn.food_per_turn_count *= 1.25
 
         self.city_resources.food_count += self.city_resources_per_turn.food_per_turn_count
-        self.city_resources_per_turn.production_per_turn_count += self.city_resources_per_turn.production_per_turn_count
+        self.city_resources.production_count += self.city_resources_per_turn.production_per_turn_count
         # update population
         if self.city_resources.food_count >= self.population * 11 + 4:
             self.city_resources.food_count -= self.population * 11 + 4
@@ -305,6 +307,8 @@ class City:
 
     def build_building_with_production(self, building_name_id, district_type_id):
         district = self.get_district_by_type(district_type_id)
+        if self.city_resources.production_count == 0:
+            return 1
         if district.district_type_id == 0:
             if self.city_resources.production_count < campus_buildings_costs[building_name_id]:
                 remaining_production = self.city_resources.production_count - campus_buildings_costs[building_name_id]
@@ -381,6 +385,8 @@ class City:
         return 0
 
     def build_unit_with_production(self, unit_type_id, unit_name_id):
+        if self.city_resources.production_count == 0:
+            return 1
         if unit_type_id == 0:
             if self.city_resources.production_count < Unit.melee_units_costs[unit_name_id]:
                 remaining_production = (self.city_resources.production_count -
@@ -453,3 +459,8 @@ class City:
                 self.city_resources.production_count -= Unit.civilian_units_costs
 
         return 0
+
+    def check_if_coastal(self):
+        for tile in self.tiles:
+            if tile.type_id in [2, 3]:
+                self.is_coastal = True
