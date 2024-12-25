@@ -44,7 +44,7 @@ class Player:
                 continue
             if Map.Map.get_tile(self.capital_line, self.capital_column).type_id in [0, 1]:
                 # add starting settler
-                self.add_units(6, 0, self.capital_line, self.capital_column)
+                self.add_units(0, 6, self.capital_line, self.capital_column)
                 # search for nearby good tile and give the player a warrior
                 if Map.Map.get_tile(self.capital_line + 1, self.capital_column).type_id in [0, 1]:
                     self.add_units(0, 0, self.capital_line + 1, self.capital_column)
@@ -218,7 +218,7 @@ class Player:
             if city.center_line_location == city_line and city.center_column_location == city_column:
                 ret_code = city.build_unit_with_production(unit_type_id, unit_name_id)
                 if ret_code == 0:
-                    self.add_units(unit_type_id, unit_name_id, unit_line, unit_column)
+                    self.add_units(unit_name_id, unit_type_id, unit_line, unit_column)
                 return ret_code
 
     def build_unit_with_gold(self, unit_line, unit_column, unit_type_id, unit_name_id):
