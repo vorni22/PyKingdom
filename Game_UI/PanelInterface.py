@@ -1,3 +1,5 @@
+import time
+
 import pygame as pg
 
 from .BasicPanel import BasicPanel
@@ -14,6 +16,7 @@ class PanelInterface:
         basic_panel_back = pg.image.load("Assets/MainMenu/tile_panel.png")
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
         next_turn_back = pg.image.load("Assets/MainMenu/next_turn_button.png")
+        self.loading_screen = pg.image.load("Assets/MainMenu/Loading_screen.png")
         self.width = width
         self.height = height
         self.clicked = False
@@ -35,6 +38,8 @@ class PanelInterface:
         self.district_is_purchased_p = False
         self.district_is_purchased_g = False
         self.clicks_district_is_purchased = 0
+        self.load_screen = False
+        self.start_time = None
 
     def draw_interface(self, screen, position, objects, tile, unit, purchasable, city):
         if not self.unit_is_moving:
@@ -183,6 +188,7 @@ class PanelInterface:
         if self.end_turn_button.rendered:
             if self.end_turn_button.circle_collidepoint(position):
                 print("end turn")
+
                 self.clicks = [0, 0, 0, 0, 0, 0]
                 self.clicked_options = [False for _ in self.clicked_options]
 
@@ -197,6 +203,8 @@ class PanelInterface:
                     self.city_panel.buy_districts[i] = False
                     self.city_panel.buy_buildings_city_center[i] = False
                 player_end_turn()
+                self.load_screen = True
+                self.start_time = pg.time.get_ticks()
 
     def move_units(self, unit, position, screen, tile_line, tile_column, move_func):
         if not self.unit_is_moving:
@@ -295,11 +303,10 @@ class PanelInterface:
                                 self.bdistrict_g = (city_line, city_column, tile_line, tile_column, i)
                             return
 
-    # def buy_district(self, game, tile_line, tile_column):
-    #     if self.district_is_purchased_p:
-    #         game.purchase_district_with_production(self.bdistrict_p[0], self.bdistrict_p[1], tile_line, tile_column, self.bdistrict_p[4])
-    #         return
-    #
-    #     if self.district_is_purchased_g:
-    #         game.purchase_district_with_production(self.bdistrict_p[0], self.bdistrict_p[1], tile_line, tile_column, self.bdistrict_p[4])
-    #         return
+
+    def draw_loading_screen(self, screen):
+        if self.load_screen:
+            if pg.time.get_ticks() - self.start_time > 1000:
+                self.load_screen = False
+                return
+            screen.blit(self.loading_screen, (0, 0))
