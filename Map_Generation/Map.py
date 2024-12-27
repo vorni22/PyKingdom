@@ -213,11 +213,9 @@ class Map:
     @staticmethod
     def get_unit_reachable_tiles(start_line, start_col, max_distance):
         source = start_line * Map.columns + start_col
-        reachable_nodes = [node for node, weight in
-                           nx.single_source_dijkstra_path_length(Map.G_unit_distance,
-                                                                 source, max_distance, weight='weight')
-                           ]
-        reachable_tiles_coordinates = [(x // Map.columns, x % Map.columns) for x in reachable_nodes]
+        reachable_nodes = nx.single_source_dijkstra_path_length(Map.G_unit_distance,
+                                                                source, max_distance, weight='weight')
+        reachable_tiles_coordinates = [(x // Map.columns, x % Map.columns) for x in reachable_nodes.keys()]
         return reachable_tiles_coordinates
 
     @staticmethod

@@ -140,7 +140,7 @@ class Player:
 
     def build_building_with_production(self, city_line, city_column, district_type_id, building_name_id):
         for city in self.cities:
-            if city.center_line_location_line == city_line and city.center_column_location == city_column:
+            if city.center_line_location == city_line and city.center_column_location == city_column:
                 return city.build_building_with_production(building_name_id, district_type_id)
 
     def build_building_with_gold(self, city_line, city_column, district_type_id, building_name_id):
