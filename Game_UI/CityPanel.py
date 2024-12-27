@@ -120,17 +120,12 @@ class CityPanel(BasicPanel):
                 district.set_colors("White", "Gray")
 
         if self.change_coords[idx] and not self.check_array_is_empty(purchasable[pidx + 1]):
-            for i, dist in enumerate(self.buy_districts_buttons[idx][::-1]):
-                print(dist.text_input, dist.rect)
-
+            print(purchasable[pidx + 1])
             for i in range(len(purchasable[pidx + 1]) - 1):
                 if len(purchasable[pidx + 1][i]) != 0:
                     for j, d in enumerate(self.buy_districts_buttons[idx][::-1][i + 1:]):
                         d.set_coords(d.x_coord, d.y_coord + 50)
                         d.update_position()
-
-            for i, dist in enumerate(self.buy_districts_buttons[idx][::-1]):
-                print(dist.text_input, dist.rect)
 
             for i, update in enumerate(self.update_buttons[idx][::-1]):
                 if len(purchasable[pidx + 1][i]) != 0:
@@ -164,7 +159,7 @@ class CityPanel(BasicPanel):
                 building.set_colors("White", "Gray")
 
         for i, building in enumerate(self.buy_buildings_city_center_buttons[idx]):
-            if i in purchasable[pidx][-1]:
+            if i + 1 in purchasable[pidx][-1]:
                 building.update(screen, position)
             else:
                 building.draw_button(screen)

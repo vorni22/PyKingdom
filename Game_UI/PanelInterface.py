@@ -154,7 +154,7 @@ class PanelInterface:
     def set_update_every_frame(self, update_every_frame):
         self.update_every_frame = update_every_frame
 
-    def cursor_is_on_ui(self, position):
+    def cursor_is_on_ui(self, position, purchasable):
         if self.clicked_options[0]:
             temp = self.tile_panel.surf.get_rect()
             temp.center = self.tile_panel.text_rect.center
@@ -184,6 +184,14 @@ class PanelInterface:
                 return True
             if self.city_panel.check_if_in_special_rects(position):
                 return True
+            if not self.city_panel.check_array_is_empty(purchasable[0]):
+                for key in self.city_panel.update_buttons[0]:
+                    if key.check_for_input(position):
+                        return True
+            if not self.city_panel.check_array_is_empty(purchasable[1]):
+                for key in self.city_panel.update_buttons[1]:
+                    if key.check_for_input(position):
+                        return True
 
         status_rect = pg.rect.Rect(0, 0, self.width, 50)
         if status_rect.collidepoint(position):
@@ -226,6 +234,12 @@ class PanelInterface:
                 for i, district in enumerate(self.city_panel.buy_districts_buttons[1]):
                     district.set_coords(district.x_coord, self.city_panel.heights[1][i])
                     district.update_position()
+
+                for i, building in enumerate(self.city_panel.update_buttons[0]):
+                    building.set_coords(building.x_coord, self.city_panel.heights[0][i])
+
+                for i, building in enumerate(self.city_panel.update_buttons[1]):
+                    building.set_coords(building.x_coord, self.city_panel.heights[1][i])
 
                 self.city_panel.change_coords = [True, True]
 
