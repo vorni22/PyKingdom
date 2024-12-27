@@ -44,6 +44,7 @@ class PanelInterface:
         self.victory = False
 
     def draw_interface(self, screen, position, objects, tile, unit, purchasable, city, get_player_info):
+        self.purchasable = purchasable
         info = get_player_info()
         if info[2] >= 2000:
             self.victory = True
@@ -154,7 +155,7 @@ class PanelInterface:
     def set_update_every_frame(self, update_every_frame):
         self.update_every_frame = update_every_frame
 
-    def cursor_is_on_ui(self, position, purchasable):
+    def cursor_is_on_ui(self, position):
         if self.clicked_options[0]:
             temp = self.tile_panel.surf.get_rect()
             temp.center = self.tile_panel.text_rect.center
@@ -184,11 +185,11 @@ class PanelInterface:
                 return True
             if self.city_panel.check_if_in_special_rects(position):
                 return True
-            if not self.city_panel.check_array_is_empty(purchasable[0]):
+            if not self.city_panel.check_array_is_empty(self.purchasable[3]):
                 for key in self.city_panel.update_buttons[0]:
                     if key.check_for_input(position):
                         return True
-            if not self.city_panel.check_array_is_empty(purchasable[1]):
+            if not self.city_panel.check_array_is_empty(self.purchasable[6]):
                 for key in self.city_panel.update_buttons[1]:
                     if key.check_for_input(position):
                         return True
