@@ -124,7 +124,7 @@ class District:
                 resources.science_per_turn_count += 2.5
                 resources.culture_per_turn_count += 1.25
                 city_resources.food_per_turn_count += 10
-                city_resources.production_per_turn_count += 100
+                city_resources.production_per_turn_count += 120
             if city_center_buildings[1] in self.buildings:
                 resources.culture_per_turn_count += 2
             if city_center_buildings[2] in self.buildings:
@@ -245,6 +245,7 @@ class City:
         self.city_resources_per_turn += temp_city_resources_per_turn
 
         self.resources_per_turn += Resources.ResourcesPerTurn(self.population, self.population, self.population)
+        self.city_resources_per_turn += Resources.CityResourcesPerTurn(self.population, -2 * self.population)
 
         if self.housing - self.population == 1:
             self.city_resources_per_turn.food_per_turn_count *= 0.75
@@ -272,6 +273,9 @@ class City:
         temp2_resources_per_turn, temp2_city_resources_per_turn = self.calculate_yields_districts()
         temp_resources_per_turn += temp2_resources_per_turn
         temp_city_resources_per_turn += temp2_city_resources_per_turn
+
+        temp_resources_per_turn += Resources.ResourcesPerTurn(self.population, self.population, self.population)
+        temp_city_resources_per_turn += Resources.CityResourcesPerTurn(self.population, -2 * self.population)
 
         if self.housing - self.population == 1:
             temp_city_resources_per_turn.food_per_turn_count *= 0.75

@@ -124,7 +124,6 @@ class Game:
         return possible_actions
 
     def purchase_unit_with_production(self, tile_line, tile_column, unit_type_id):
-        print(tile_line, tile_column, unit_type_id)
         place_line = tile_line
         place_column = tile_column
         if unit_type_id in [4, 5]:
@@ -287,6 +286,13 @@ class Game:
             if coordinate_pair[0] == tile_line and coordinate_pair[1] == tile_column:
                 self.units_coordinates.remove(coordinate_pair)
                 self.units_coordinates.append((new_tile_line, new_tile_column))
+
+    def highlight_move_tiles(self, tile_line, tile_column):
+        if self.get_unit_owner(tile_line, tile_column) != self.current_player:
+            pass
+
+    def remove_highlight_move_tiles(self, tile_line, tile_column):
+        pass
 
     def settle_city(self, tile_line, tile_column):
         settler = None
@@ -505,10 +511,17 @@ class Game:
     def purchase_district_with_production(self, city_tile_line, city_tile_column, tile_line, tile_column, district_id):
         if (tile_line, tile_column) in self.districts_coordinates:
             return False
-        self.players[self.current_player].build_district_with_production(city_tile_line, city_tile_column,district_id,
-                                                                         tile_line, tile_column)
+        tile = Map.Map.get_tile(tile_line, tile_column)
+        if tile not in self.players[self.current_player].tiles:
+            return False
+        if district_id == 3 and tile.type_id != 2:
+            return False
+        if district_id != 3 and tile.type_id in [2, 3]:
+            return False
+        self.players[self.current_player].build_district_with_production(city_tile_line, city_tile_column, district_id,
+                                                                         tile_line, tile_column, self.players)
         self.districts_coordinates.append((tile_line, tile_column))
-        coords = self.map_interface.convert_coordinates_to_mine(city_tile_line, city_tile_column)
+        coords = self.map_interface.convert_coordinates_to_mine(tile_line, tile_column)
         self.map_interface.add_object_on_tile(coords, City.district_types[district_id])
         for tile in self.players[self.current_player].tiles:
             coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
@@ -517,8 +530,15 @@ class Game:
     def purchase_district_with_gold(self, city_tile_line, city_tile_column, tile_line, tile_column, district_id):
         if (tile_line, tile_column) in self.districts_coordinates:
             return False
+        tile = Map.Map.get_tile(tile_line, tile_column)
+        if tile not in self.players[self.current_player].tiles:
+            return False
+        if district_id == 3 and tile.type_id != 2:
+            return False
+        if district_id != 3 and tile.type_id in [2, 3]:
+            return False
         self.players[self.current_player].build_district_with_gold(city_tile_line, city_tile_column,district_id,
-                                                                         tile_line, tile_column)
+                                                                         tile_line, tile_column, self.players)
         self.districts_coordinates.append((tile_line, tile_column))
         coords = self.map_interface.convert_coordinates_to_mine(city_tile_line, city_tile_column)
         self.map_interface.add_object_on_tile(coords, City.district_types[district_id])
