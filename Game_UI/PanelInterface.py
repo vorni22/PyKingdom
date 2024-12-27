@@ -8,7 +8,6 @@ from .UnitPanel import UnitPanel
 from .PermanentPanel import PermanentPanel
 from UI.CircleButton import CircleButton
 from Logic.City import district_cost
-from Logic.City import district_types
 
 class PanelInterface:
     def __init__(self, width, height):
@@ -83,9 +82,6 @@ class PanelInterface:
             else:
                 self.end_turn_button.rendered = True
             self.clicked = True
-
-        # if self.city_panel.error_message_time and time.time() - self.city_panel.error_message_time < 1:
-        #     self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
     def close_interface(self, position, screen, unit, settle_func):
         if self.victory:
@@ -186,6 +182,8 @@ class PanelInterface:
                 return True
             if self.city_panel.close_rect.collidepoint(position):
                 return True
+            if self.city_panel.check_if_in_special_rects(position):
+                return True
 
         status_rect = pg.rect.Rect(0, 0, self.width, 50)
         if status_rect.collidepoint(position):
@@ -221,9 +219,22 @@ class PanelInterface:
                 self.load_screen = True
                 self.start_time = pg.time.get_ticks()
 
-    def move_units(self, unit, position, screen, tile_line, tile_column, move_func):
+                for i, district in enumerate(self.city_panel.buy_districts_buttons[0]):
+                    district.set_coords(district.x_coord, self.city_panel.heights[0][i])
+                    district.update_position()
+
+                for i, district in enumerate(self.city_panel.buy_districts_buttons[1]):
+                    district.set_coords(district.x_coord, self.city_panel.heights[1][i])
+                    district.update_position()
+
+                self.city_panel.change_coords = [True, True]
+
+    def move_units(self, unit, position, screen, tile_line, tile_column, move_func, game):
         if not self.unit_is_moving:
             self.unit_is_moving = self.unit_panel.move_unit(position, screen)
+
+        if self.unit_is_moving:
+            game.highlight_move_tiles(tile_line, tile_column)
 
         if self.unit_is_moving and self.clicks_unit_is_moving == 2:
             move_func(unit[1], unit[2], tile_line, tile_column)
@@ -294,7 +305,6 @@ class PanelInterface:
             if self.district_is_purchased_p and (self.bdistrict_p[0] != tile_line or self.bdistrict_p[1] != tile_column):
                 game.purchase_district_with_production(self.bdistrict_p[0], self.bdistrict_p[1], tile_line, tile_column, self.bdistrict_p[4])
                 self.district_is_purchased_p = False
-                self.city_panel.change_coords[0] = True
                 return
             elif not self.district_is_purchased_p:
                 for i, key in enumerate(self.city_panel.buy_districts_buttons[0][::-1]):
@@ -308,7 +318,6 @@ class PanelInterface:
             if self.district_is_purchased_g and (self.bdistrict_g[0] != tile_line or self.bdistrict_g[1] != tile_column):
                 game.purchase_district_with_production(self.bdistrict_g[0], self.bdistrict_g[1], tile_line, tile_column, self.bdistrict_g[4])
                 self.district_is_purchased_g = False
-                self.city_panel.change_coords[1] = True
                 return
             elif not self.district_is_purchased_g:
                 for i, key in enumerate(self.city_panel.buy_districts_buttons[1][::-1]):
@@ -319,6 +328,27 @@ class PanelInterface:
                                 self.bdistrict_g = (city_line, city_column, tile_line, tile_column, i)
                             return
 
+
+    def buy_district_buildings(self, tile_line, tile_column, position, game, city, purchasable):
+        if city is None:
+            return
+        temp = game.get_player_information()
+        production = city[6]
+        if not self.city_panel.check_array_is_empty(purchasable[3]):
+            for i, key in enumerate(self.city_panel.update_buttons[0][::-1]):
+                if key.check_for_input(position) and self.clicks[2] >= 2 and len(purchasable[3][i]) != 0:
+                    if self.city_panel.buildings_costs[0][i][purchasable[3][i][-1]]  <= production:
+                        ret = game.purchase_building_with_production(tile_line, tile_column, i, purchasable[3][i][-1])
+                        print("building_bought")
+                        return
+
+        if not self.city_panel.check_array_is_empty(purchasable[6]):
+            for i, key in enumerate(self.city_panel.update_buttons[1][::-1]):
+                if key.check_for_input(position) and self.clicks[3] >= 2 and len(purchasable[3][i]) != 0:
+                    if self.city_panel.buildings_costs[1][i][purchasable[6][i][-1]] <= temp[3]:
+                        ret = game.purchase_building_with_production(tile_line, tile_column, i, purchasable[6][i][-1])
+                        print("building_bought")
+                        return
 
     def draw_loading_screen(self, screen):
         if self.load_screen:

@@ -11,6 +11,8 @@ from Logic.Unit import civilian_units_costs
 from Logic.City import district_types
 from Logic.City import district_cost
 from Logic.City import city_center_buildings
+from Logic.City import campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs
+from Logic.City import  harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs
 
 class CityPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
@@ -80,7 +82,8 @@ class CityPanel(BasicPanel):
         self.buy_districts_button_gold = Button(bg_buy, w + 100, 330, "Gold", None, "White", "Gray", 40)
         self.buy_buildings_city_center_button_production = Button(bg_buy, w - 100, 450, "Production", None, "White", "Gray", 40)
         self.buy_buildings_city_center_button_gold = Button(bg_buy, w + 100, 450, "Gold", None, "White", "Gray", 40)
-
+        self.buildings_costs = [[campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs, harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs], []]
+        self.buildings_costs[1] = [[value * 2 for value in sublist] for sublist in self.buildings_costs[0]]
 
     def render_text(self, text_type, center, screen):
         text = "Buy " + text_type + " with:"
@@ -117,22 +120,33 @@ class CityPanel(BasicPanel):
                 district.set_colors("White", "Gray")
 
         if self.change_coords[idx] and not self.check_array_is_empty(purchasable[pidx + 1]):
-            print("loh", purchasable[pidx + 1], pidx + 1)
-            for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
-                if len(purchasable[pidx + 1][len(self.buy_districts_buttons[idx]) - i - 1]) != 0:
-                    for j, d in enumerate(self.buy_districts_buttons[idx][::-1][len(self.buy_districts_buttons[idx]) - i + 1:]):
+            for i, dist in enumerate(self.buy_districts_buttons[idx][::-1]):
+                print(dist.text_input, dist.rect)
+
+            for i in range(len(purchasable[pidx + 1]) - 1):
+                if len(purchasable[pidx + 1][i]) != 0:
+                    for j, d in enumerate(self.buy_districts_buttons[idx][::-1][i + 1:]):
                         d.set_coords(d.x_coord, d.y_coord + 50)
                         d.update_position()
 
+            for i, dist in enumerate(self.buy_districts_buttons[idx][::-1]):
+                print(dist.text_input, dist.rect)
+
             for i, update in enumerate(self.update_buttons[idx][::-1]):
-                update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + 50)
-                update.update_position()
+                if len(purchasable[pidx + 1][i]) != 0:
+                    update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + 50)
+                    update.update_position()
+                else:
+                    update.set_coords(update.x_coord, 4000)
+                    update.update_position()
 
             self.change_coords[idx] = False
 
         if not self.check_array_is_empty(purchasable[pidx + 1]):
             for i, building in enumerate(self.update_buttons[idx][::-1]):
                 if len(purchasable[pidx + 1][i]) != 0:
+                    idx = purchasable[pidx + 1][i][-1]
+                    building.set_text(self.format_text("Upgrade " + district_types[i], str(self.buildings_costs[idx][i][idx]), 350, 30))
                     building.update(screen, position)
 
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
@@ -140,6 +154,7 @@ class CityPanel(BasicPanel):
                 district.update(screen, position)
             else:
                 district.draw_button(screen)
+
 
     def draw_purchase_city_center_buildings(self, idx, pidx, screen, position, purchasable):
         for i, building in enumerate(self.buy_buildings_city_center_buttons[idx]):
@@ -177,7 +192,7 @@ class CityPanel(BasicPanel):
 
         self.draw_title_text(f"{city[11]}", 45, (self.width + self.center_x, self.center_y + 10))
         screen.blit(self.text_rendered, self.text_rect)
-        resources_per_turn = ["+" + str(round(city[0])), "+" + str(round(city[1])), "+" + str(round(city[2])), "+" + str(round(city[3])), "+" + str(round(city[4]))]
+        resources_per_turn = ["+" + str(round(city[0])), "+" + str(round(city[1])), "+" + str(round(city[2])), "+" + str(round(city[4])), "+" + str(round(city[3]))]
 
         i = 0
         rects = []
@@ -280,9 +295,13 @@ class CityPanel(BasicPanel):
 
             for i, district in enumerate(self.buy_districts_buttons[0]):
                 district.set_coords(district.x_coord, self.heights[0][i])
+                # district.update_position()
 
-            for i, district in enumerate(self.buy_districts_buttons[0]):
+            for i, district in enumerate(self.buy_districts_buttons[1]):
                 district.set_coords(district.x_coord, self.heights[1][i])
+                district.update_position()
+
+            # self.change_coords = [True, True]
 
     def return_to_init_surf(self, position, screen):
         close = self.check_if_in_special_rects(position)

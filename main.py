@@ -240,7 +240,7 @@ while running:
         if panels.end_turn_button.rendered or sw:
             panels.end_turn_button.draw(screen_surf)
             sw = False
-        panels.draw_loading_screen(screen_surf)
+        # panels.draw_loading_screen(screen_surf)
         if panels.clicked:
             if game.is_player_turn:
                 panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable, city, game.get_player_information)
@@ -256,18 +256,17 @@ while running:
                             if not panels.cursor_is_on_ui(mouse_pos):
                                 mouse_y = HEIGHT - mouse_pos[1]
                                 mouse_x = mouse_pos[0]
-                                # if tile_l == -1 or tile_c == -1:
                                 tid = map_interface.tile_on_mouse(mouse_x, mouse_y)
                                 tile_l = tid % size[1]
                                 tile_c = tid // size[1]
                             panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
                             if panels.unit_is_moving:
                                 panels.clicks_unit_is_moving += 1
-                            print(tile_l, tile_c)
-                            panels.move_units(unit, mouse_pos, screen_surf, tile_l, tile_c, game.move_unit)
+                            panels.move_units(unit, mouse_pos, screen_surf, tile_l, tile_c, game.move_unit, game)
                             panels.count_clicks()
-                            panels.buy_units(tile_l, tile_c, mouse_pos, game, city)
-                            panels.buy_buildings(tile_l, tile_c, mouse_pos, game, city)
+                            panels.buy_units(city_pos[0], city_pos[1], mouse_pos, game, city)
+                            panels.buy_buildings(city_pos[0], city_pos[1], mouse_pos, game, city)
+                            panels.buy_district_buildings(city_pos[0], city_pos[1], mouse_pos, game, city, purchasable)
                             panels.buy_districts(city_pos[0], city_pos[1], mouse_pos, game, city, tile_l, tile_c)
 
     # UI end here

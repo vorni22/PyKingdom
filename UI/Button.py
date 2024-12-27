@@ -58,3 +58,8 @@ class Button:
 
     def set_coords(self, x_coord, y_coord):
         self.x_coord, self.y_coord = x_coord, y_coord
+
+    def set_text(self, new_text):
+        self.text_input = new_text
+        self.text = self.fnt.render(self.text_input, True, self.color)
+        self.text_rect = self.text.get_rect(center=(self.x_coord, self.y_coord))
