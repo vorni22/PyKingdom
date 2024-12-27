@@ -133,6 +133,7 @@ class Game:
                         if tile.type_id in [2, 3] and (tile.line, tile.column) not in self.units_coordinates:
                             place_line = tile.line
                             place_column = tile.column
+                            break
 
         purchase_result = self.players[self.current_player].build_unit_with_production(place_line, place_column,
                                                                                        tile_line, tile_column,
@@ -156,6 +157,7 @@ class Game:
                         if tile.type_id in [2, 3] and (tile.line, tile.column) not in self.units_coordinates:
                             place_line = tile.line
                             place_column = tile.column
+                            break
         purchase_result = self.players[self.current_player].build_unit_with_gold(place_line, place_column,
                                                                                  unit_type_id, 0)
         coords = self.map_interface.convert_coordinates_to_mine(place_line, place_column)
@@ -173,6 +175,7 @@ class Game:
         for unit in self.players[self.current_player].units:
             if unit.position_line == tile_line and unit.position_column == tile_column:
                 moved_unit = unit
+                break
         # if it's a settler, it can only move, so cancel any movements on tiles where other players / cities are
         is_settler = (moved_unit.type_id == 6)
         # check if movement is valid
@@ -289,10 +292,60 @@ class Game:
 
     def highlight_move_tiles(self, tile_line, tile_column):
         if self.get_unit_owner(tile_line, tile_column) != self.current_player:
-            pass
+            return False
+        moved_unit = None
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == tile_line and unit.position_column == tile_column:
+                moved_unit = unit
+                break
+        reachable_tiles = Map.Map.get_unit_reachable_tiles(tile_line, tile_column, moved_unit.remaining_movement)
+        for tile in reachable_tiles:
+            if tile in self.units_coordinates or tile in self.cities_coordinates:
+                continue
+            coords = self.map_interface.convert_coordinates_to_mine(tile[0], tile[1])
+            self.map_interface.add_tile_selector(coords)
 
     def remove_highlight_move_tiles(self, tile_line, tile_column):
-        pass
+        if self.get_unit_owner(tile_line, tile_column) != self.current_player:
+            return False
+        moved_unit = None
+        for unit in self.players[self.current_player].units:
+            if unit.position_line == tile_line and unit.position_column == tile_column:
+                moved_unit = unit
+                break
+        reachable_tiles = Map.Map.get_unit_reachable_tiles(tile_line, tile_column, moved_unit.remaining_movement)
+        for tile in reachable_tiles:
+            coords = self.map_interface.convert_coordinates_to_mine(tile[0], tile[1])
+            self.map_interface.rmv_tile_selector(coords)
+
+    def highlight_purchase_tiles(self, tile_line, tile_column, district_id):
+        if self.get_city_owner(tile_line, tile_column) != self.current_player:
+            return False
+        selected_city = None
+        for city in self.players[self.current_player].cities:
+            if city.center_line_location == tile_line and city.center_column_location == tile_column:
+                selected_city = city
+                break
+        for tile in selected_city.tiles:
+            if ((tile.line, tile.column) in self.districts_coordinates
+                or tile in self.players[self.current_player].tiles
+                or district_id == 3 and tile.type_id != 2
+                or district_id != 3 and tile.type_id in [2, 3]):
+                continue
+            coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+            self.map_interface.add_tile_selector(coords)
+
+    def remove_highlight_purchase_tiles(self, tile_line, tile_column):
+        if self.get_city_owner(tile_line, tile_column) != self.current_player:
+            return False
+        selected_city = None
+        for city in self.players[self.current_player].cities:
+            if city.center_line_location == tile_line and city.center_column_location == tile_column:
+                selected_city = city
+                break
+        for tile in selected_city.tiles:
+            coords = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+            self.map_interface.rmv_tile_selector(coords)
 
     def settle_city(self, tile_line, tile_column):
         settler = None
