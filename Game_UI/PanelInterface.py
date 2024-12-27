@@ -17,6 +17,8 @@ class PanelInterface:
         unit_panel_back = pg.image.load("Assets/MainMenu/unit_panel.png")
         next_turn_back = pg.image.load("Assets/MainMenu/next_turn_button.png")
         self.loading_screen = pg.image.load("Assets/MainMenu/Loading_screen.png")
+        self.culture_victory = pg.image.load("Assets/MainMenu/Culture_victory_bg.png")
+        self.science_victory = pg.image.load("Assets/MainMenu/Science_victory_bg.png")
         self.width = width
         self.height = height
         self.clicked = False
@@ -40,8 +42,18 @@ class PanelInterface:
         self.clicks_district_is_purchased = 0
         self.load_screen = False
         self.start_time = None
+        self.victory = False
 
-    def draw_interface(self, screen, position, objects, tile, unit, purchasable, city):
+    def draw_interface(self, screen, position, objects, tile, unit, purchasable, city, get_player_info):
+        info = get_player_info()
+        if info[2] >= 2000:
+            self.victory = True
+            screen.blit(self.culture_victory, (0, 0))
+            return
+        if info[1] >= 2000:
+            self.victory = True
+            screen.blit(self.science_victory, (0, 0))
+            return
         if not self.unit_is_moving:
             if self.sw:
                 for obj in objects:
@@ -76,6 +88,8 @@ class PanelInterface:
         #     self.city_panel.draw_error_box(screen, self.city_panel.error_message_time)
 
     def close_interface(self, position, screen, unit, settle_func):
+        if self.victory:
+            return
         if not self.cursor_is_on_ui(position):
             self.clicked_options = [False for _ in self.clicked_options]
 
@@ -126,8 +140,9 @@ class PanelInterface:
                 self.district_is_purchased_p = False
                 self.clicks_district_is_purchased = 0
                 self.clicked = False
+                print(self.bdistrict_p)
                 buy_func1(self.bdistrict_p[0], self.bdistrict_p[1], position[0], position[1], self.bdistrict_p[4])
-            if self.district_is_purchased_g and self.bdistrict_p[0] != position[0] and self.bdistrict_p[1] != position[1]:
+            if self.district_is_purchased_g and self.bdistrict_g[0] != position[0] and self.bdistrict_g[1] != position[1]:
                 self.district_is_purchased_g = False
                 self.clicks_district_is_purchased = 0
                 self.clicked = False
@@ -276,10 +291,10 @@ class PanelInterface:
         temp = game.get_player_information()
         production = city[6]
         if self.city_panel.buy_districts[0]:
-            if self.district_is_purchased_p and self.bdistrict_p[0] != self.bdistrict_p[3] and self.bdistrict_p[1] != self.bdistrict_p[4]:
-                game.purchase_district_with_production(self.bdistrict_p[0], self.bdistrict_p[1], self.bdistrict_p[2], self.bdistrict_p[3], self.bdistrict_p[4])
+            if self.district_is_purchased_p and (self.bdistrict_p[0] != tile_line or self.bdistrict_p[1] != tile_column):
+                game.purchase_district_with_production(self.bdistrict_p[0], self.bdistrict_p[1], tile_line, tile_column, self.bdistrict_p[4])
                 self.district_is_purchased_p = False
-                print(district_types[self.bdistrict_p[4]])
+                self.city_panel.change_coords[0] = True
                 return
             elif not self.district_is_purchased_p:
                 for i, key in enumerate(self.city_panel.buy_districts_buttons[0][::-1]):
@@ -290,9 +305,10 @@ class PanelInterface:
                             return
 
         if self.city_panel.buy_districts[1]:
-            if self.district_is_purchased_g and self.bdistrict_p[0] != self.bdistrict_p[3] and self.bdistrict_p[1] != self.bdistrict_p[4]:
-                game.purchase_district_with_production(self.bdistrict_g[0], self.bdistrict_g[1], self.bdistrict_g[2], self.bdistrict_g[3], self.bdistrict_g[4])
+            if self.district_is_purchased_g and (self.bdistrict_g[0] != tile_line or self.bdistrict_g[1] != tile_column):
+                game.purchase_district_with_production(self.bdistrict_g[0], self.bdistrict_g[1], tile_line, tile_column, self.bdistrict_g[4])
                 self.district_is_purchased_g = False
+                self.city_panel.change_coords[1] = True
                 return
             elif not self.district_is_purchased_g:
                 for i, key in enumerate(self.city_panel.buy_districts_buttons[1][::-1]):

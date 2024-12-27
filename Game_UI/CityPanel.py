@@ -102,6 +102,13 @@ class CityPanel(BasicPanel):
             else:
                 unit.draw_button(screen)
 
+    @staticmethod
+    def check_array_is_empty(arr):
+        for a in arr[:-1]:
+            if len(a) != 0:
+                return False
+        return True
+
     def draw_purchase_districts(self, idx, pidx, screen, position, purchasable):
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
             if not i in purchasable[pidx][:-1]:
@@ -109,10 +116,11 @@ class CityPanel(BasicPanel):
             else:
                 district.set_colors("White", "Gray")
 
-        if self.change_coords[idx]:
+        if self.change_coords[idx] and not self.check_array_is_empty(purchasable[pidx + 1]):
+            print("loh", purchasable[pidx + 1], pidx + 1)
             for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
                 if len(purchasable[pidx + 1][len(self.buy_districts_buttons[idx]) - i - 1]) != 0:
-                    for j, d in enumerate(self.buy_districts_buttons[idx][::-1][len(self.buy_districts_buttons[idx]) - i:]):
+                    for j, d in enumerate(self.buy_districts_buttons[idx][::-1][len(self.buy_districts_buttons[idx]) - i + 1:]):
                         d.set_coords(d.x_coord, d.y_coord + 50)
                         d.update_position()
 
@@ -122,9 +130,10 @@ class CityPanel(BasicPanel):
 
             self.change_coords[idx] = False
 
-        for i, building in enumerate(self.update_buttons[idx][::-1]):
-            if len(purchasable[pidx + 1][i]) != 0:
-                building.update(screen, position)
+        if not self.check_array_is_empty(purchasable[pidx + 1]):
+            for i, building in enumerate(self.update_buttons[idx][::-1]):
+                if len(purchasable[pidx + 1][i]) != 0:
+                    building.update(screen, position)
 
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
             if i in purchasable[pidx][:-1]:
@@ -268,7 +277,6 @@ class CityPanel(BasicPanel):
                 self.buy_units[i] = False
                 self.buy_districts[i] = False
                 self.buy_buildings_city_center[i] = False
-                self.change_coords[i] = True
 
             for i, district in enumerate(self.buy_districts_buttons[0]):
                 district.set_coords(district.x_coord, self.heights[0][i])
