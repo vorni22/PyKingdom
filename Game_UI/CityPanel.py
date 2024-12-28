@@ -24,7 +24,7 @@ class CityPanel(BasicPanel):
         rect = self.surf.get_rect()
         rect.center = self.text_rect.center
         w = rect.width // 2 + self.center_x
-        h = rect.height // 2 + self.center_y
+        h = rect.height // 2 + self.center_y - 120
 
         self.buy_units = [False, False]
         self.buy_districts = [False, False]
@@ -41,7 +41,7 @@ class CityPanel(BasicPanel):
         self.error_message_time = 0
         self.error_message = "Not enough production to buy this"
         self.change_coords = [True, True]
-        bg = pg.transform.scale(bg, (bg.get_rect().width + 50, bg.get_rect().height))
+        bg = pg.transform.scale(bg, (bg.get_rect().width + 50, bg.get_rect().height - 10))
 
         self.units_cost_production = [melee_units_costs[0], ranged_units_costs[0], cavalry_units_costs[0], siege_units_costs[0], naval_melee_units_costs[0], naval_ranged_units_costs[0], civilian_units_costs]
         self.units_cost_gold = [cost * 2 for cost in self.units_cost_production]
@@ -49,32 +49,34 @@ class CityPanel(BasicPanel):
 
         self.update_districts_buttons = [[], []]
         self.heights = [[], []]
-        for i, unit_name in enumerate(unit_classes):
-            self.buy_units_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(unit_name, str(self.units_cost_production[i]), 350, 30), None, "White", "Gray", 30))
-
-        for i, district_name in enumerate(district_types[-2::-1]):
-            self.buy_districts_buttons[0].append(Button(bg, w, h - i * 50 - 50, self.format_text(district_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
-            self.heights[0].append(h - i * 50)
+        self.scale = 35
 
         for i, unit_name in enumerate(unit_classes):
-            self.buy_units_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(unit_name, str(self.units_cost_gold[i]), 350, 30), None, "White", "Gray", 30))
+            self.buy_units_buttons[0].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text(unit_name, str(self.units_cost_production[i]), 350, 30), None, "White", "Gray", 30))
 
         for i, district_name in enumerate(district_types[-2::-1]):
-            self.buy_districts_buttons[1].append(Button(bg, w, h - i * 50 - 50, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
-            self.heights[1].append(h - i * 50)
+            self.buy_districts_buttons[0].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text(district_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
+            self.heights[0].append(h - (i + 1) * self.scale)
+
+        for i, unit_name in enumerate(unit_classes):
+            self.buy_units_buttons[1].append(Button(bg, w - 35, h - (i + 1) * self.scale , self.format_text(unit_name, str(self.units_cost_gold[i]), 350, 30), None, "White", "Gray", 30))
+
+        for i, district_name in enumerate(district_types[-2::-1]):
+            self.buy_districts_buttons[1].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
+            self.heights[1].append(h - (i + 1) * self.scale)
 
         for i, building_name in enumerate(city_center_buildings[1:]):
-            self.buy_buildings_city_center_buttons[0].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
+            self.buy_buildings_city_center_buttons[0].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
 
         for i, building_name in enumerate(city_center_buildings[1:]):
-            self.buy_buildings_city_center_buttons[1].append(Button(bg, w, h - i * 50, self.format_text(building_name, str(district_cost_gold), 350, 30),None, "White", "Gray", 30))
+            self.buy_buildings_city_center_buttons[1].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(district_cost_gold), 350, 30),None, "White", "Gray", 30))
 
         self.update_buttons = [[], []]
         for i in range(len(self.buy_districts_buttons[0])):
-            self.update_buttons[0].append(Button(bg, w, h - (i + 1) * 50, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
+            self.update_buttons[0].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
 
         for i in range(len(self.buy_districts_buttons[1])):
-            self.update_buttons[1].append(Button(bg, w, h - (i + 1) * 50, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
+            self.update_buttons[1].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text("Update" + str(i), str(self.units_cost_production[0]), 350, 30), None, "White", "Gray", 30))
 
         self.buy_units_button_production = Button(bg_buy, w - 100, 210, "Production", None, "White", "Gray", 40)
         self.buy_districts_button_production = Button(bg_buy, w - 100, 330, "Production", None, "White", "Gray", 40)
@@ -84,6 +86,7 @@ class CityPanel(BasicPanel):
         self.buy_buildings_city_center_button_gold = Button(bg_buy, w + 100, 450, "Gold", None, "White", "Gray", 40)
         self.buildings_costs = [[campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs, harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs], []]
         self.buildings_costs[1] = [[value * 2 for value in sublist] for sublist in self.buildings_costs[0]]
+        self.upgradable = [[], []]
 
     def render_text(self, text_type, center, screen):
         text = "Buy " + text_type + " with:"
@@ -120,17 +123,17 @@ class CityPanel(BasicPanel):
                 district.set_colors("White", "Gray")
 
         if self.change_coords[idx] and not self.check_array_is_empty(purchasable[pidx + 1]):
-            print(purchasable[pidx + 1])
             for i in range(len(purchasable[pidx + 1]) - 1):
                 if len(purchasable[pidx + 1][i]) != 0:
                     for j, d in enumerate(self.buy_districts_buttons[idx][::-1][i + 1:]):
-                        d.set_coords(d.x_coord, d.y_coord + 50)
+                        d.set_coords(d.x_coord, d.y_coord + self.scale)
                         d.update_position()
 
             for i, update in enumerate(self.update_buttons[idx][::-1]):
                 if len(purchasable[pidx + 1][i]) != 0:
-                    update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + 50)
+                    update.set_coords(update.x_coord, self.buy_districts_buttons[idx][len(self.buy_districts_buttons[idx]) - i - 1].y_coord + self.scale)
                     update.update_position()
+                    self.upgradable[idx].append(update)
                 else:
                     update.set_coords(update.x_coord, 4000)
                     update.update_position()
@@ -140,8 +143,8 @@ class CityPanel(BasicPanel):
         if not self.check_array_is_empty(purchasable[pidx + 1]):
             for i, building in enumerate(self.update_buttons[idx][::-1]):
                 if len(purchasable[pidx + 1][i]) != 0:
-                    idx = purchasable[pidx + 1][i][-1]
-                    building.set_text(self.format_text("Upgrade " + district_types[i], str(self.buildings_costs[idx][i][idx]), 350, 30))
+                    j = purchasable[pidx + 1][i][-1]
+                    building.set_text(self.format_text("Upgrade " + district_types[i], str(self.buildings_costs[idx][i][j]), 350, 30))
                     building.update(screen, position)
 
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):

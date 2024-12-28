@@ -126,13 +126,14 @@ sw = True
 
 tile_id = -1
 
-purchasable_units = [[0], [], [0], [0], [], [0], []]
-purchasable_districts = [0, 1, 3, 5]
-purchasable_buildings = [[0], [0], [], [0], [], [], []]
-purchasable_units_gold = [[0], [0], [], [], [], [], []]
-purchasable_districts_gold = [2, 4, 6]
-purchasable_buildings_gold = [[0], [], [0], [], [], [], []]
-purchasable = (True, purchasable_units, purchasable_districts, purchasable_buildings, purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
+# purchasable_units = [[0], [], [0], [0], [], [0], []]
+# purchasable_districts = [0, 1, 3, 5]
+# purchasable_buildings = [[0], [0], [], [0], [], [], []]
+# purchasable_units_gold = [[0], [0], [], [], [], [], []]
+# purchasable_districts_gold = [2, 4, 6]
+# purchasable_buildings_gold = [[0], [], [0], [], [], [], []]
+# purchasable = (True, purchasable_units, purchasable_districts, purchasable_buildings, purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
+purchasable = None
 tile_line = -1
 tile_column = -1
 tile_l = -1
@@ -262,7 +263,7 @@ while running:
                             panels.close_interface(mouse_pos, screen_surf, unit, game.settle_city)
                             if panels.unit_is_moving:
                                 panels.clicks_unit_is_moving += 1
-                            panels.move_units(unit, mouse_pos, screen_surf, tile_l, tile_c, game.move_unit, game)
+                            panels.move_units(unit, mouse_pos, screen_surf, city_pos[0], city_pos[1], game.move_unit, game)
                             panels.count_clicks()
                             panels.buy_units(city_pos[0], city_pos[1], mouse_pos, game, city)
                             panels.buy_buildings(city_pos[0], city_pos[1], mouse_pos, game, city)

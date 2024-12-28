@@ -314,6 +314,10 @@ class PanelInterface:
     def buy_districts(self, city_line, city_column, position, game, city, tile_line, tile_column):
         if city is None:
             return
+        if self.district_is_purchased_p:
+            game.highlight_purchase_tiles(self.bdistrict_p[0], self.bdistrict_p[1], self.bdistrict_p[4])
+        if self.district_is_purchased_g:
+            game.highlight_purchase_tiles(self.bdistrict_g[0], self.bdistrict_g[1], self.bdistrict_g[4])
         temp = game.get_player_information()
         production = city[6]
         if self.city_panel.buy_districts[0]:
