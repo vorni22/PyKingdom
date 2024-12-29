@@ -331,6 +331,7 @@ class PanelInterface:
                         if district_cost <= production:
                             self.district_is_purchased_p = True
                             self.bdistrict_p = (city_line, city_column, tile_line, tile_column, i)
+                            game.highlight_purchase_tiles(self.bdistrict_p[0], self.bdistrict_p[1], self.bdistrict_p[4])
                             return
 
         if self.city_panel.buy_districts[1]:
@@ -345,6 +346,8 @@ class PanelInterface:
                             if not self.district_is_purchased_g:
                                 self.district_is_purchased_g = True
                                 self.bdistrict_g = (city_line, city_column, tile_line, tile_column, i)
+                                game.highlight_purchase_tiles(self.bdistrict_g[0], self.bdistrict_g[1],
+                                                              self.bdistrict_g[4])
                             return
 
 
