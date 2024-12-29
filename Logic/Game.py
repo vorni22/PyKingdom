@@ -322,7 +322,6 @@ class Game:
             self.map_interface.rmv_tile_selector(coords)
 
     def highlight_purchase_tiles(self, tile_line, tile_column, district_id):
-        print(tile_line, tile_column, district_id)
         if self.get_city_owner(tile_line, tile_column) != self.current_player:
             return False
         selected_city = None
@@ -571,6 +570,7 @@ class Game:
                     purchasable_units_gold[4] = []
                     purchasable_units_gold[5] = []
 
+        print(purchasable_buildings[7])
         return (True, purchasable_units, purchasable_districts, purchasable_buildings,
                purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 
