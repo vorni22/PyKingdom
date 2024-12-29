@@ -46,6 +46,8 @@ class UnitPanel(BasicPanel):
             pg.draw.rect(screen, "Blue", self.settler_rect)
             settle_func(unit[1], unit[2])
             self.clicked = False
+            return True
+        return False
 
     def render_text(self, text_type, center, screen):
         text = str(text_type)

@@ -18,6 +18,7 @@ class PanelInterface:
         self.loading_screen = pg.image.load("Assets/MainMenu/Loading_screen.png")
         self.culture_victory = pg.image.load("Assets/MainMenu/Culture_victory_bg.png")
         self.science_victory = pg.image.load("Assets/MainMenu/Science_victory_bg.png")
+        self.domination_victory = pg.image.load("Assets/MainMenu/Domination_victory_bg.png")
         self.width = width
         self.height = height
         self.clicked = False
@@ -41,17 +42,17 @@ class PanelInterface:
         self.clicks_district_is_purchased = 0
         self.load_screen = False
         self.start_time = None
-        self.victory = False
+        self.victory = 0
 
-    def draw_interface(self, screen, position, objects, tile, unit, purchasable, city, get_player_info):
+    def draw_interface(self, screen, position, objects, tile, unit, purchasable, city):
         self.purchasable = purchasable
-        info = get_player_info()
-        if info[2] >= 2000:
-            self.victory = True
+        if self.victory == 1:
+            screen.blit(self.domination_victory, (0, 0))
+            return
+        if self.victory == 3:
             screen.blit(self.culture_victory, (0, 0))
             return
-        if info[1] >= 2000:
-            self.victory = True
+        if self.victory == 2:
             screen.blit(self.science_victory, (0, 0))
             return
         if not self.unit_is_moving:
@@ -106,7 +107,8 @@ class PanelInterface:
             self.unit_panel.close_surf(position, screen)
             if self.unit_panel.move_unit(position, screen):
                 self.unit_is_moving = True
-            self.unit_panel.settle_city(position, screen, unit, settle_func)
+            if self.unit_panel.settle_city(position, screen, unit, settle_func):
+                self.reset_all()
             self.clicked_options[1] = self.unit_panel.clicked
 
         if self.clicked_options[2]:
@@ -132,17 +134,16 @@ class PanelInterface:
                 self.unit_is_moving = False
                 move_func(unit[1], unit[2], position[0], position[1])
                 self.clicks_unit_is_moving = 0
-                self.clicked = False
+                self.reset_all()
             if self.district_is_purchased_p and self.bdistrict_p[0] != position[0] and self.bdistrict_p[1] != position[1]:
                 self.district_is_purchased_p = False
                 self.clicks_district_is_purchased = 0
-                self.clicked = False
-                print(self.bdistrict_p)
+                self.reset_all()
                 buy_func1(self.bdistrict_p[0], self.bdistrict_p[1], position[0], position[1], self.bdistrict_p[4])
             if self.district_is_purchased_g and self.bdistrict_g[0] != position[0] and self.bdistrict_g[1] != position[1]:
                 self.district_is_purchased_g = False
                 self.clicks_district_is_purchased = 0
-                self.clicked = False
+                self.reset_all()
                 buy_func2(self.bdistrict_g[0], self.bdistrict_g[1], position[0], position[1], self.bdistrict_g[4])
 
     def set_clicked(self, clicked):
@@ -206,25 +207,28 @@ class PanelInterface:
 
         return False
 
+    def reset_all(self):
+        self.clicks = [0, 0, 0, 0, 0, 0]
+        self.clicked_options = [False for _ in self.clicked_options]
+
+        self.clicked = False
+        self.sw = True
+        self.city_panel.clicked = False
+        self.tile_panel.clicked = False
+        self.unit_panel.clicked = False
+        self.end_turn_button.rendered = True
+        for i in range(2):
+            self.city_panel.buy_units[i] = False
+            self.city_panel.buy_districts[i] = False
+            self.city_panel.buy_buildings_city_center[i] = False
+
     def end_turn(self, position, player_end_turn):
         if self.end_turn_button.rendered:
             if self.end_turn_button.circle_collidepoint(position):
                 print("end turn")
 
-                self.clicks = [0, 0, 0, 0, 0, 0]
-                self.clicked_options = [False for _ in self.clicked_options]
-
-                self.clicked = False
-                self.sw = True
-                self.city_panel.clicked = False
-                self.tile_panel.clicked = False
-                self.unit_panel.clicked = False
-                self.end_turn_button.rendered = True
-                for i in range(2):
-                    self.city_panel.buy_units[i] = False
-                    self.city_panel.buy_districts[i] = False
-                    self.city_panel.buy_buildings_city_center[i] = False
-                player_end_turn()
+                self.reset_all()
+                self.victory = player_end_turn()
                 self.load_screen = True
                 self.start_time = pg.time.get_ticks()
 
@@ -255,6 +259,7 @@ class PanelInterface:
             move_func(unit[1], unit[2], tile_line, tile_column)
             self.unit_is_moving = False
             self.clicks_unit_is_moving = 0
+            self.reset_all()
 
     def count_clicks(self):
         if self.city_panel.buy_units[0]:
@@ -332,6 +337,7 @@ class PanelInterface:
                             self.district_is_purchased_p = True
                             self.bdistrict_p = (city_line, city_column, tile_line, tile_column, i)
                             game.highlight_purchase_tiles(self.bdistrict_p[0], self.bdistrict_p[1], self.bdistrict_p[4])
+                            self.reset_all()
                             return
 
         if self.city_panel.buy_districts[1]:
@@ -348,6 +354,7 @@ class PanelInterface:
                                 self.bdistrict_g = (city_line, city_column, tile_line, tile_column, i)
                                 game.highlight_purchase_tiles(self.bdistrict_g[0], self.bdistrict_g[1],
                                                               self.bdistrict_g[4])
+                                self.reset_all()
                             return
 
 

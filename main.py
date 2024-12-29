@@ -241,10 +241,10 @@ while running:
         if panels.end_turn_button.rendered or sw:
             panels.end_turn_button.draw(screen_surf)
             sw = False
-        # panels.draw_loading_screen(screen_surf)
+        panels.draw_loading_screen(screen_surf)
         if panels.clicked:
             if game.is_player_turn:
-                panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable, city, game.get_player_information)
+                panels.draw_interface(screen_surf, mouse_pos, objects, tile, unit, purchasable, city)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False

@@ -117,7 +117,7 @@ class CityPanel(BasicPanel):
 
     def draw_purchase_districts(self, idx, pidx, screen, position, purchasable):
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
-            if not i in purchasable[pidx][:-1]:
+            if not i in purchasable[pidx]:
                 district.set_colors("#9c9c9c", "#9c9c9c")
             else:
                 district.set_colors("White", "Gray")
@@ -148,7 +148,7 @@ class CityPanel(BasicPanel):
                     building.update(screen, position)
 
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
-            if i in purchasable[pidx][:-1]:
+            if i in purchasable[pidx]:
                 district.update(screen, position)
             else:
                 district.draw_button(screen)
@@ -156,7 +156,7 @@ class CityPanel(BasicPanel):
 
     def draw_purchase_city_center_buildings(self, idx, pidx, screen, position, purchasable):
         for i, building in enumerate(self.buy_buildings_city_center_buttons[idx]):
-            if not i in purchasable[pidx][-1]:
+            if not i + 1 in purchasable[pidx][-1]:
                 building.set_colors("#9c9c9c", "#9c9c9c")
             else:
                 building.set_colors("White", "Gray")
@@ -201,7 +201,7 @@ class CityPanel(BasicPanel):
             self.resources_per_turn(f"{resource}", 25, rects[i], screen)
             i += 1
 
-        city_information = [("Total Food", city[5]), ("Total Production", city[6]), ("Housing", city[7]), ("Population", city[8]), ("Health", city[9]), ("Combat Strength", city[10])]
+        city_information = [("Total Food", round(city[5])), ("Total Production", round(city[6])), ("Housing", city[7]), ("Population", city[8]), ("Health", city[9]), ("Combat Strength", city[10])]
 
         i = 0
         for information in city_information:
@@ -299,7 +299,7 @@ class CityPanel(BasicPanel):
                 district.set_coords(district.x_coord, self.heights[1][i])
                 district.update_position()
 
-            # self.change_coords = [True, True]
+            self.change_coords = [True, True]
 
     def return_to_init_surf(self, position, screen):
         close = self.check_if_in_special_rects(position)
