@@ -84,6 +84,7 @@ class Tile:
             self.city_resources.production_per_turn_count += 1
         elif self.strategic_resource == tile_strategic_resources[1]:
             self.resources.science_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 1
         elif self.strategic_resource == tile_strategic_resources[2]:
             self.city_resources.food_per_turn_count += 1
             self.city_resources.production_per_turn_count += 1
@@ -104,13 +105,17 @@ class Tile:
             self.resources.gold_per_turn_count += 3
 
         if self.feature == tile_features[0]:
-            self.city_resources.production_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 2
             self.movement_cost = 2
         elif self.feature == tile_features[1]:
             self.city_resources.food_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 1
             self.movement_cost = 2
         elif self.feature == tile_features[2]:
             self.city_resources.food_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 1
             self.movement_cost = 2
         elif self.feature == tile_features[3]:
             self.resources.science_per_turn_count += 1
+            self.city_resources.production_per_turn_count += 1
+            self.movement_cost = 2

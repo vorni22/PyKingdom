@@ -170,6 +170,7 @@ class Game:
         return False
 
     def move_unit(self, tile_line, tile_column, new_tile_line, new_tile_column):
+        self.remove_highlight_move_tiles(tile_line, tile_column)
         moved_unit = None
         objects = self.identify_object(new_tile_line, new_tile_column)
         for unit in self.players[self.current_player].units:
@@ -321,6 +322,7 @@ class Game:
             self.map_interface.rmv_tile_selector(coords)
 
     def highlight_purchase_tiles(self, tile_line, tile_column, district_id):
+        print(tile_line, tile_column, district_id)
         if self.get_city_owner(tile_line, tile_column) != self.current_player:
             return False
         selected_city = None
@@ -330,7 +332,7 @@ class Game:
                 break
         for tile in selected_city.tiles:
             if ((tile.line, tile.column) in self.districts_coordinates
-                or tile in self.players[self.current_player].tiles
+                or tile not in self.players[self.current_player].tiles
                 or district_id == 3 and tile.type_id != 2
                 or district_id != 3 and tile.type_id in [2, 3]):
                 continue
@@ -581,6 +583,7 @@ class Game:
                                                                    district_id, building_id)
 
     def purchase_district_with_production(self, city_tile_line, city_tile_column, tile_line, tile_column, district_id):
+        self.remove_highlight_purchase_tiles(city_tile_line, city_tile_column)
         if (tile_line, tile_column) in self.districts_coordinates:
             return False
         tile = Map.Map.get_tile(tile_line, tile_column)
@@ -600,6 +603,7 @@ class Game:
             self.map_interface.add_tile_owner(coords, self.current_player)
 
     def purchase_district_with_gold(self, city_tile_line, city_tile_column, tile_line, tile_column, district_id):
+        self.remove_highlight_purchase_tiles(city_tile_line, city_tile_column)
         if (tile_line, tile_column) in self.districts_coordinates:
             return False
         tile = Map.Map.get_tile(tile_line, tile_column)

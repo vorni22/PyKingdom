@@ -119,6 +119,9 @@ class Player:
                        district_location_line, district_location_column, players_list):
         for city in self.cities:
             if city.center_line_location == city_line and city.center_column_location == city_column:
+                target_tile = Map.Map.get_tile(district_location_line, district_location_column)
+                if target_tile not in city.tiles:
+                    return False
                 city.build_district_with_production(district_name_id, district_location_line, district_location_column)
                 new_tiles = self.tiles + list(set(city.tiles) - set(self.tiles))
                 for player in players_list:
@@ -130,13 +133,16 @@ class Player:
                        district_location_line, district_location_column, players_list):
         for city in self.cities:
             if city.center_line_location == city_line and city.center_column_location == city_column:
+                target_tile = Map.Map.get_tile(district_location_line, district_location_column)
+                if target_tile not in city.tiles:
+                    return False
                 city.add_district(district_name_id, district_location_line, district_location_column)
                 new_tiles = self.tiles + list(set(city.tiles) - set(self.tiles))
                 for player in players_list:
                     if player.player_id != self.player_id:
                         new_tiles = list(set(new_tiles) - set(player.tiles))
                 self.tiles = new_tiles
-        self.resources.gold_count -= City.district_cost * 2
+                self.resources.gold_count -= City.district_cost * 2
 
     def build_building_with_production(self, city_line, city_column, district_type_id, building_name_id):
         for city in self.cities:
