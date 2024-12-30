@@ -7,7 +7,7 @@ from .CityPanel import CityPanel
 from .UnitPanel import UnitPanel
 from .PermanentPanel import PermanentPanel
 from UI.CircleButton import CircleButton
-from Logic.City import district_cost
+from Logic.City import district_cost, city_center_buildings_costs
 
 class PanelInterface:
     def __init__(self, width, height):
@@ -303,7 +303,7 @@ class PanelInterface:
         if self.city_panel.buy_buildings_city_center[0]:
             for i, key in enumerate(self.city_panel.buy_buildings_city_center_buttons[0]):
                 if key.check_for_input(position) and self.clicks[4] >= 2 and key.hover_color != "#9c9c9c":
-                    if district_cost <= production:
+                    if city_center_buildings_costs[i + 1] <= production:
                         ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
                         print("building_bought")
                         return
@@ -311,7 +311,7 @@ class PanelInterface:
         if self.city_panel.buy_buildings_city_center[1]:
             for i, key in enumerate(self.city_panel.buy_buildings_city_center_buttons[1]):
                 if key.check_for_input(position) and self.clicks[5] >= 2 and key.hover_color != "#9c9c9c":
-                    if 2 * district_cost <= temp[3]:
+                    if 2 * city_center_buildings_costs[i + 1] <= temp[3]:
                         ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
                         print("building_bought")
                         return
@@ -381,7 +381,9 @@ class PanelInterface:
 
     def draw_loading_screen(self, screen):
         if self.load_screen:
+            self.end_turn_button.rendered = False
             if pg.time.get_ticks() - self.start_time > 1000:
                 self.load_screen = False
+                self.end_turn_button.rendered = True
                 return
             screen.blit(self.loading_screen, (0, 0))

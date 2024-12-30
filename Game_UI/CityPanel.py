@@ -12,7 +12,7 @@ from Logic.City import district_types
 from Logic.City import district_cost
 from Logic.City import city_center_buildings
 from Logic.City import campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs
-from Logic.City import  harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs
+from Logic.City import  harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs, city_center_buildings_costs
 
 class CityPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
@@ -65,11 +65,13 @@ class CityPanel(BasicPanel):
             self.buy_districts_buttons[1].append(Button(bg, w - 35, h - (i + 1) * self.scale, self.format_text(district_name, str(district_cost_gold), 350, 30), None, "White", "Gray", 30))
             self.heights[1].append(h - (i + 1) * self.scale)
 
+        j = 0
         for i, building_name in enumerate(city_center_buildings[1:]):
-            self.buy_buildings_city_center_buttons[0].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(district_cost), 350, 30), None, "White", "Gray", 30))
+            self.buy_buildings_city_center_buttons[0].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(city_center_buildings_costs[i + 1]), 350, 30), None, "White", "Gray", 30))
 
+        temp = [cost * 2 for cost in city_center_buildings_costs]
         for i, building_name in enumerate(city_center_buildings[1:]):
-            self.buy_buildings_city_center_buttons[1].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(district_cost_gold), 350, 30),None, "White", "Gray", 30))
+            self.buy_buildings_city_center_buttons[1].append(Button(bg, w - 35, h - (i + 4) * self.scale, self.format_text(building_name, str(temp[i + 1]), 350, 30),None, "White", "Gray", 30))
 
         self.update_buttons = [[], []]
         for i in range(len(self.buy_districts_buttons[0])):
@@ -293,7 +295,7 @@ class CityPanel(BasicPanel):
 
             for i, district in enumerate(self.buy_districts_buttons[0]):
                 district.set_coords(district.x_coord, self.heights[0][i])
-                # district.update_position()
+                district.update_position()
 
             for i, district in enumerate(self.buy_districts_buttons[1]):
                 district.set_coords(district.x_coord, self.heights[1][i])
