@@ -285,6 +285,7 @@ class PanelInterface:
                 if key.check_for_input(position) and self.clicks[0] >= 2:
                     if self.city_panel.units_cost_production[i] <= production and key.hover_color != "#9c9c9c":
                         ret = game.purchase_unit_with_production(tile_line, tile_column, i)
+                        self.reset_all()
                         return
 
         if self.city_panel.buy_units[1]:
@@ -292,6 +293,7 @@ class PanelInterface:
                 if key.check_for_input(position) and self.clicks[1] >= 2:
                     if self.city_panel.units_cost_gold[i] <= temp[3] and key.hover_color != "#9c9c9c":
                         ret = game.purchase_unit_with_gold(tile_line, tile_column, i)
+                        self.reset_all()
                         return
 
     def buy_buildings(self, tile_line, tile_column, position, game, city):
@@ -306,6 +308,7 @@ class PanelInterface:
                     if city_center_buildings_costs[i + 1] <= production:
                         ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
                         print("building_bought")
+                        self.reset_all()
                         return
 
         if self.city_panel.buy_buildings_city_center[1]:
@@ -314,6 +317,7 @@ class PanelInterface:
                     if 2 * city_center_buildings_costs[i + 1] <= temp[3]:
                         ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
                         print("building_bought")
+                        self.reset_all()
                         return
 
     def buy_districts(self, city_line, city_column, position, game, city, tile_line, tile_column):
@@ -369,6 +373,7 @@ class PanelInterface:
                     if self.city_panel.buildings_costs[0][i][purchasable[3][i][-1]]  <= production:
                         ret = game.purchase_building_with_production(tile_line, tile_column, i, purchasable[3][i][-1])
                         print("building_bought")
+                        self.reset_all()
                         return
 
         if not self.city_panel.check_array_is_empty(purchasable[6]):
@@ -377,6 +382,7 @@ class PanelInterface:
                     if self.city_panel.buildings_costs[1][i][purchasable[6][i][-1]] <= temp[3]:
                         ret = game.purchase_building_with_production(tile_line, tile_column, i, purchasable[6][i][-1])
                         print("building_bought")
+                        self.reset_all()
                         return
 
     def draw_loading_screen(self, screen):
