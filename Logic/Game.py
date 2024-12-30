@@ -249,37 +249,38 @@ class Game:
         if (2 in objects and ((next_to_last_tile not in self.units_coordinates
             and next_to_last_tile not in self.cities_coordinates) or len(shortest_path) == 2)):
             city_owner = self.get_city_owner(new_tile_line, new_tile_column)
-            for city in self.players[city_owner].cities:
-                if city.center_line_location == new_tile_line and city.center_column_location == new_tile_column:
-                    city.melee_combat(moved_unit)
-                    moved_unit.calculate_melee_combat_with_city(city)
-                    city.health_percentage = round(city.health_percentage)
-                    moved_unit.health_percentage = round(moved_unit.health_percentage)
-                    if city.health_percentage <= 0:
-                        ret = self.players[city_owner].delete_city(new_tile_line, new_tile_column)
-                        if ret == 1:
-                            for captured_city in self.players[city_owner].cities:
-                                for tile in captured_city.tiles:
-                                    coord = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
-                                    self.map_interface.remove_owner(coord)
-                                    self.map_interface.add_tile_owner(coord, self.current_player)
-                                self.players[self.current_player].cities.append(captured_city)
-                            for unit in self.players[city_owner].units:
-                                self.map_interface.clr_unit(unit.unit_id)
-                            self.players[city_owner] = None
-                            self.defeated_players += 1
-                        else:
-                            self.players[self.current_player].cities.append(city)
+            if city_owner != self.current_player:
+                for city in self.players[city_owner].cities:
+                    if city.center_line_location == new_tile_line and city.center_column_location == new_tile_column:
+                        city.melee_combat(moved_unit)
+                        moved_unit.calculate_melee_combat_with_city(city)
+                        city.health_percentage = round(city.health_percentage)
+                        moved_unit.health_percentage = round(moved_unit.health_percentage)
+                        if city.health_percentage <= 0:
+                            ret = self.players[city_owner].delete_city(new_tile_line, new_tile_column)
+                            if ret == 1:
+                                for captured_city in self.players[city_owner].cities:
+                                    for tile in captured_city.tiles:
+                                        coord = self.map_interface.convert_coordinates_to_mine(tile.line, tile.column)
+                                        self.map_interface.remove_owner(coord)
+                                        self.map_interface.add_tile_owner(coord, self.current_player)
+                                    self.players[self.current_player].cities.append(captured_city)
+                                for unit in self.players[city_owner].units:
+                                    self.map_interface.clr_unit(unit.unit_id)
+                                self.players[city_owner] = None
+                                self.defeated_players += 1
+                            else:
+                                self.players[self.current_player].cities.append(city)
+                            if moved_unit.health_percentage <= 0:
+                                moved_unit.health_percentage = 1
+                            self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
                         if moved_unit.health_percentage <= 0:
-                            moved_unit.health_percentage = 1
-                        self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
-                    if moved_unit.health_percentage <= 0:
-                        self.map_interface.clr_unit(moved_unit.unit_id)
-                        self.players[self.current_player].delete_units(moved_unit.position_line,
-                                                                       moved_unit.position_column)
-                    moved_unit.remaining_movement = 0
-                    return True
-        elif 1 in objects or 2 in objects:
+                            self.map_interface.clr_unit(moved_unit.unit_id)
+                            self.players[self.current_player].delete_units(moved_unit.position_line,
+                                                                           moved_unit.position_column)
+                        moved_unit.remaining_movement = 0
+                        return True
+        elif 1 in objects:
             return False
         self.__render_movement(moved_unit, tile_line, tile_column, new_tile_line, new_tile_column)
         return True
@@ -575,6 +576,7 @@ class Game:
                purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 
     def purchase_building_with_production(self, tile_line, tile_column, district_id, building_id):
+        print(tile_line, tile_column, district_id, building_id)
         self.players[self.current_player].build_building_with_production(tile_line, tile_column,
                                                                          district_id, building_id)
 
