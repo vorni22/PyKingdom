@@ -46,8 +46,7 @@ glEnable(GL_CULL_FACE)
 glEnable(GL_BLEND)
 glBlendColor(0.0, 0.0, 0.0, 0.75)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-# pg.mouse.set_visible(False)  # Hide the mouse cursor
-# pg.event.set_grab(True)  # Grab the mouse for capturing movement
+
 pg.mouse.set_visible(True)
 pg.event.set_grab(False)
 
