@@ -32,7 +32,7 @@ pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF)
+screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF | pg.FULLSCREEN)
 size = pg.display.get_surface().get_size()
 WIDTH = size[0]
 HEIGHT = size[1]
