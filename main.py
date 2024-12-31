@@ -32,7 +32,7 @@ pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF | pg.FULLSCREEN)
+screen = pg.display.set_mode((0, ), pg.OPENGL | pg.DOUBLEBUF)
 size = pg.display.get_surface().get_size()
 WIDTH = size[0]
 HEIGHT = size[1]
@@ -122,16 +122,7 @@ tile = None
 unit = None
 city = None
 sw = True
-
 tile_id = -1
-
-# purchasable_units = [[0], [], [0], [0], [], [0], []]
-# purchasable_districts = [0, 1, 3, 5]
-# purchasable_buildings = [[0], [0], [], [0], [], [], []]
-# purchasable_units_gold = [[0], [0], [], [], [], [], []]
-# purchasable_districts_gold = [2, 4, 6]
-# purchasable_buildings_gold = [[0], [], [0], [], [], [], []]
-# purchasable = (True, purchasable_units, purchasable_districts, purchasable_buildings, purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 purchasable = None
 tile_line = -1
 tile_column = -1

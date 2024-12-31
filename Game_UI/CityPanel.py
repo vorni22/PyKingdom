@@ -379,18 +379,3 @@ class CityPanel(BasicPanel):
         screen.blit(text_rendered, text_rect)
 
 
-
-    # def draw_error_box(self, screen, start_time, duration=1000):
-    #
-    #     current_time = time.time()
-    #     if current_time - start_time < duration:
-    #
-    #         box_rect = pg.Rect(self.width // 4, self.height // 2 - 50, self.width // 2, 100)
-    #
-    #         text = self.fnt.render(self.error_message, True, "Red")
-    #         text_rect = text.get_rect(center=box_rect.center)
-    #         screen.blit(text, text_rect)
-    #         return True
-    #     return False
-
-

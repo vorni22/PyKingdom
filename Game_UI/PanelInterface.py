@@ -159,7 +159,7 @@ class PanelInterface:
     def cursor_is_on_ui(self, position):
         if self.clicked_options[0]:
             temp = self.tile_panel.surf.get_rect()
-            temp.center = self.tile_panel.text_rect.center
+            temp.topleft = (self.tile_panel.center_x, self.tile_panel.center_y)
             if temp.collidepoint(position):
                 return True
             if self.tile_panel.close_rect.collidepoint(position):
@@ -167,7 +167,7 @@ class PanelInterface:
 
         if self.clicked_options[1]:
             temp = self.unit_panel.surf.get_rect()
-            temp.center = self.unit_panel.text_rect.center
+            temp.topleft = (self.unit_panel.center_x, self.unit_panel.center_y)
             if temp.collidepoint(position):
                 return True
             if self.unit_panel.close_rect.collidepoint(position):
@@ -179,7 +179,7 @@ class PanelInterface:
 
         if self.clicked_options[2]:
             temp = self.city_panel.surf.get_rect()
-            temp.center = self.city_panel.text_rect.center
+            temp.topleft = (self.city_panel.center_x, self.city_panel.center_y)
             if temp.collidepoint(position):
                 return True
             if self.city_panel.close_rect.collidepoint(position):
@@ -224,7 +224,9 @@ class PanelInterface:
 
     def end_turn(self, position, player_end_turn):
         if self.end_turn_button.rendered:
-            if self.end_turn_button.circle_collidepoint(position):
+            temp = self.end_turn_button.surf.get_rect()
+            temp.topleft = self.end_turn_button.center
+            if temp.collidepoint(position):
                 print("end turn")
 
                 self.reset_all()
@@ -306,7 +308,7 @@ class PanelInterface:
             for i, key in enumerate(self.city_panel.buy_buildings_city_center_buttons[0]):
                 if key.check_for_input(position) and self.clicks[4] >= 2 and key.hover_color != "#9c9c9c":
                     if city_center_buildings_costs[i + 1] <= production:
-                        ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
+                        ret = game.purchase_building_with_production(tile_line, tile_column, 7, i + 1)
                         print("building_bought")
                         self.reset_all()
                         return
@@ -315,7 +317,7 @@ class PanelInterface:
             for i, key in enumerate(self.city_panel.buy_buildings_city_center_buttons[1]):
                 if key.check_for_input(position) and self.clicks[5] >= 2 and key.hover_color != "#9c9c9c":
                     if 2 * city_center_buildings_costs[i + 1] <= temp[3]:
-                        ret = game.purchase_building_with_production(tile_line, tile_column, 7, i)
+                        ret = game.purchase_building_with_production(tile_line, tile_column, 7, i + 1)
                         print("building_bought")
                         self.reset_all()
                         return
@@ -387,9 +389,7 @@ class PanelInterface:
 
     def draw_loading_screen(self, screen):
         if self.load_screen:
-            self.end_turn_button.rendered = False
             if pg.time.get_ticks() - self.start_time > 1000:
                 self.load_screen = False
-                self.end_turn_button.rendered = True
                 return
             screen.blit(self.loading_screen, (0, 0))

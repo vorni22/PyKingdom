@@ -1,5 +1,3 @@
-from inspect import signature
-
 import pygame as pg
 
 from Logic.Tile import tile_types
@@ -77,7 +75,6 @@ class BasicPanel:
         self.text = new_text
         f = pg.font.Font(self.font, font_size)
         self.text_rendered = f.render(self.text, True, "Black")
-
 
         self.text_rect = self.text_rendered.get_rect()
         self.text_rect.topleft = center
