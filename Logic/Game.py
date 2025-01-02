@@ -570,13 +570,10 @@ class Game:
                     purchasable_units[5] = []
                     purchasable_units_gold[4] = []
                     purchasable_units_gold[5] = []
-
-        print(purchasable_buildings[7])
         return (True, purchasable_units, purchasable_districts, purchasable_buildings,
                purchasable_units_gold, purchasable_districts_gold, purchasable_buildings_gold)
 
     def purchase_building_with_production(self, tile_line, tile_column, district_id, building_id):
-        print(tile_line, tile_column, district_id, building_id)
         self.players[self.current_player].build_building_with_production(tile_line, tile_column,
                                                                          district_id, building_id)
 

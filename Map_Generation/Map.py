@@ -9,7 +9,7 @@ import Logic.Tile as Tile
 # from the class container via get_tile
 # @param lines: the number of lines the map has
 # @param columns: the number of columns the map has
-# @param tiles: 2d list of tiles. Tiles are generated using the init_tiles once, and then remained stored in the Map
+# @param tiles: list of tiles. Tiles are generated using the init_tiles once, and then remained stored in the Map
 # class, which acts as a singleton container for all the map related information
 # @param G: Graph containing the entire map, where each node is a tile and the edges are the connections between tiles
 # @param shortest_distances: vector of dictionaries, each dictionary shortest_distances[u] contains a pair v:distance,
@@ -19,7 +19,11 @@ import Logic.Tile as Tile
 # @param unit_shortest_distances: vector of dictionaries, each dictionary unit_shortest_distances[u] contains a pair
 # v:distance, which represents the distance which a unit needs to traverse to get from u to v. Note that this isn't
 # symmetric, unit_shortest_distances[u][v] may be different from unit_shortest_distances[v][u]
-
+# Movement cost to mountains, as well as movement cost from land to water and vice versa is infinite,
+# meaning that passing is impossible
+# @param unit_shortest_paths: list of all the shortest paths on the map. unit_shortest_paths[v] holds a dictionary,
+# where each element unit_shortest_paths[v][u] represents a list of all nodes (tile coordinates) on the shortest path
+# from u to v. The paths keep in mind the movement cost of each tile.
 class Map:
     lines = 0
     columns = 0
