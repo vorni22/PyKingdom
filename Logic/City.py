@@ -124,7 +124,7 @@ class District:
                 resources.science_per_turn_count += 2.5
                 resources.culture_per_turn_count += 1.25
                 city_resources.food_per_turn_count += 10
-                city_resources.production_per_turn_count += 120
+                city_resources.production_per_turn_count += 20
             if city_center_buildings[1] in self.buildings:
                 resources.culture_per_turn_count += 2
             if city_center_buildings[2] in self.buildings:

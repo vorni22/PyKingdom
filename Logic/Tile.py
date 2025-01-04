@@ -9,21 +9,20 @@ tile_luxury_resources = ['Mercury', 'Silk', 'Turtles', 'Coffee', 'Diamonds', Non
 # Holds information about a tile on the map
 # @param line: the line on the map on which the tile is situated
 # @param column: the column on the map on which te tile is situated
-# @param type: the type of tile this tile is. Tiles can be Ocean, Shallow Water, Grassland, Plains or Mountains
+# @param type: the type of tile this tile is. Tiles can be Ocean, Shallow Water, Grassland, Plains, Mountains or Peaks
 # depending on their altitude (increasing in this order). Mountains may not have features or resources. Fish, Crabs,
-# Whales and Coral Reefs may be found only on shallow water tiles. Every other resource or feature may only be found
+# Turtles and Coral Reefs may be found only on shallow water tiles. Every other resource or feature may only be found
 # on grassland or plains tiles (equal chances)
 # @param basic_resource: the basic resource on the tile (if the tile has one) only one of basic, strategic or luxury
 # resources can be present on a tile
 # @param strategic_resource: the strategic resource on the tile (if the tile has one) only one of basic, strategic or
 # luxury resources can be present on a tile
-# @param luxury: the luxury resource on the tile (if the tile has one) only one of basic, strategic or luxury
+# @param luxury_resource: the luxury resource on the tile (if the tile has one) only one of basic, strategic or luxury
 # resources can be present on a tile
-# @param feature: the feature of the tile (if the tile has one). A tile can have both a resource and a feature
+# @param feature: the feature of the tile (if the tile has one)
 # @param resources: how much science, culture and gold the tile yields to the player when worked
 # @param city_resources: how much food and production the tile yields to the city when worked
 # @param movement_cost: how much movement must a unit have remaining to be able to move to this tile.
-# The first move of a unit is special and ignores this cost
 # Mountains may never be passed - equivalent to having infinite movement cost
 class Tile:
     def __init__(self, line, column, type_id, basic_resource_id, feature_id, strategic_resource_id, luxury_resource_id):

@@ -12,6 +12,13 @@ import random
 # @param resources: the total resources owned by the player (not necessarily all ever earned)
 # @param resources_per_turn: the amount of resources that should be earned by the player this turn
 # to be updated at the start of the turn
+# @param units: list of all the units the players owns. Each unit can be moved only by the owner player
+# @param cities: list of all the cities the player owns. Each city can only be interacted with only by the owner player
+# @param tiles: list of all tiles of all cities owned by the player - each player has a border color, with will be
+# displayed around each tile owned by the player
+# @param capital_line and capital_column: the position of the capital. The capital is the first city the player settles.
+# If another player captures the capital - all cities of this players will be passed to the victor, and the initial
+# owner will be defeated
 class Player:
     player_count = 0
     def __init__(self, other_players):
