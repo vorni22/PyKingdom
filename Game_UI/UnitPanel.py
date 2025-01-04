@@ -1,7 +1,24 @@
 import pygame as pg
 
 from .BasicPanel import BasicPanel
-from Logic.Unit import unit_classes
+
+# @author Alexandru Condorache
+# Unit panel to display information about a unit, inherits the BasicPanel class
+# @param width (int): Width of the screen.
+# @param height (int): Height of the screen.
+# @param surf (pg.Surface): Surface object for rendering the panel.
+# @param font (str): Path to the font used for text rendering.
+# @param text_size (int): Font size for the panel text.
+# @param text (str): Initial text to display on the panel.
+# @param text_color (str): Color of the text in the panel.
+# @param x_coord (int): X-coordinate of the panel's top-left corner.
+# @param y_coord (int): Y-coordinate of the panel's top-left corner.
+# @param hover_color (str): Color of the panel when hovered over.
+# @param clicked (bool): Tracks whether the panel is clicked.
+# @param fnt (pg.font.Font): Font object created from the specified font and size.
+# @param text_rendered (pg.Surface): Rendered text surface for display.
+# @param text_rect (pg.Rect): Rectangle for positioning the text.
+# @param close_rect (pg.Rect): Rectangle for the close button on the panel.
 
 class UnitPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf):
@@ -12,6 +29,7 @@ class UnitPanel(BasicPanel):
         self.settler_rect = pg.Rect(7 + self.x_coord, 48 + self.y_coord, 41, 41)
         self.is_settler = False
 
+# Checks if the move button is clicked
     def move_unit(self, position, screen):
         if self.move_unit_rect.collidepoint(position):
             pg.draw.rect(screen, "Blue", self.move_unit_rect)
@@ -20,6 +38,7 @@ class UnitPanel(BasicPanel):
 
         return False
 
+# Draws the unit panel and display the information about unit based on unit param
     def draw_surf(self, screen, mouse_pos, tile, unit, purchasable, city):
         if unit[3] is None:
             return
@@ -41,6 +60,7 @@ class UnitPanel(BasicPanel):
                 screen.blit(self.text_rendered, self.text_rect)
                 i += 1
 
+# Checks if the settle button is clicked
     def settle_city(self, position, screen, unit, settle_func):
         if self.settler_rect.collidepoint(position) and 3 in unit[0]:
             pg.draw.rect(screen, "Blue", self.settler_rect)

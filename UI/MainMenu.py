@@ -3,6 +3,21 @@ import pygame as pg
 from .Button import Button
 from .DropDownButton import DropDownButton
 
+
+# @param width (int): Width of the screen.
+# @param height (int): Height of the screen.
+# @param background (pg.Surface): Background image for the menu.
+# @param font_main (str): Path to the main font used for buttons and headings.
+# @param font_options (str): Path to the font used for dropdown options.
+# @param options_map_size (dict): Dictionary mapping map size names to their dimensions.
+# @param options_num_players (list): List of available player count options.
+# @param default_number_players_value (str): Default display text for number of players dropdown.
+# @param default_map_size_value (str): Default display text for map size dropdown.
+# @param map_size (tuple): Selected map size dimensions.
+# @param num_players (int): Selected number of players.
+# @param game_state (int): Current game state (0: Main Menu, 1: Options Menu, 2: Pause, 3: Game is running).
+# @param button_* (Button/DropDownButton): Various button instances for the menu.
+
 class MainMenu:
     def __init__(self, width, height):
         self.width = width
@@ -47,6 +62,7 @@ class MainMenu:
         self.button_map_size.check_input(mouse_pos)
         self.button_number_players.check_input(mouse_pos)
 
+# Checks the game_state and based on that value draws buttons
     def draw_menu_buttons(self, screen, mouse_pos):
         if self.game_state == 0:
 
@@ -116,6 +132,8 @@ class MainMenu:
     def check_game_is_paused(self, mouse_pos):
         return self.game_state == 2
 
+# Checks if a user selected the map size and the number of players
+# then return this values
     def get_game_constants(self):
         if self.button_map_size.get_text_input() != self.default_map_size_value:
             selected_size = self.button_map_size.get_text_input()
@@ -129,6 +147,7 @@ class MainMenu:
 
         return self.map_size, self.num_players
 
+# Checks if a user clicked on a button and based on that action change the game_state
     def check_input_main_menu(self, mouse_pos):
         if self.check_input_play(mouse_pos):
             self.set_game_state(1)

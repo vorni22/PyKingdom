@@ -12,6 +12,24 @@ from Logic.City import city_center_buildings
 from Logic.City import campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs
 from Logic.City import  harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs, city_center_buildings_costs
 
+# @author Alexandru Condorache
+# City panel to display information about a city, inherits the BasicPanel class
+# @param width (int): Width of the screen.
+# @param height (int): Height of the screen.
+# @param surf (pg.Surface): Surface object for rendering the panel.
+# @param font (str): Path to the font used for text rendering.
+# @param text_size (int): Font size for the panel text.
+# @param text (str): Initial text to display on the panel.
+# @param text_color (str): Color of the text in the panel.
+# @param x_coord (int): X-coordinate of the panel's top-left corner.
+# @param y_coord (int): Y-coordinate of the panel's top-left corner.
+# @param hover_color (str): Color of the panel when hovered over.
+# @param clicked (bool): Tracks whether the panel is clicked.
+# @param fnt (pg.font.Font): Font object created from the specified font and size.
+# @param text_rendered (pg.Surface): Rendered text surface for display.
+# @param text_rect (pg.Rect): Rectangle for positioning the text.
+# @param close_rect (pg.Rect): Rectangle for the close button on the panel.
+
 class CityPanel(BasicPanel):
     def __init__(self, width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf):
         super().__init__(width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf)
@@ -94,6 +112,8 @@ class CityPanel(BasicPanel):
         rect = rendered_text.get_rect(center=(center[0], center[1]))
         screen.blit(rendered_text, rect)
 
+# Checks if the player can buy a unit
+# If he cannot buy it changes the color and hover color of button to #9c9c9c
     def draw_purchase_units(self, idx, pidx, screen, position, purchasable):
         for i, unit in enumerate(self.buy_units_buttons[idx]):
             if len(purchasable[pidx][i]) == 0:
@@ -107,6 +127,10 @@ class CityPanel(BasicPanel):
             else:
                 unit.draw_button(screen)
 
+# Checks if the player can buy a district
+# If he cannot buy it changes the color and hover color of button to #9c9c9c
+# Also if a district is upgradable the button for upgrade is displayed and
+# The positions of other buttons are changed
     def draw_purchase_districts(self, idx, pidx, screen, position, purchasable):
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
             if not i in purchasable[pidx]:
@@ -145,7 +169,8 @@ class CityPanel(BasicPanel):
             else:
                 district.draw_button(screen)
 
-
+# Checks if the player can buy a city center building
+# If he cannot buy it changes the color and hover color of button to #9c9c9c
     def draw_purchase_city_center_buildings(self, idx, pidx, screen, position, purchasable):
         for i, building in enumerate(self.buy_buildings_city_center_buttons[idx]):
             if not i + 1 in purchasable[pidx][-1]:
@@ -159,6 +184,8 @@ class CityPanel(BasicPanel):
             else:
                 building.draw_button(screen)
 
+# Draws the city panel and display the information about the city
+# If a player want to buy something it renders buttons for buying what players wants
     def draw_surf(self, screen, position, tile, unit, purchasable, city):
         screen.blit(self.surf, (self.x_coord, self.y_coord))
 
@@ -271,6 +298,7 @@ class CityPanel(BasicPanel):
 
         return close
 
+# Closes the city panel and update the positions of buttons
     def close_surf(self, position, screen):
 
         close = self.check_if_in_special_rects(position)
@@ -374,5 +402,3 @@ class CityPanel(BasicPanel):
         space_width = width - unit_width - cost_width
         num_spaces = max(0, space_width // font.size(" ")[0] - 5)
         return unit + " " * num_spaces + cost
-
-

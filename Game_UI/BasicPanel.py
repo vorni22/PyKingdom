@@ -6,6 +6,24 @@ from Logic.Tile import tile_features
 from Logic.Tile import tile_strategic_resources
 from Logic.Tile import tile_luxury_resources
 
+# @author Alexandru Condorache
+# Basic panel to display information about a tile
+# @param width (int): Width of the screen.
+# @param height (int): Height of the screen.
+# @param surf (pg.Surface): Surface object for rendering the panel.
+# @param font (str): Path to the font used for text rendering.
+# @param text_size (int): Font size for the panel text.
+# @param text (str): Initial text to display on the panel.
+# @param text_color (str): Color of the text in the panel.
+# @param x_coord (int): X-coordinate of the panel's top-left corner.
+# @param y_coord (int): Y-coordinate of the panel's top-left corner.
+# @param hover_color (str): Color of the panel when hovered over.
+# @param clicked (bool): Tracks whether the panel is clicked.
+# @param fnt (pg.font.Font): Font object created from the specified font and size.
+# @param text_rendered (pg.Surface): Rendered text surface for display.
+# @param text_rect (pg.Rect): Rectangle for positioning the text.
+# @param close_rect (pg.Rect): Rectangle for the close button on the panel.
+
 class BasicPanel:
     def __init__(self, width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf):
         self.width = width
@@ -30,6 +48,8 @@ class BasicPanel:
 
         self.close_rect = pg.Rect(437 + self.x_coord, 7 + self.y_coord, 40, 42)
 
+
+# Draws the tile panel and display the information about tile based on tile param
     def draw_surf(self, screen, mouse_pos, tile, unit, purchasable, city):
         screen.blit(self.surf, (self.x_coord, self.y_coord))
         self.draw_title_text(f"Tile type: {tile_types[tile[0]]}", 45, (self.x_coord, self.y_coord + 10))

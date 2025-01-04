@@ -24,7 +24,6 @@ screen = pg.display.set_mode((0, 0), pg.OPENGL | pg.DOUBLEBUF | pg.HWSURFACE)
 size = pg.display.get_surface().get_size()
 WIDTH = size[0]
 HEIGHT = size[1]
-# print(WIDTH, HEIGHT)
 
 # set up OpenGL
 glClearColor(0.6, 0.6, 0.6, 1)

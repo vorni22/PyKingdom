@@ -7,6 +7,11 @@ from .PermanentPanel import PermanentPanel
 from UI.CircleButton import CircleButton
 from Logic.City import district_cost, city_center_buildings_costs
 
+# @author Alexandru Condorache
+# Class that handle all panels
+# @param width (int): Width of the screen.
+# @param height (int): Height of the screen.
+
 class PanelInterface:
     def __init__(self, width, height):
         city_panel_back = pg.image.load("Assets/UIAssets/city_panel.png")
@@ -43,6 +48,7 @@ class PanelInterface:
         self.start_time = None
         self.victory = 0
 
+# Draws panels based on objects that are on a tile
     def draw_interface(self, screen, position, objects, tile, unit, purchasable, city):
         self.purchasable = purchasable
         if self.victory == 1:
@@ -84,6 +90,7 @@ class PanelInterface:
                 self.end_turn_button.rendered = True
             self.clicked = True
 
+# Close panels based on player actions
     def close_interface(self, position, screen, unit, settle_func):
         if self.victory:
             return
@@ -125,6 +132,7 @@ class PanelInterface:
             self.sw = True
             self.end_turn_button.rendered = True
 
+# Updates the inteface every frame
     def update_interface(self, move_func, unit, position, buy_func1, buy_func2):
         if not self.clicked:
             self.clicked = True
@@ -155,6 +163,7 @@ class PanelInterface:
     def set_update_every_frame(self, update_every_frame):
         self.update_every_frame = update_every_frame
 
+# Checks if current cursor position is on UI
     def cursor_is_on_ui(self, position):
         if self.clicked_options[0]:
             temp = self.tile_panel.surf.get_rect()
@@ -206,6 +215,7 @@ class PanelInterface:
 
         return False
 
+# Close all panels
     def reset_all(self):
         self.clicks = [0, 0, 0, 0, 0, 0]
         self.clicked_options = [False for _ in self.clicked_options]
@@ -221,6 +231,8 @@ class PanelInterface:
             self.city_panel.buy_districts[i] = False
             self.city_panel.buy_buildings_city_center[i] = False
 
+# Checks if the player clicked on end turn button
+# and pass to the next player
     def end_turn(self, position, player_end_turn):
         if self.end_turn_button.rendered:
             temp = self.end_turn_button.surf.get_rect()
@@ -275,6 +287,8 @@ class PanelInterface:
         elif self.city_panel.buy_buildings_city_center[1]:
             self.clicks[5] += 1
 
+# Depending on the chose resource checks for input on a button and if
+# the player clicked on that button the unit is bought if the player had enough quantity of that resource
     def buy_units(self, tile_line, tile_column, position, game, city):
         if city is None:
             return
@@ -296,6 +310,8 @@ class PanelInterface:
                         self.reset_all()
                         return
 
+# Depending on the chose resource checks for input on a button and if
+# the player clicked on that button the city center building is bought if the player had enough quantity of that resource
     def buy_buildings(self, tile_line, tile_column, position, game, city):
         if city is None:
             return
@@ -318,6 +334,8 @@ class PanelInterface:
                         self.reset_all()
                         return
 
+# Depending on the chose resource checks for input on a button and if
+# the player clicked on that button the district is bought if the player had enough quantity of that resource
     def buy_districts(self, city_line, city_column, position, game, city, tile_line, tile_column):
         if city is None:
             return
@@ -359,7 +377,8 @@ class PanelInterface:
                                 self.reset_all()
                             return
 
-
+# Depending on the chose resource checks for input on a button and if
+# the player clicked on that button the district building is bought if the player had enough quantity of that resource
     def buy_district_buildings(self, tile_line, tile_column, position, game, city, purchasable):
         if city is None:
             return
