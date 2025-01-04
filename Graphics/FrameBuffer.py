@@ -1,6 +1,11 @@
 from OpenGL.GL import *
 import pygame as pg
 
+# @author Alexandru Condorache
+# A basic OpenGL buffer around the Framebuffer object.
+# In comparison to the default framebuffer, it provides one more color attachment:
+# A 2D texture that store an INT for every pixel, the corresponding tile id of the pixel
+# This additional information is helps identify on which tile the mouse is currently standing.
 class FrameBuffer:
     def __init__(self, width:int, height:int):
         self.fbo = glGenFramebuffers(1)

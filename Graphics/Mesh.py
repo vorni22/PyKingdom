@@ -1,11 +1,14 @@
 import pyrr
-from OpenGL.GL import *
 import numpy as np
-from numpy import dtype
-
 from Graphics.Buffers import DynamicVBO
 from Graphics.Shaders import Shader
 
+# @author Vornicescu Vasile
+# A simple class used to store information about a vertex, which will then
+# go to be stored in the VBO to draw on the screen
+# Note: The color vector is not entirely a color: color.x is the key color,
+# and color.yz can provide additional information about a vertex, such as
+# the tile_id.
 class Vertex:
     def __init__(self, position, normal, color):
         self.position = position
@@ -19,6 +22,11 @@ class Vertex:
     def copy(self):
         return Vertex(self.position, self.normal, self.color)
 
+# An object that essentially is used to store vertices. Every 3 consecutive vertices form
+# a triangle. The given information represents an 3D object and can be pushed to the VBO
+# to be drawn. To do so flush the mesh.
+# It also stores positional information like translation, scale and rotation that will
+# be applied to all vertices and can be updated dynamically.
 class Mesh:
     def __init__(self, vbo_ref:DynamicVBO):
         self.vbo = vbo_ref
@@ -117,6 +125,7 @@ class Mesh:
         self.vertices[real_id + 7] = vertex.color[1]
         self.vertices[real_id + 8] = vertex.color[2]
 
+    # flush all vertices in the Mesh to the VBO
     def flush(self):
         if len(self.vertices) == 0:
             return

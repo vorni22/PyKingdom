@@ -1,6 +1,9 @@
 from OpenGL.GL import *
 import numpy as np
 
+# @author Vornicescu Vasile
+# Holds simple information about a memory block used as a node in a list
+# It is used by DynamicVBO to allocate video memory
 class MemBlock:
     def __init__(self, start, size):
         self.start = start
@@ -10,6 +13,10 @@ class MemBlock:
     def __hash__(self):
         return hash((self.start, self.size))
 
+# @author Vornicescu Vasile
+# Dynamic video memory allocator and wrapper around a VBO used by any mesh in the game
+# Stores the data in video memory as a vertex
+# Any vertex is expected to store position, normal and color (data)
 class DynamicVBO:
     def __init__(self, capacity:int, size_of_vertex:int):
         self.capacity = capacity
@@ -172,6 +179,9 @@ class DynamicVBO:
             count = block.size // self.size_of_vertex
             glDrawArrays(GL_TRIANGLES, first, count)
 
+# @author Vornicescu Vasile
+# A much simpler VBO used for testing early in the project and to store some really simple
+# stuff currently.
 class BasicVBO:
 
     # capacity -> size of vbo in bytes

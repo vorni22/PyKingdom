@@ -27,6 +27,12 @@ tile_colors = {'Plains': 0,
                'Peaks': 5,
 }
 
+# @author Vornicescu Vasile
+# A wrapper around the Mesh class. Once created, the class will generate a 3D map
+# according to the given parameters. The class will allways provide the same map given
+# the same parameters, for variation change the seed parameter.
+# Note: The class does not take into account player information and other high
+# level details. For this see the MapInterface class
 class MapMesh:
     def __init__(self, size_x, size_y, y_min, y_max, divs, vbo, shader, assets, seed):
         self.size_x = size_x
@@ -62,13 +68,13 @@ class MapMesh:
 
         for y in range(size_y):
             for x in range(size_x):
-                self.pick_type(x, y)
+                self.__pick_type(x, y)
 
         for y in range(size_y):
             for x in range(size_x):
                 real_index = x * size_y + y
                 self.loaded[real_index] = True
-                self.add_hex(x, y, self.mesh, y & 1 == 0)
+                self.__add_hex(x, y, self.mesh, y & 1 == 0)
 
         # add water plane
         self.water_lvl = (y_max / divs) * 1.8
@@ -76,7 +82,7 @@ class MapMesh:
 
         for y in range(size_y):
             for x in range(size_x):
-                self.add_hex(x, y, self.water, y & 1 == 0, True)
+                self.__add_hex(x, y, self.water, y & 1 == 0, True)
 
         self.water.flush()
         self.water.update_matrices()
@@ -102,24 +108,38 @@ class MapMesh:
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glBindTexture(GL_TEXTURE_1D, 0)
 
+    # Set the visibility of a tile
+    # The result will be global, it will not set the visibility for only one specific player
+    # and the result will be visible instantly. If you want to set the visibility of a single
+    # player see the MapInterface class
     def set_visibility(self, real_id, new_state):
         self.visibility[real_id] = new_state
         glBindTexture(GL_TEXTURE_1D, self.visibility_texture)
         glTexSubImage1D(GL_TEXTURE_1D, 0, real_id, 1, GL_RED, GL_FLOAT, new_state)
 
+    # clear a mesh loaded on a given tile
+    # Do not call it for a unit or wall
     def clear_object_on_tile(self, tile_id):
         if self.resource_type[tile_id] == None:
             return
         self.assets.remove_instance_of_at(self.resource_type[tile_id], tile_id)
         self.resource_type[tile_id] = None
 
+    # add a mesh on a given tile. It can be a resource, a city or a district.
+    # The method does not differentiate between a those since there can be
+    # only one of them on a tile at a single time
+    # Just make sure not to call it for a unit or wall
     def add_object_on_tile(self, tile_id, asset_name):
         if self.resource_type[tile_id] != None:
             self.clear_object_on_tile(tile_id)
         self.assets.add_instance_of_at(asset_name, tile_id, self.heights[tile_id], -1.0)
         self.resource_type[tile_id] = asset_name
 
-    def get_tile_on_mouse(self, mouse_x, mouse_y, fbo):
+    # Try to query information about the pixel where the mouse is currently
+    # The function will work with a probability of around 98% but the success is not
+    # guaranteed. For a 100% method use the higher level version in MapInterface
+    @staticmethod
+    def get_tile_on_mouse(mouse_x, mouse_y, fbo):
         glReadBuffer(GL_COLOR_ATTACHMENT1)
         glBindTexture(GL_TEXTURE_2D, fbo.data_texture)
         pixel = glReadPixels(mouse_x, mouse_y, 1, 1, GL_RED_INTEGER, GL_INT)
@@ -142,29 +162,29 @@ class MapMesh:
         return ret
 
     @staticmethod
-    def paraboloid_up(x1, x2, x):
+    def __paraboloid_up(x1, x2, x):
         n = x2
         a = 1
         m = -1 / pow(x1 - x2, 2)
         return a + m * pow(x - n, 2)
 
     @staticmethod
-    def paraboloid_down(x1, x2, x):
+    def __paraboloid_down(x1, x2, x):
         n = x1
         a = 1
         m = -1 / pow(x2 - x1, 2)
         return a + m * pow(x - n, 2)
 
     @staticmethod
-    def continental(x, s):
+    def __continental(x, s):
         if x <= 4:
-            return MapMesh.paraboloid_up(0, 8, x)
+            return MapMesh.__paraboloid_up(0, 8, x)
         if x >= s - 5:
-            return MapMesh.paraboloid_down(s - 9, s - 1, x)
+            return MapMesh.__paraboloid_down(s - 9, s - 1, x)
         return 1.0
         #return (pow(s / 2.0, 2) - pow(x - s / 2.0, 2)) / pow(s / 2.0, 2)
 
-    def pick_type(self, x_id: int, y_id: int):
+    def __pick_type(self, x_id: int, y_id: int):
         x_offset = 0
         if y_id & 1:
             x_offset = self.len_x + 0.5 * dR
@@ -173,7 +193,7 @@ class MapMesh:
 
         value = (1.0 + self.noise([x / (self.size_y * 0.2), y / (self.size_y * 0.2)])) * 0.5
         value = 1.2 * value * value
-        value *= MapMesh.continental(x_id, self.size_x) * MapMesh.continental(y_id, self.size_y) * self.y_max
+        value *= MapMesh.__continental(x_id, self.size_x) * MapMesh.__continental(y_id, self.size_y) * self.y_max
 
         lvl = int(np.floor(value / (self.y_max / self.divs)))
 
@@ -260,7 +280,7 @@ class MapMesh:
 
         return x_coord, y_coord
 
-    def add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
+    def __add_hex(self, x_id, y_id, mesh, even_tile: bool, water_tile = False):
         central_id = x_id * self.size_y + y_id
 
         x, y = self.real_coords(x_id, y_id)

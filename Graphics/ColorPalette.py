@@ -1,7 +1,10 @@
-import random
 import numpy as np
 from OpenGL.GL import *
 
+# @author Vornicescu Vasile
+# A helping class that stores all the colors used int a mesh and gives them a specific key.
+# It is used to save memory and instead of providing the whole color vector to the shader,
+# it provides only an integer, the color key.
 class ColorPalette:
     def __init__(self, shader):
         self.shader = shader
@@ -41,6 +44,8 @@ class ColorPalette:
 
         glActiveTexture(GL_TEXTURE0)
 
+    # function used to obtain the color key if available and if not,
+    # insert the color into the palette.
     def identify_color(self, color):
         key = (color[0], color[1], color[2])
 

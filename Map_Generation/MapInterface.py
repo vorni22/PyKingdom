@@ -18,6 +18,10 @@ player_colors = [
     [0.553, 1.000, 0.576]
 ]
 
+# @author Vornicescu Vasile
+# A wrapper around MapBuilder that take into account the contex of the game (players).
+# It also automatically handles player borders and visibility when units, cities and
+# districts are added through this class.
 class MapInterface:
     size_x = 0
     size_y = 0
@@ -59,16 +63,25 @@ class MapInterface:
 
         Shader.close_all_shaders()
 
-    def id_convertor(self, external_id):
+    # Converts external ids to mine
+    # Other functions in the Logic directory use a different
+    # id calculating function so it is necessary to differentiate.
+    def __id_convertor(self, external_id):
         line = external_id // self.size_x
         column = external_id % self.size_x
         return self.convert_coordinates_to_mine(line, column)
 
+    # Create a simple tile id based on it's position
+    # Other functions in the Logic directory use a different
+    # id calculating function so it is necessary to differentiate.
     def convert_coordinates_to_mine(self, line, column):
         if not self.activated:
             return -1
         return column * self.size_y + line
 
+    # Start generating the map based on given parameters
+    # Also takes into control the camera to update its position when
+    # a contex switch occurs.
     def activate(self, size_x, size_y, num_players, seed, camera_manager):
         if self.activated:
             return None
@@ -148,17 +161,23 @@ class MapInterface:
         return ret
         # return None
 
+    # Apply the set_visibility function from MapBuilder with different
+    # values based on the visibility state
     def __apply_vis(self, visibility, tile_id):
         if self.activated is False:
             return
 
         if visibility < 0:
-            self.set_visibility(tile_id, 0.0)
+            self.__set_visibility(tile_id, 0.0)
         elif visibility == 0:
-            self.set_visibility(tile_id, 0.7)
+            self.__set_visibility(tile_id, 0.7)
         else:
-            self.set_visibility(tile_id, 1.0)
+            self.__set_visibility(tile_id, 1.0)
 
+    # Switch the current player with another one.
+    # The function mainly handles visibility changes: it hides
+    # what the current player sees and reveals what the new player
+    # should see. It also moves the camera to the new player.
     def switch_context(self, player_id, player_position):
         if self.active_player == player_id or self.activated is False:
             return
@@ -173,19 +192,25 @@ class MapInterface:
 
             self.__apply_vis(visibility, tile_id)
 
+    # Function used to add a resource, city or district on a tile.
     def clr_object_on_tile(self, tile_id):
         if not self.activated:
             return
 
         self.builder.clear_object_on_tile(tile_id)
 
+    # function used to remove a resource, city or district on a tile.
     def add_object_on_tile(self, tile_id, asset_name):
         if not self.activated:
             return
 
         self.builder.add_object_on_tile(tile_id, asset_name)
 
-    def add_visibility_source_here(self, tile_id, player_id):
+    # Add a visibility source to the given player.
+    # Once added the player will see everything in a radius of 3 from this tile
+    # Can handle multiple sources on the same tile (a city and a unit can
+    # be on the same tile, both providing visibility)
+    def __add_visibility_source_here(self, tile_id, player_id):
         if not self.activated:
             return
 
@@ -199,7 +224,7 @@ class MapInterface:
         ]
 
         for external_id in nodes_at_distance:
-            my_id = self.id_convertor(external_id)
+            my_id = self.__id_convertor(external_id)
 
             if self.visibility[player_id][my_id] < 0:
                 self.visibility[player_id][my_id] = 0
@@ -210,7 +235,9 @@ class MapInterface:
                 self.__apply_vis(self.visibility[player_id][my_id], my_id)
 
 
-    def rmv_visibility_source_here(self, tile_id, player_id):
+    # Remove a visibility source from a given player. Make sure to call
+    # this only on tiles where the add_visibility_source_here was called.
+    def __rmv_visibility_source_here(self, tile_id, player_id):
         if not self.activated:
             return
 
@@ -224,7 +251,7 @@ class MapInterface:
         ]
 
         for external_id in nodes_at_distance:
-            my_id = self.id_convertor(external_id)
+            my_id = self.__id_convertor(external_id)
 
             if self.visibility[player_id][my_id] > 0:
                 self.visibility[player_id][my_id] -= 1
@@ -232,6 +259,7 @@ class MapInterface:
             if self.active_player == player_id:
                 self.__apply_vis(self.visibility[player_id][my_id], my_id)
 
+    # A wrapper directly on top of add_instance_of_at that handles units.
     def __add_unit__(self, tile_id, unit_name, player_id, unit_id):
         if self.activated is False:
             return -1
@@ -246,10 +274,13 @@ class MapInterface:
         self.unit_types[unit_id] = unit_name
         self.unit_player[unit_id] = player_id
 
-        self.add_visibility_source_here(tile_id, player_id)
+        self.__add_visibility_source_here(tile_id, player_id)
 
         return unit_id
 
+    # Add a unit owned by a given player on a tile.
+    # The function will provide a unit id.
+    # Make sure to keep the id in order to move or destroy the unit latter.
     def add_unit_on_tile(self, tile_id, unit_name, player_id):
         if self.activated is False:
             return -1
@@ -259,6 +290,7 @@ class MapInterface:
 
         return self.__add_unit__(tile_id, unit_name, player_id, unit_id)
 
+    # Destroy a unit from a tile using the unit id
     def clr_unit(self, unit_id):
         if self.activated is False or unit_id not in self.unit_pos:
             return
@@ -272,10 +304,11 @@ class MapInterface:
         self.unit_pos.pop(unit_id)
         self.unit_types.pop(unit_id)
 
-        self.rmv_visibility_source_here(tile_id, self.unit_player[unit_id])
+        self.__rmv_visibility_source_here(tile_id, self.unit_player[unit_id])
 
         self.unit_player.pop(unit_id)
 
+    # Move a unit on a new tile using its unit id
     def move_unit(self, unit_id, new_tile_id):
         if unit_id not in self.unit_pos or self.activated is False:
             return -1
@@ -311,12 +344,15 @@ class MapInterface:
         wall_id = tile_id | (side << 12) | (player_id << 15)
         self.assets.remove_instance_of_at("Wall", wall_id)
 
+    # Select a tile to another color. Can select multiple tiles.
     def add_tile_selector(self, tile_id):
         self.builder.set_visibility(tile_id, 1.1)
 
+    # De-select a tile to another color.
     def rmv_tile_selector(self, tile_id):
         self.__apply_vis(self.visibility[self.active_player][tile_id], tile_id)
 
+    # Mark a given player as owner of a tile. It will update the borders accordingly.
     def add_tile_owner(self, tile_id, player_id):
         if not self.activated or self.owner[tile_id] != -1 or self.owner[player_id] == player_id:
             return
@@ -326,7 +362,7 @@ class MapInterface:
         x = tile_id // self.size_y
         y = tile_id % self.size_y
 
-        self.add_visibility_source_here(tile_id, player_id)
+        self.__add_visibility_source_here(tile_id, player_id)
 
         # side 0
         x_id = x - 1; y_id = y
@@ -376,6 +412,7 @@ class MapInterface:
         else:
             self.__remove_border_on_side(nid, 2)
 
+    # Remove the ownership of a tile. It will update the borders accordingly.
     def remove_owner(self, tile_id):
         if not self.activated or self.owner[tile_id] == -1:
             return
@@ -383,7 +420,7 @@ class MapInterface:
         for i in range(6):
             self.__remove_border_on_side(tile_id, i)
 
-        self.rmv_visibility_source_here(tile_id, self.owner[tile_id])
+        self.__rmv_visibility_source_here(tile_id, self.owner[tile_id])
 
         self.owner[tile_id] = -1
 
@@ -433,19 +470,25 @@ class MapInterface:
             self.__add_border_on_side(nid, 2, player_id)
 
 
+    # Highlight a tile. Can highlight only ONE tile with this function
+    # Call this function with -1 to highlight no tile
     def highlight_tile(self, tile_id):
         self.shader.set_float("highlight_id", tile_id)
 
-    def set_visibility(self, tile_id, vis: float):
+    def __set_visibility(self, tile_id, vis: float):
         self.builder.set_visibility(tile_id, vis)
 
+    # The function that should be used to identify on what tile the mouse is
+    # currently standing.
     def tile_on_mouse(self, mouse_x, mouse_y):
         #return self.builder.get_tile_on_mouse(mouse_x, mouse_y, self.fbo)
         return self.selected_tile
 
+    # Action performed only on the first frame.
     def __first_frame(self):
         self.first_frame = False
 
+    # A function called every frame, that draws the game.
     def every_frame(self, tile_on_mouse_func):
         # DO NOT MODIFY
         if not self.activated:
@@ -473,12 +516,7 @@ class MapInterface:
             self.selected_tile = -1
             self.highlight_tile(-1)
 
-        # DO NOT MODIFY ENDS HERE
-
-        # TEST LOGIC STARTS HERE
         pixel = self.tile_on_mouse(mouse_x, mouse_y)
 
         if 0 <= pixel < self.size_x * self.size_y:
             self.highlight_tile(pixel)
-
-        # TEST LOGIC ENDS HERE

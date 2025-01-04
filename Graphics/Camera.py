@@ -3,6 +3,11 @@ import numpy as np
 import pyrr
 import Shaders
 
+# @author Vornicescu Vasile
+# An object that store all the relevant information about a camera
+# Does not include actual camera controls, just information and methods
+# that can modify the camera. It is able to provide relevant information
+# such as the view and perspective matrix to the shader
 class Camera:
     def __init__(self, pos,
                  screen_height, screen_width,
@@ -112,6 +117,9 @@ class CameraManager:
         shader.set_mat4("view", self.camera.get_view_matrix())
         shader.set_mat4("projection", self.camera.get_perspective_matrix())
 
+# @author Vornicescu Vasile
+# Simple camera controller that is wrapping the Camera class to provide
+# camera movement from keyboard input
 class StrategicCamera:
     def __init__(self, camera: Camera):
         self.camera = camera

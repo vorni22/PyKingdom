@@ -1,9 +1,12 @@
-import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram,compileShader
-import numpy as np
-import pyrr
 
+# @author Vornicescu Vasile
+# An object that reads from given file paths the shader source code and compiles it.
+# @param main_shader shall be true if the expected shader to be compiled is specifically
+# the main shader of the game, false otherwise. Eventually this class should be generalized
+# to not include such particularities but for now there is no need, since we only use 2 different
+# shaders.
 class Shader:
     def __init__(self, fragment_shader_path:str, vertex_shader_path:str, main_shader):
         with open(vertex_shader_path, 'r') as f:

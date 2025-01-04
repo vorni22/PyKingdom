@@ -6,11 +6,17 @@ from OpenGL.GL import *
 from Logic.City import district_types
 from Logic.Unit import unit_classes
 
-
-class Asset:
-    def __init__(self):
-        self.i = 0
-
+# @author Vornicescu Vasile
+# A class that reads from the ./Assets directory all .ply files and creates a mesh
+# for each one of them and then loads them into the VBO at specific locations.
+# Every single one of this meshes won't be rendered directly using the mesh's
+# draw function, but instead we will use its location in memory to access
+# the vertices, and then we'll do instancing to render multiple object of the same
+# type at different locations, since this way is much faster than using a
+# separate mesh for every instance.
+# The class provide functionalities to add a specific instance of one of the loaded meshes
+# at a specific location on the map, and it will handle the drawing of all of them
+# using the own draw function
 class AssetsManager:
     def __init__(self, vbo, color_palette, shader, total_tiles):
         self.vbo = vbo
