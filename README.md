@@ -95,6 +95,22 @@ Because our testing pool is very small, consisting of our own devices and some o
 devices of some friends, we probably left some problems unsolved. 
 There even was a problem found on some old computer (2009) where everything
 was black and white, no colors and the UI was handled wrong.
+* __Problem 5:__ PyGame has a poor events handling.
+    * __Solution:__ We had to manually handle all interactions. 
+We created two cycles for checking events: the first cycle handles events that 
+occur when the game is not in the running game state and extracts information 
+about a tile. The second cycle handles actions during the running game state, 
+managing player interactions with units and cities. In some cases, such as 
+moving units or buying districts, we also had to count the number of clicks. 
+For example, when a player wants to move a unit, the first click presses 
+the move button, and the second click must be on a tile where the unit 
+can move.
+  * __Drawback:__ Sometimes, when clicking the action a player wants to execute, 
+the action may be performed on the second click instead of the first. 
+This issue occurs because we have two cycles for checking events, 
+and sometimes the event could be read by the first cycle. 
+We couldn't change this because we use PyGame for rendering the UI during 
+gameplay, and we render the UI on a surface that may be None in some cases
 
 Even though we identified some problems, we are happy with the final result.
 We learned a lot from this project and given more time we would probably
