@@ -2,8 +2,8 @@ import pygame as pg
 
 class PermanentPanel:
     def __init__(self):
-        self.surf = pg.image.load("Assets/MainMenu/permanent_layout.png")
-        self.fnt = pg.font.Font("Assets/MainMenu/DejaVuSans.ttf", 30)
+        self.surf = pg.image.load("Assets/UIAssets/permanent_layout.png")
+        self.fnt = pg.font.Font("Assets/UIAssets/DejaVuSans.ttf", 30)
 
         self.science_rect = pg.rect.Rect(51, 0, 143, 50)
         self.culture_rect = pg.rect.Rect(241, 0, 143, 50)

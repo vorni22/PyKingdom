@@ -7,10 +7,10 @@ class MainMenu:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.background = pg.image.load("Assets/MainMenu/Background.jpg")
-        rect1 = pg.image.load("Assets/MainMenu/Play Rect.png")
-        rect2 = pg.image.load("Assets/MainMenu/Quit Rect.png")
-        self.font_main = "Assets/MainMenu/Font.ttf"
+        self.background = pg.image.load("Assets/UIAssets/Background.jpg")
+        rect1 = pg.image.load("Assets/UIAssets/Play Rect.png")
+        rect2 = pg.image.load("Assets/UIAssets/Quit Rect.png")
+        self.font_main = "Assets/UIAssets/Font.ttf"
         self.font_options = None
         self.options_map_size = {"Small": (32, 24), "Normal": (48, 36), "Large": (64, 48)}
         self.options_num_players = ["2", "3", "4", "5"]

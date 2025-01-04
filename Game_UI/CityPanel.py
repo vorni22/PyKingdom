@@ -3,8 +3,6 @@ import pygame as pg
 from UI.Button import Button
 from .BasicPanel import BasicPanel
 from Logic.Unit import unit_classes, naval_ranged_units_costs
-from Logic.Unit import melee_units, ranged_units, cavalry_units
-from Logic.Unit import siege_units, naval_melee_units, naval_ranged_units, civilian_units
 from Logic.Unit import melee_units_costs, ranged_units_costs, cavalry_units_costs
 from Logic.Unit import siege_units_costs, naval_melee_units_costs
 from Logic.Unit import civilian_units_costs
@@ -15,16 +13,16 @@ from Logic.City import campus_buildings_costs, theatre_square_buildings_costs, c
 from Logic.City import  harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs, city_center_buildings_costs
 
 class CityPanel(BasicPanel):
-    def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
-        super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
+    def __init__(self, width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf):
+        super().__init__(width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf)
 
         self.close_rect = pg.Rect(437 + 3 * width // 4 - 100, 57, 40, 42)
         self.return_rect = pg.Rect(392 + 3 * width // 4 - 100, 57, 40, 42)
 
         rect = self.surf.get_rect()
         rect.center = self.text_rect.center
-        w = rect.width // 2 + self.center_x
-        h = rect.height // 2 + self.center_y - 120
+        w = rect.width // 2 + self.x_coord
+        h = rect.height // 2 + self.y_coord - 120
 
         self.buy_units = [False, False]
         self.buy_districts = [False, False]
@@ -34,12 +32,14 @@ class CityPanel(BasicPanel):
         self.buy_districts_buttons = [[], []]
         self.buy_buildings_city_center_buttons = [[], []]
         self.buy_buildings = [[], []]
+        self.update_districts_buttons = [[], []]
+        self.heights = [[], []]
+        self.upgradable = [[], []]
 
-        bg = pg.image.load("Assets/MainMenu/cnt2.png")
-        bg_buy_buttons = pg.image.load("Assets/MainMenu/buy_smth_bg.png")
+        bg = pg.image.load("Assets/UIAssets/cnt2.png")
+        bg_buy_buttons = pg.image.load("Assets/UIAssets/buy_smth_bg.png")
         bg_buy = pg.transform.scale(bg_buy_buttons, (2 * bg.get_rect().width // 3 - 10, bg.get_rect().height + 20))
-        self.error_message_time = 0
-        self.error_message = "Not enough production to buy this"
+
         self.change_coords = [True, True]
         bg = pg.transform.scale(bg, (bg.get_rect().width + 50, bg.get_rect().height - 10))
 
@@ -47,8 +47,6 @@ class CityPanel(BasicPanel):
         self.units_cost_gold = [cost * 2 for cost in self.units_cost_production]
         district_cost_gold = 2 * district_cost
 
-        self.update_districts_buttons = [[], []]
-        self.heights = [[], []]
         self.scale = 35
 
         for i, unit_name in enumerate(unit_classes):
@@ -88,7 +86,6 @@ class CityPanel(BasicPanel):
         self.buy_buildings_city_center_button_gold = Button(bg_buy, w + 100, 450, "Gold", None, "White", "Gray", 40)
         self.buildings_costs = [[campus_buildings_costs, theatre_square_buildings_costs, commercial_hub_buildings_costs, harbour_buildings_costs, industrial_zone_buildings_costs, neighborhood_buildings_costs], []]
         self.buildings_costs[1] = [[value * 2 for value in sublist] for sublist in self.buildings_costs[0]]
-        self.upgradable = [[], []]
 
     def render_text(self, text_type, center, screen):
         text = "Buy " + text_type + " with:"
@@ -109,13 +106,6 @@ class CityPanel(BasicPanel):
                 unit.update(screen, position)
             else:
                 unit.draw_button(screen)
-
-    @staticmethod
-    def check_array_is_empty(arr):
-        for a in arr[:-1]:
-            if len(a) != 0:
-                return False
-        return True
 
     def draw_purchase_districts(self, idx, pidx, screen, position, purchasable):
         for i, district in enumerate(self.buy_districts_buttons[idx][::-1]):
@@ -170,12 +160,12 @@ class CityPanel(BasicPanel):
                 building.draw_button(screen)
 
     def draw_surf(self, screen, position, tile, unit, purchasable, city):
-        screen.blit(self.surf, (self.center_x, self.center_y))
+        screen.blit(self.surf, (self.x_coord, self.y_coord))
 
         if not self.buy_districts[0] and not self.buy_units[0] and not self.buy_districts[1] and not self.buy_units[1] and not self.buy_buildings_city_center[0] and not self.buy_buildings_city_center[1]:
             rect = self.surf.get_rect()
             rect.center = self.text_rect.center
-            w = rect.width // 2 + self.center_x
+            w = rect.width // 2 + self.x_coord
             self.render_text("units", (w, 150), screen)
             self.render_text("districts", (w, 270), screen)
             self.render_text("buildings", (w, 390), screen)
@@ -190,7 +180,7 @@ class CityPanel(BasicPanel):
         if city is None:
             return
 
-        self.draw_title_text(f"{city[11]}", 45, (self.width + self.center_x, self.center_y + 10))
+        self.draw_title_text(f"{city[11]}", 45, (self.width + self.x_coord, self.y_coord + 10))
         screen.blit(self.text_rendered, self.text_rect)
         resources_per_turn = ["+" + str(round(city[0])), "+" + str(round(city[1])), "+" + str(round(city[2])), "+" + str(round(city[4])), "+" + str(round(city[3]))]
 
@@ -313,15 +303,6 @@ class CityPanel(BasicPanel):
                 self.buy_districts[i] = False
                 self.buy_buildings_city_center[i] = False
 
-    @staticmethod
-    def format_text(unit, cost, width, font_size):
-        font = pg.font.Font(None, font_size)
-        unit_width = font.size(unit)[0]
-        cost_width = font.size(cost)[0]
-        space_width = width - unit_width - cost_width
-        num_spaces = max(0, space_width // font.size(" ")[0] - 5)
-        return unit + " " * num_spaces + cost
-
     def switch_to_buy_units_districts(self, position):
         if self.check_if_rendered():
             return
@@ -375,7 +356,23 @@ class CityPanel(BasicPanel):
         text_rendered = f.render(text, True, self.text_color)
 
         text_rect = text_rendered.get_rect()
-        text_rect.topleft = (self.center_x + 10, self.height - (self.center_y - 10 + 35 * idx))
+        text_rect.topleft = (self.x_coord + 10, self.height - (self.y_coord - 10 + 35 * idx))
         screen.blit(text_rendered, text_rect)
+
+    @staticmethod
+    def check_array_is_empty(arr):
+        for a in arr[:-1]:
+            if len(a) != 0:
+                return False
+        return True
+
+    @staticmethod
+    def format_text(unit, cost, width, font_size):
+        font = pg.font.Font(None, font_size)
+        unit_width = font.size(unit)[0]
+        cost_width = font.size(cost)[0]
+        space_width = width - unit_width - cost_width
+        num_spaces = max(0, space_width // font.size(" ")[0] - 5)
+        return unit + " " * num_spaces + cost
 
 

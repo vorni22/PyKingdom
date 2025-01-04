@@ -16,18 +16,6 @@ from Game_UI.PanelInterface import PanelInterface
 # set up pygame
 pg.init()
 
-def surface_to_texture(surface, texture_id):
-    if surface is not None:
-        texture_data = pg.image.tostring(surface, "RGB", True)
-    else:
-        texture_data = None
-    glBindTexture(GL_TEXTURE_2D, texture_id)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glBindTexture(GL_TEXTURE_2D, 0)
-
-
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
 pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
@@ -106,7 +94,7 @@ quad_shader.use_shader()
 quad_shader.set_int("screenTexture", 0)
 
 texture_data = glGenTextures(1)
-surface_to_texture(None, texture_data)
+fbo.surface_to_texture(None, texture_data)
 
 main_menu = MainMenu(WIDTH, HEIGHT)
 
@@ -262,7 +250,7 @@ while running:
 
     # UI end here
 
-    surface_to_texture(screen_surf, texture_data)
+    fbo.surface_to_texture(screen_surf, texture_data)
 
     glClear(GL_COLOR_BUFFER_BIT)
 

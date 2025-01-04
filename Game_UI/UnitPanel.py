@@ -4,12 +4,12 @@ from .BasicPanel import BasicPanel
 from Logic.Unit import unit_classes
 
 class UnitPanel(BasicPanel):
-    def __init__(self, width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf):
-        super().__init__(width, height, font, text_size, text_color, text, center_x, center_y, hover_color, surf)
-        self.move_unit_rect = pg.Rect(7 + self.center_x, 7 + self.center_y, 41, 41)
+    def __init__(self, width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf):
+        super().__init__(width, height, font, text_size, text_color, text, x_coord, y_coord, hover_color, surf)
+        self.move_unit_rect = pg.Rect(7 + self.x_coord, 7 + self.y_coord, 41, 41)
         self.is_unit_moved = False
-        self.settler_surf = pg.image.load("Assets/MainMenu/settler_panel.png")
-        self.settler_rect = pg.Rect(7 + self.center_x, 48 + self.center_y, 41, 41)
+        self.settler_surf = pg.image.load("Assets/UIAssets/settler_panel.png")
+        self.settler_rect = pg.Rect(7 + self.x_coord, 48 + self.y_coord, 41, 41)
         self.is_settler = False
 
     def move_unit(self, position, screen):
@@ -25,10 +25,10 @@ class UnitPanel(BasicPanel):
             return
         if 3 in unit[0]:
             self.is_settler = True
-            screen.blit(self.settler_surf, (self.center_x, self.center_y))
+            screen.blit(self.settler_surf, (self.x_coord, self.y_coord))
         else:
-            screen.blit(self.surf, (self.center_x, self.center_y))
-        self.draw_title_text(f"Unit class: {unit[3][4]}", 45, (self.center_x, self.center_y + 10))
+            screen.blit(self.surf, (self.x_coord, self.y_coord))
+        self.draw_title_text(f"Unit class: {unit[3][4]}", 45, (self.x_coord, self.y_coord + 10))
         screen.blit(self.text_rendered, self.text_rect)
 
         self.render_text(unit[3][0], (200, 119), screen)
